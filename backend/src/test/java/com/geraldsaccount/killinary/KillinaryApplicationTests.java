@@ -1,13 +1,13 @@
-package com.geraldsaccount.mordine;
+package com.geraldsaccount.killinary;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MordineApplicationTests {
+class KillinaryApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

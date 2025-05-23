@@ -1,6 +1,6 @@
 spring:
   application:
-    name: mordine
+    name: killinary
   security:
     oauth2:
       client:

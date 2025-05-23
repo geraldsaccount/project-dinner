@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.geraldsaccount</groupId>
-    <artifactId>mordine</artifactId>
+    <artifactId>killinary</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mordine</name>
+    <name>killinary</name>
     <description></description>
     <url/>
     <licenses>
@@ -78,7 +78,7 @@
     </dependencies>
 
     <build>
-        <finalName>mordine</finalName>
+        <finalName>killinary</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
