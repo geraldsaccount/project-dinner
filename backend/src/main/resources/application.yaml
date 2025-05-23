@@ -8,4 +8,4 @@ spring:
           github:
             client-id: ${OAUTH_GITHUB_ID}
             client-secret: ${OAUTH_GITHUB_SECRET}
-            scope: none
+            scope: user:email
