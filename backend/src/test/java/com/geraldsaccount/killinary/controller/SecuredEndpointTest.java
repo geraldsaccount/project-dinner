@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@SuppressWarnings("unused")
 class SecuredEndpointTest {
     @Autowired
     private MockMvc mockMvc;
@@ -32,7 +33,7 @@ class SecuredEndpointTest {
     @Test
     void getUserData_deniesAccess_whenUnauthenticated() throws Exception {
         mockMvc.perform(get("/api/protected/user"))
-                .andExpect(status().isUnauthorized()); // Expect 401 Unauthorized
+                .andExpect(status().isUnauthorized()); // expect 401
     }
 
     @Test
@@ -69,9 +70,8 @@ class SecuredEndpointTest {
 
         assertNotNull(response);
         assertEquals("This is protected data. You are authenticated!", response.get("message"));
-        assertEquals("user_2U5aLg5Vw8xxxxxxxxxx", response.get("authenticatedUser")); // `authentication.getName()` is
-                                                                                      // 'sub'
-        assertEquals("user_2U5aLg5Vw8xxxxxxxxxx", response.get("userId")); // Your custom 'userId' claim
+        assertEquals("user_2U5aLg5Vw8xxxxxxxxxx", response.get("authenticatedUser"));
+        assertEquals("user_2U5aLg5Vw8xxxxxxxxxx", response.get("userId"));
         assertEquals("test@example.com", response.get("email"));
         assertEquals("testuser123", response.get("username"));
     }
@@ -89,7 +89,7 @@ class SecuredEndpointTest {
         claims.put(JwtClaimNames.SUB, "user_no_email");
         claims.put("userId", "user_no_email");
         claims.put("username", "noemailuser");
-        // Intentionally omit the "email" claim
+        // omit "email" claim
 
         Instant issuedAt = Instant.now();
         Instant expiresAt = issuedAt.plusSeconds(3600);
