@@ -24,7 +24,6 @@ const Navbar = () => {
             <span className="font-bold text-xl">Killinary</span>
           </Link>
 
-          {/* Nav items next to brand in desktop view */}
           <nav className="hidden md:flex gap-6">
             {navItems.map((item) => (
               <Link
@@ -44,9 +43,7 @@ const Navbar = () => {
           </nav>
         </div>
 
-        {/* Right side with language selection and mobile menu */}
         <div className="flex items-center gap-2">
-          {/* Sign in - only visible on desktop */}
           <div className="hidden md:flex gap-1">
             <Button
               variant={"outline"}
@@ -64,7 +61,6 @@ const Navbar = () => {
             </Button>
           </div>
 
-          {/* Mobile menu button on the right */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden ml-2">
