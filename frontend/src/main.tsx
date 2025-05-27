@@ -7,6 +7,7 @@ import "./index.css";
 import RootLayout from "./layouts/root-layout.tsx";
 import LandingPage from "./pages/landing-page.tsx";
 import EventsPage from "./pages/events-page.tsx";
+import ProtectedRoute from "./components/protected-route.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -21,7 +22,9 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route element={<RootLayout />}>
             <Route index element={<LandingPage />} />
-            <Route path="events" element={<EventsPage />} />
+            <Route path="events" element={<ProtectedRoute />}>
+              <Route index element={<EventsPage />} />
+            </Route>
           </Route>
         </Routes>
       </Router>

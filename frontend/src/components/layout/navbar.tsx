@@ -51,7 +51,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-2">
           <SignedOut>
-            <div className="hidden md:flex gap-1">
+            <div className="hidden md:flex">
               <SignInButton>
                 <Button
                   variant={"default"}
