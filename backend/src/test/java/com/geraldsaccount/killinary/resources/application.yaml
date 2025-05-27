@@ -1,9 +1,0 @@
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: test-id
-            client-secret: test-secret
-            scope: user:email

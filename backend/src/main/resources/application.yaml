@@ -1,11 +1,3 @@
 spring:
   application:
     name: killinary
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: ${OAUTH_GITHUB_ID}
-            client-secret: ${OAUTH_GITHUB_SECRET}
-            scope: user:email

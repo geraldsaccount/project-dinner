@@ -8,6 +8,7 @@ class KillinaryApplicationTests {
 
     @Test
     void contextLoads() {
+        // default test
     }
 
 }
