@@ -16,7 +16,6 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  SignUpButton,
   UserButton,
 } from "@clerk/clerk-react";
 
@@ -55,22 +54,13 @@ const Navbar = () => {
             <div className="hidden md:flex gap-1">
               <SignInButton>
                 <Button
-                  variant={"outline"}
+                  variant={"default"}
                   size={"sm"}
                   className="px-2 min-w-[40px]"
                 >
                   Sign In
                 </Button>
               </SignInButton>
-              <SignUpButton>
-                <Button
-                  variant={"default"}
-                  size={"sm"}
-                  className="px-2 min-w-[40px]"
-                >
-                  Sign Up
-                </Button>
-              </SignUpButton>
             </div>
           </SignedOut>
           <SignedIn>
