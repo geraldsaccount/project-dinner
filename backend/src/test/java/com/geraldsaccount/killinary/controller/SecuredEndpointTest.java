@@ -113,6 +113,6 @@ class SecuredEndpointTest {
         assertEquals("This is protected data. You are authenticated!", response.get("message"));
         assertEquals("user_no_email", response.get("userId"));
         assertEquals("noemailuser", response.get("username"));
-        assertEquals(null, response.get("email")); // Or assertFalse(response.containsKey("email"));
+        assertEquals(null, response.get("email"));
     }
 }
