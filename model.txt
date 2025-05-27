@@ -1,0 +1,70 @@
+User:
+- id (UUID)
+- username (string, UNIQUE)
+- email (string, UNIQUE)
+- createdAt (timestamp)
+- updatedAt (timestamp)
+// ownedStoriesIds and joinedSessionsIds can be derived from relationships,
+// so you don't necessarily need to store them as explicit arrays here.
+
+Story:
+- id (UUID)
+- title (string)
+- shop_description (string)
+- setting_description (string)
+- author (FK to User.id)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+Character:
+- id (Primary Key, UUID or BigInt)
+- name (TEXT) // e.g., "Lord Reginald", "The Maid"
+- gender (TEXT, e.g., 'male', 'female', 'non-binary', 'any')
+- character_description (TEXT) // A general description of the character, visible to all in a session
+- private_briefing (TEXT) // Only visible to the assigned player
+- story_id (FK to Story.id) // Links characters to the story they belong to
+- is_primary_character (BOOLEAN, default false) // Useful if some characters are essential
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+StoryConfiguration: (To handle varied player counts and character sets)
+- id (Primary Key, UUID or BigInt)
+- story_id (FK to Story.id)
+- min_players (INTEGER)
+- max_players (INTEGER)
+- configuration_name (TEXT, e.g., "Standard 6-player", "Full 10-player")
+// You'll need a way to link which characters are part of this configuration.
+// A many-to-many relationship between StoryConfiguration and Character is best here.
+// See `StoryConfigurationCharacter` below.
+
+StoryConfigurationCharacter: (Join table for StoryConfiguration and Character)
+- story_configuration_id (FK to StoryConfiguration.id)
+- character_id (FK to Character.id)
+- PRIMARY KEY (story_configuration_id, character_id) // Composite primary key
+
+Session:
+- id (Primary Key, UUID or BigInt)
+- host_id (FK to User.id)
+- story_id (FK to Story.id)
+- story_configuration_id (FK to StoryConfiguration.id, or null if no specific config chosen)
+- session_code (TEXT, UNIQUE) // A short, shareable code for guests to join
+- status (TEXT, e.g., 'pending', 'active', 'completed', 'cancelled')
+- current_round (INTEGER, optional, for game progression)
+- created_at (TIMESTAMP)
+- started_at (TIMESTAMP, optional)
+- ended_at (TIMESTAMP, optional)
+
+SessionParticipant: (Join table for Session and User)
+- session_id (FK to Session.id)
+- user_id (FK to User.id)
+- joined_at (TIMESTAMP)
+- PRIMARY KEY (session_id, user_id)
+
+SessionCharacterAssignment: (Join table for Session, User, and Character)
+- id (Primary Key, UUID or BigInt)
+- session_id (FK to Session.id)
+- user_id (FK to User.id, NULLABLE - if character is unassigned)
+- character_id (FK to Character.id)
+- assigned_at (TIMESTAMP, optional)
+- role_briefing_sent (BOOLEAN, default false) // To track if private briefing has been sent
+- PRIMARY KEY (session_id, character_id) // Ensures each character can only be assigned once per session
