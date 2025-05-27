@@ -1,3 +1,8 @@
 spring:
   application:
     name: killinary
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${CLERK_JWKS_URL}
