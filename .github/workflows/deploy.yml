@@ -9,9 +9,10 @@ jobs:
   build-frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout repo
+        uses: actions/checkout@v4
 
-      - name: setup node
+      - name: setup node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -22,7 +23,7 @@ jobs:
           npm i
           npm run build
       
-      - name: copy frontend build
+      - name: upload frontend build
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
@@ -32,26 +33,27 @@ jobs:
     needs: build-frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: inject frontend
-        uses: actions/download-artifact@v4
-        with: 
-          name: frontend-build
-          path: backend/src/main/resources/static
-
+      - name: checkout repo
+        uses: actions/checkout@v4
+        
       - name: setup jdk
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
           cache: maven
+
+      - name: inject frontend
+        uses: actions/download-artifact@v4
+        with: 
+          name: frontend-build
+          path: backend/src/main/resources/static/
         
       - name: build with maven
         working-directory: backend
         run: mvn -B package --file pom.xml
       
-      - name: Copy app build
+      - name: copy app.jar
         uses: actions/upload-artifact@v4
         with:
           name: app.jar
@@ -63,13 +65,14 @@ jobs:
     needs: build-backend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout repo
+        uses: actions/checkout@v4
 
-      - name: inject app build
+      - name: inject app.jar
         uses: actions/download-artifact@v4
         with: 
           name: app.jar
-          path: backend/target
+          path: backend/target/
       
       - name: login to dockerhub
         uses: docker/login-action@v3
@@ -80,9 +83,9 @@ jobs:
       - name: build and push
         uses: docker/build-push-action@v6
         with:
-          push: 'true'
-          tags: ${{secrets.DOCKER_TAG}}
           context: .
+          push: true
+          tags: ${{secrets.DOCKER_TAG}}
 
   deploy-render:
     needs: push-docker-image
