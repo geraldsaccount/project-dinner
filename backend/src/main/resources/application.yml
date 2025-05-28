@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: killinary
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "https://related-colt-33.clerk.accounts.dev/.well-known/jwks.json"

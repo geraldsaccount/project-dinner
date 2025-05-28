@@ -4,6 +4,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { footerItems } from "@/data/navigation-data";
+import { SignedOut, SignInButton } from "@clerk/clerk-react";
 
 export function Sidebar({ items, activeItem, setActiveItem }: MobileNavProps) {
   return (
@@ -48,14 +49,19 @@ export function Sidebar({ items, activeItem, setActiveItem }: MobileNavProps) {
           ))}
         </footer>
 
-        <div className="flex gap-1 justify-end">
-          <Button variant={"outline"} size={"sm"} className="px-2 min-w-[40px]">
-            Sign In
-          </Button>
-          <Button variant={"default"} size={"sm"} className="px-2 min-w-[40px]">
-            Sign Up
-          </Button>
-        </div>
+        <SignedOut>
+          <div className="flex gap-1">
+            <SignInButton>
+              <Button
+                variant={"default"}
+                size={"sm"}
+                className="px-2 min-w-[40px]"
+              >
+                Sign In
+              </Button>
+            </SignInButton>
+          </div>
+        </SignedOut>
       </div>
     </div>
   );

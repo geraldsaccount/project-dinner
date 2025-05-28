@@ -12,6 +12,12 @@ import {
 import { Link } from "react-router-dom";
 import { navItems } from "@/data/navigation-data";
 import { Sidebar } from "./sidebar";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [activeItem, setActiveItem] = useState<string>("/");
@@ -44,22 +50,22 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden md:flex gap-1">
-            <Button
-              variant={"outline"}
-              size={"sm"}
-              className="px-2 min-w-[40px]"
-            >
-              Sign In
-            </Button>
-            <Button
-              variant={"default"}
-              size={"sm"}
-              className="px-2 min-w-[40px]"
-            >
-              Sign Up
-            </Button>
-          </div>
+          <SignedOut>
+            <div className="hidden md:flex">
+              <SignInButton>
+                <Button
+                  variant={"default"}
+                  size={"sm"}
+                  className="px-2 min-w-[40px]"
+                >
+                  Sign In
+                </Button>
+              </SignInButton>
+            </div>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
 
           <Sheet>
             <SheetTrigger asChild>
