@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.http.HttpHeaders;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,23 +17,39 @@ import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserPayload;
 import com.svix.Webhook;
 import com.svix.exceptions.WebhookVerificationException;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ClerkWebhookService {
     private final UserService userService;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
     private UserMapper userMapper;
 
     @Value("${clerk.webhook.secret}")
     private String webhookSecret;
 
-    public ClerkWebhookService(UserService userService) {
+    private Webhook webhook;
+
+    @PostConstruct
+    public void setWebhook() {
+        if (this.webhook == null) {
+            this.webhook = new Webhook(webhookSecret);
+        }
+    }
+
+    public ClerkWebhookService(UserService userService, UserMapper userMapper, ObjectMapper objectMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
+        this.objectMapper = objectMapper;
+    }
+
+    public ClerkWebhookService(UserService userService, UserMapper userMapper, ObjectMapper objectMapper,
+            Webhook webhook) {
+        this(userService, userMapper, objectMapper);
+        this.webhook = webhook;
     }
 
     public void handleUserWebhook(HttpServletRequest request, HttpHeaders headers)
@@ -53,7 +68,7 @@ public class ClerkWebhookService {
         }
     }
 
-    private String verifyWebhook(HttpHeaders headers, HttpServletRequest request)
+    public String verifyWebhook(HttpHeaders headers, HttpServletRequest request)
             throws ClerkWebhookException, WebhookVerificationException {
         String payload;
         try {
@@ -66,7 +81,6 @@ public class ClerkWebhookService {
             throw new ClerkWebhookException("Webhook payload is empty");
         }
 
-        Webhook webhook = new Webhook(webhookSecret);
         webhook.verify(payload, headers);
         return payload;
     }
