@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,7 +32,8 @@ public class ClerkWebhookController {
     }
 
     @PostMapping()
-    public ResponseEntity<Void> clerkUserWebhook(
+    @ResponseStatus(HttpStatus.OK)
+    public void clerkUserWebhook(
             @RequestHeader("svix-id") String svixId,
             @RequestHeader("svix-timestamp") String svixTimestamp,
             @RequestHeader("svix-signature") String svixSignature,
@@ -44,6 +46,5 @@ public class ClerkWebhookController {
 
         HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         service.handleUserWebhook(request, headers);
-        return ResponseEntity.ok().build();
     }
 }
