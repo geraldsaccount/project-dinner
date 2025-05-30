@@ -1,6 +1,8 @@
 spring:
   application:
     name: killinary
+  profiles:
+    active: dev
   security:
     oauth2:
       resourceserver:
