@@ -9,13 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.exceptions.ClerkWebhookException;
 import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
+import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserPayload;
 import com.svix.Webhook;
 import com.svix.exceptions.WebhookVerificationException;
 
@@ -39,18 +38,16 @@ public class ClerkWebhookService {
     }
 
     public void handleUserWebhook(HttpServletRequest request, HttpHeaders headers)
-            throws ClerkWebhookException, WebhookVerificationException, JsonMappingException, JsonProcessingException,
-            UserMapperException, UserNotFoundException {
+            throws ClerkWebhookException, WebhookVerificationException, JsonProcessingException, UserNotFoundException,
+            UserMapperException {
         String payload = verifyWebhook(headers, request);
 
-        JsonNode webhookEvent = objectMapper.readTree(payload);
-        String eventType = webhookEvent.get("type").asText();
-        JsonNode data = webhookEvent.get("data");
+        ClerkUserPayload userPayload = objectMapper.readValue(payload, ClerkUserPayload.class);
 
-        switch (eventType) {
-            case "user.created" -> userService.createUserData(userMapper.fromJsonNode(data));
-            case "user.updated" -> userService.updateUserData(userMapper.fromJsonNode(data));
-            case "user.deleted" -> userService.deleteUser(data.get("id").asText());
+        switch (userPayload.getType()) {
+            case "user.created" -> userService.createUserData(userMapper.fromClerkUser(userPayload.getData()));
+            case "user.updated" -> userService.updateUserData(userMapper.fromClerkUser(userPayload.getData()));
+            case "user.deleted" -> userService.deleteUser(userPayload.getData().getId());
             default -> {
             }
         }

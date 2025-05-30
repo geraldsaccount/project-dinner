@@ -2,9 +2,10 @@ package com.geraldsaccount.killinary.mappers;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.model.User;
+import com.geraldsaccount.killinary.model.dto.clerk.ClerkEmailAddress;
+import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserData;
 
 @Component
 public class UserMapper {
@@ -16,34 +17,30 @@ public class UserMapper {
                 .withEmail(updated.getEmail());
     }
 
-    public User fromJsonNode(JsonNode data) throws UserMapperException {
-        String id = data.hasNonNull("id") ? data.get("id").asText() : null;
-        String firstName = data.hasNonNull("first_name") ? data.get("first_name").asText() : null;
-        String lastName = data.hasNonNull("last_name") ? data.get("last_name").asText() : null;
-        String primaryEmail = getPrimaryEmail(data);
+    public User fromClerkUser(ClerkUserData clerkUser) throws UserMapperException {
+        String primaryEmail = getPrimaryEmail(clerkUser);
 
-        String username = data.hasNonNull("username") ? data.get("username").asText() : null;
-
-        if (id == null || primaryEmail == null) {
+        if (clerkUser.getId() == null || primaryEmail == null) {
             throw new UserMapperException("Missing required user fields in webhook payload");
         }
+
         return User.builder()
-                .id(id)
-                .firstName(firstName)
-                .lastName(lastName)
-                .email(primaryEmail)
-                .username(username)
+                .id(clerkUser.getId())
+                .firstName(clerkUser.getFirstName())
+                .lastName(clerkUser.getLastName())
+                .email(getPrimaryEmail(clerkUser))
+                .username(clerkUser.getUsername())
                 .build();
     }
 
-    private String getPrimaryEmail(JsonNode data) {
-        if (!data.hasNonNull("primary_email_address_id") || !data.hasNonNull("email_addresses")) {
+    private String getPrimaryEmail(ClerkUserData clerkUser) {
+        if (clerkUser.getPrimaryEmailAddressID() == null || clerkUser.getEmailAddresses() == null) {
             return null;
         }
-        String primaryEmailId = data.get("primary_email_address_id").asText();
-        for (JsonNode emailNode : data.get("email_addresses")) {
-            if (emailNode.hasNonNull("id") && primaryEmailId.equals(emailNode.get("id").asText())) {
-                return emailNode.hasNonNull("email_address") ? emailNode.get("email_address").asText() : null;
+        String primaryEmailId = clerkUser.getPrimaryEmailAddressID();
+        for (ClerkEmailAddress email : clerkUser.getEmailAddresses()) {
+            if (email.getId() != null && primaryEmailId.equals(email.getId())) {
+                return email.getEmailAddress() != null ? email.getEmailAddress() : null;
             }
         }
         return null;
