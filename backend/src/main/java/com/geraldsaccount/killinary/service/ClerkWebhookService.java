@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.http.HttpHeaders;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class ClerkWebhookService {
         }
     }
 
+    @Autowired
     public ClerkWebhookService(UserService userService, UserMapper userMapper, ObjectMapper objectMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
