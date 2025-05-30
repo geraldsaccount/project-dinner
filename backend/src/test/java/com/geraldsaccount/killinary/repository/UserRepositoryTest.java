@@ -6,14 +6,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest; // To ensure no conflict with dev profile properties
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager; // Optional: For seeding test data
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.model.User;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@SuppressWarnings("unused")
 class UserRepositoryTest {
 
     @Autowired
@@ -27,14 +28,27 @@ class UserRepositoryTest {
 
         userRepository.deleteAll();
 
-        User testUser = new User("test@example.com", "testuser", "test mctest");
+        User testUser = User.builder()
+                .id("TEST")
+                .email("test@example.com")
+                .username("testuser")
+                .firstName("test")
+                .lastName("user")
+                .build();
         entityManager.persist(testUser);
         entityManager.flush();
     }
 
     @Test
     void shouldSaveAndFindUser() {
-        User newUser = new User("john@example.com", "john.doe", "john doe");
+        User newUser = User.builder()
+                .id("U1")
+                .email("john@example.com")
+                .username("john.doe")
+                .firstName("john")
+                .lastName("doe")
+                .build();
+
         User savedUser = userRepository.save(newUser);
 
         assertThat(savedUser).isNotNull();
