@@ -12,6 +12,3 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-clerk:
-  webhook:
-    secret: ${CLERK_WEBHOOK_SECRET}
