@@ -16,3 +16,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+clerk:
+  webhook:
+    secret: aGVsbG8td29ybGQtd2ViYm9vay1zZWNyZXQ # "hello-world-webhook-secret" in base64

@@ -6,9 +6,12 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update # For development: 'update' to sync schema
+      ddl-auto: create-drop # For development: 'update' to sync schema
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+clerk:
+  webhook:
+    secret: ${CLERK_WEBHOOK_SECRET}
