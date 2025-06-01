@@ -21,35 +21,27 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.With;
 
 @Entity
-@Table(name = "users")
+@Table(name = "stories")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@With
-public class User {
+public class Story {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
-    private String clerkId;
+    @Column(nullable = false)
+    private String title;
 
-    @Column(unique = true, nullable = true)
-    private String username;
+    @Column(name = "shop_description", columnDefinition = "TEXT") // Use columnDefinition for TEXT
+    private String shopDescription;
 
-    @Column(name = "first_name", unique = false, nullable = true)
-    private String firstName;
-
-    @Column(name = "last_name", unique = false, nullable = true)
-    private String lastName;
-
-    @Column(unique = true, nullable = false)
-    private String email;
+    @Column(name = "setting_description", columnDefinition = "TEXT")
+    private String settingDescription;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -57,13 +49,17 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<Session> hostedSessions = new HashSet<>();
+    private Set<Character> characters = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<SessionParticipant> sessionParticipations = new HashSet<>();
+    private Set<StoryConfiguration> configurations = new HashSet<>();
+
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Session> sessions = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
