@@ -14,9 +14,9 @@ class UserMapperTest {
     private final UserMapper userMapper = new UserMapper();
 
     @Test
-    void withUpdatedUserData_shouldUpdateFields() {
+    void withUpdatedClerkUserData_shouldUpdateFields() {
         User source = User.builder()
-                .id("1")
+                .clerkId("U1")
                 .firstName("John")
                 .lastName("Doe")
                 .username("johndoe")
@@ -30,13 +30,13 @@ class UserMapperTest {
                 .email("jane@example.com")
                 .build();
 
-        User result = userMapper.withUpdatedUserData(source, updated);
+        User result = userMapper.withUpdatedClerkUserData(source, updated);
 
         assertThat(result.getFirstName()).isEqualTo("Jane");
         assertThat(result.getLastName()).isEqualTo("Smith");
         assertThat(result.getUsername()).isEqualTo("janesmith");
         assertThat(result.getEmail()).isEqualTo("jane@example.com");
-        assertThat(result.getId()).isEqualTo("1");
+        assertThat(result.getClerkId()).isEqualTo("U1");
     }
 
     @Test
@@ -57,7 +57,7 @@ class UserMapperTest {
 
         User user = userMapper.fromClerkUser(clerkUser);
 
-        assertThat(user.getId()).isEqualTo(clerkUser.getId());
+        assertThat(user.getClerkId()).isEqualTo(clerkUser.getId());
         assertThat(user.getFirstName()).isEqualTo(clerkUser.getFirstName());
         assertThat(user.getLastName()).isEqualTo(clerkUser.getLastName());
         assertThat(user.getUsername()).isEqualTo(clerkUser.getUsername());

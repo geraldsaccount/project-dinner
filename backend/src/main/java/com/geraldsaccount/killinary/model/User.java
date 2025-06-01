@@ -21,10 +21,10 @@ import lombok.With;
 @With
 public class User {
     @Id
-    private String id;
+    private UUID id;
 
     @Column(unique = true, nullable = false)
-    private String email;
+    private String clerkId;
 
     @Column(unique = true, nullable = true)
     private String username;
@@ -34,6 +34,9 @@ public class User {
 
     @Column(name = "last_name", unique = false, nullable = true)
     private String lastName;
+
+    @Column(unique = true, nullable = false)
+    private String email;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

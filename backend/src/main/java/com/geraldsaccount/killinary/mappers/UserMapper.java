@@ -10,7 +10,7 @@ import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserData;
 @Component
 public class UserMapper {
 
-    public User withUpdatedUserData(User source, User updated) {
+    public User withUpdatedClerkUserData(User source, User updated) {
         return source.withFirstName(updated.getFirstName())
                 .withLastName(updated.getLastName())
                 .withUsername(updated.getUsername())
@@ -25,7 +25,7 @@ public class UserMapper {
         }
 
         return User.builder()
-                .id(clerkUser.getId())
+                .clerkId(clerkUser.getId())
                 .firstName(clerkUser.getFirstName())
                 .lastName(clerkUser.getLastName())
                 .email(getPrimaryEmail(clerkUser))
