@@ -12,6 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -21,35 +23,38 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.With;
 
 @Entity
-@Table(name = "users")
+@Table(name = "characters")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@With
-public class User {
+public class Character {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
-    private String clerkId;
+    @Column(nullable = false)
+    private String name;
 
-    @Column(unique = true, nullable = true)
-    private String username;
+    @Column(nullable = false)
+    private Gender gender;
 
-    @Column(name = "first_name", unique = false, nullable = true)
-    private String firstName;
+    @Column(name = "character_description", columnDefinition = "TEXT")
+    private String characterDescription;
 
-    @Column(name = "last_name", unique = false, nullable = true)
-    private String lastName;
+    @Column(name = "private_briefing", columnDefinition = "TEXT")
+    private String privateBriefing;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "story_id", nullable = false)
+    private Story story;
+
+    @Column(name = "is_primary_character", nullable = false)
+    @Builder.Default
+    private Boolean isPrimaryCharacter = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -57,13 +62,13 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<Session> hostedSessions = new HashSet<>();
+    private Set<StoryConfigurationCharacter> characterConfigurations = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<SessionParticipant> sessionParticipations = new HashSet<>();
+    private Set<SessionCharacterAssignment> characterAssignments = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

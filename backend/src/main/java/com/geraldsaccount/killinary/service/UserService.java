@@ -1,6 +1,5 @@
 package com.geraldsaccount.killinary.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
@@ -13,18 +12,21 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Transactional
-    public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
+    public void deleteUser(String clerkId) throws UserNotFoundException {
+        User foundUser = userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> new UserNotFoundException("Could not find User with given ClerkID"));
+
+        userRepository.delete(foundUser);
     }
 
     @Transactional
@@ -36,7 +38,7 @@ public class UserService {
     public void updateUserData(User updatedUser) throws UserNotFoundException {
         User existingUser = userRepository.findById(updatedUser.getId())
                 .orElseThrow(() -> new UserNotFoundException("User could not be found."));
-        updatedUser = userMapper.withUpdatedUserData(existingUser, updatedUser);
+        updatedUser = userMapper.withUpdatedClerkUserData(existingUser, updatedUser);
 
         userRepository.save(updatedUser);
     }

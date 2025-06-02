@@ -23,13 +23,14 @@ class UserRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
+    private User testUser;
+
     @BeforeEach
     void setUp() {
 
         userRepository.deleteAll();
-
-        User testUser = User.builder()
-                .id("TEST")
+        testUser = User.builder()
+                .clerkId("T1")
                 .email("test@example.com")
                 .username("testuser")
                 .firstName("test")
@@ -42,7 +43,7 @@ class UserRepositoryTest {
     @Test
     void shouldSaveAndFindUser() {
         User newUser = User.builder()
-                .id("U1")
+                .clerkId("U1")
                 .email("john@example.com")
                 .username("john.doe")
                 .firstName("john")

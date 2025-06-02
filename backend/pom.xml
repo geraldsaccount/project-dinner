@@ -30,6 +30,7 @@
         <java.version>21</java.version>
         <sonar.organization>geraldsaccount</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.exclusions>**/model/**</sonar.exclusions>
     </properties>
     <dependencies>
 
