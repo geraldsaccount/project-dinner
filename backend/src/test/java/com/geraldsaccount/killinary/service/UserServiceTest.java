@@ -32,7 +32,7 @@ class UserServiceTest {
     void deleteUser_shouldDeleteUser_whenUserExists() throws Exception {
         String clerkId = "clerk123";
         User user = new User();
-        when(userRepository.findByClerkId(clerkId)).thenReturn(Optional.of(user));
+        when(userRepository.findByOauthId(clerkId)).thenReturn(Optional.of(user));
 
         userService.deleteUser(clerkId);
 
@@ -42,7 +42,7 @@ class UserServiceTest {
     @Test
     void deleteUser_shouldThrowException_whenUserDoesNotExist() {
         String clerkId = "notfound";
-        when(userRepository.findByClerkId(clerkId)).thenReturn(Optional.empty());
+        when(userRepository.findByOauthId(clerkId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.deleteUser(clerkId))
                 .isInstanceOf(UserNotFoundException.class)

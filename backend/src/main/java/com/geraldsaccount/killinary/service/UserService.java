@@ -23,7 +23,7 @@ public class UserService {
 
     @Transactional
     public void deleteUser(String clerkId) throws UserNotFoundException {
-        User foundUser = userRepository.findByClerkId(clerkId)
+        User foundUser = userRepository.findByOauthId(clerkId)
                 .orElseThrow(() -> new UserNotFoundException("Could not find User with given ClerkID"));
 
         userRepository.delete(foundUser);

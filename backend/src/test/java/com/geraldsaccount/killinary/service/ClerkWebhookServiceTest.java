@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.exceptions.ClerkWebhookException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserData;
+import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserPayload;
 import com.svix.Webhook;
 import com.svix.exceptions.WebhookVerificationException;
@@ -62,7 +62,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.created");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
 
         when(objectMapper.readValue(payload, ClerkUserPayload.class)).thenReturn(userPayload);
@@ -82,7 +82,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.updated");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
 
         when(objectMapper.readValue(payload, ClerkUserPayload.class)).thenReturn(userPayload);
@@ -102,7 +102,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.deleted");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
         when(clerkUserData.getId()).thenReturn("U1");
 
@@ -122,7 +122,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.unknown");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
 
         when(objectMapper.readValue(payload, ClerkUserPayload.class)).thenReturn(userPayload);
