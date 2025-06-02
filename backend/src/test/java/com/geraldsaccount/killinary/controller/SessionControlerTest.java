@@ -36,6 +36,7 @@ import jakarta.transaction.Transactional;
 @SpringBootTest(classes = KillinaryApplication.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@SuppressWarnings("unused")
 class SessionControlerTest {
 
     @Autowired

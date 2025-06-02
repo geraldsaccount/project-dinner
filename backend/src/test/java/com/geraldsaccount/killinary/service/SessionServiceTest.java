@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Session;
@@ -22,6 +23,8 @@ import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.output.SessionSummaryDTO;
 import com.geraldsaccount.killinary.repository.SessionRepository;
 
+@ActiveProfiles("test")
+@SuppressWarnings("unused")
 class SessionServiceTest {
 
     @Mock
@@ -59,11 +62,12 @@ class SessionServiceTest {
 
         assertThat(result).hasSize(1);
         SessionSummaryDTO dto = result.iterator().next();
-        assertThat(dto.sessionId()).isEqualTo(session.getId());
-        assertThat(dto.hostName()).isEqualTo(host.getFirstName());
-        assertThat(dto.assignedCharacterName()).isEqualTo(character.getName());
-        assertThat(dto.storyName()).isEqualTo(story.getTitle());
-        assertThat(dto.sessionDate()).isEqualTo(session.getStartedAt());
+
+        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
+                character.getName(), session.getStartedAt());
+
+        assertThat(dto)
+                .isEqualTo(expected);
     }
 
     @Test
@@ -76,11 +80,12 @@ class SessionServiceTest {
 
         assertThat(result).hasSize(1);
         SessionSummaryDTO dto = result.iterator().next();
-        assertThat(dto.assignedCharacterName()).isNull();
-        assertThat(dto.sessionId()).isEqualTo(session.getId());
-        assertThat(dto.hostName()).isEqualTo(host.getFirstName());
-        assertThat(dto.storyName()).isEqualTo(story.getTitle());
-        assertThat(dto.sessionDate()).isEqualTo(session.getStartedAt());
+
+        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
+                null, session.getStartedAt());
+
+        assertThat(dto)
+                .isEqualTo(expected);
     }
 
     private void createDummySession() {

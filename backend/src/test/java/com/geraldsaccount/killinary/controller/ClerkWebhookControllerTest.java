@@ -23,6 +23,7 @@ import com.svix.exceptions.WebhookVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @ActiveProfiles("test")
+@SuppressWarnings("unused")
 class ClerkWebhookControllerTest {
 
     private ClerkWebhookService service;

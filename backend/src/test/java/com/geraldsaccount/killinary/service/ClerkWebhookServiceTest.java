@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.doThrow;
@@ -47,12 +48,12 @@ class ClerkWebhookServiceTest {
     @Mock
     private Webhook webhook;
 
+    @InjectMocks
     private ClerkWebhookService webhookService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        webhookService = new ClerkWebhookService(userService, userMapper, objectMapper, webhook);
     }
 
     @Test
