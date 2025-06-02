@@ -37,7 +37,7 @@ public class Story {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "shop_description", columnDefinition = "TEXT") // Use columnDefinition for TEXT
+    @Column(name = "shop_description", columnDefinition = "TEXT")
     private String shopDescription;
 
     @Column(name = "setting_description", columnDefinition = "TEXT")

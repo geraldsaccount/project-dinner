@@ -19,7 +19,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.exceptions.ClerkWebhookException;
@@ -52,8 +51,6 @@ class ClerkWebhookServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         webhookService = new ClerkWebhookService(userService, userMapper, objectMapper, webhook);
-        // ReflectionTestUtils.setField(webhookService, "webhookSecret", "test-secret");
-
     }
 
     @Test

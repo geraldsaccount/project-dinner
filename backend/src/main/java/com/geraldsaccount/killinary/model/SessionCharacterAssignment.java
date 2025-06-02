@@ -22,7 +22,6 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "session_character_assignments", uniqueConstraints = {
-        // Defines the composite unique constraint
         @UniqueConstraint(columnNames = { "session_id", "character_id" })
 })
 @Getter
