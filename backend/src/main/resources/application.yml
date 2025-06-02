@@ -8,3 +8,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: "https://related-colt-33.clerk.accounts.dev/.well-known/jwks.json"
+
+clerk:
+  webhook:
+    secret: ${CLERK_WEBHOOK_SECRET}
