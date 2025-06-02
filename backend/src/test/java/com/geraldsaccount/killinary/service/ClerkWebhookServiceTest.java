@@ -19,18 +19,20 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.exceptions.ClerkWebhookException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserPayload;
+import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
 import com.svix.Webhook;
 import com.svix.exceptions.WebhookVerificationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+@ActiveProfiles("test")
 @SuppressWarnings("unused")
 class ClerkWebhookServiceTest {
     @Mock

@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.ClerkWebhookException;
 import com.geraldsaccount.killinary.exceptions.UserMapperException;
@@ -21,6 +22,7 @@ import com.svix.exceptions.WebhookVerificationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+@ActiveProfiles("test")
 class ClerkWebhookControllerTest {
 
     private ClerkWebhookService service;

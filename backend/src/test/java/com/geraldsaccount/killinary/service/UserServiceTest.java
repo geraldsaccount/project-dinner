@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.repository.UserRepository;
 
+@ActiveProfiles("test")
 class UserServiceTest {
 
     private UserRepository userRepository;

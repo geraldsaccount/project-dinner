@@ -3,12 +3,14 @@ package com.geraldsaccount.killinary.mappers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkEmailAddress;
 import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
 
+@ActiveProfiles("test")
 class UserMapperTest {
 
     private final UserMapper userMapper = new UserMapper();

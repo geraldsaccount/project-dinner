@@ -21,7 +21,7 @@ public class SessionControler {
     }
 
     @GetMapping()
-    public Set<SessionSummaryDTO> getUsersEvents(Authentication authentication) {
+    public Set<SessionSummaryDTO> getSessionsForUser(Authentication authentication) {
         return sessionService.getSessionSummariesFrom(authentication.getName());
     }
 }
