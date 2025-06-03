@@ -16,6 +16,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(NotAllowedException.class)
+    public ResponseEntity<String> handleNotAllowedException(NotAllowedException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
     @ExceptionHandler(WebhookVerificationException.class)
     public ResponseEntity<String> handleWebhookVerificationException(WebhookVerificationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
@@ -31,8 +36,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(StoryNotFoundException.class)
+    public ResponseEntity<String> handleStoryNotFoundException(StoryNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(StoryConfigurationNotFoundException.class)
+    public ResponseEntity<String> handleStoryConfigurationNotFoundException(StoryConfigurationNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(UserMapperException.class)
     public ResponseEntity<String> handleUserMapperException(UserMapperException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

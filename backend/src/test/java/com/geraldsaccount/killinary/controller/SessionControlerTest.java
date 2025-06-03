@@ -1,7 +1,9 @@
 package com.geraldsaccount.killinary.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +16,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
 import com.geraldsaccount.killinary.model.Character;
@@ -26,9 +30,13 @@ import com.geraldsaccount.killinary.model.SessionCharacterAssignment;
 import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
+import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.User;
+import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
+import com.geraldsaccount.killinary.model.dto.output.NewSessionDTO;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.SessionRepository;
+import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 import com.geraldsaccount.killinary.repository.UserRepository;
 
@@ -56,11 +64,17 @@ class SessionControlerTest {
     private CharacterRepository characterRepository;
 
     @Autowired
+    private StoryConfigurationRepository configRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private User host;
     private User participant;
     private Session session;
+    private Story story;
+    private Story newStory;
+    private StoryConfiguration config;
 
     @BeforeEach
     @Transactional
@@ -79,9 +93,20 @@ class SessionControlerTest {
                 .email("mycroft@holmes.com")
                 .build());
 
-        Story story = storyRepository.save(Story.builder()
+        story = storyRepository.save(Story.builder()
                 .title("Murder Mystery")
                 .build());
+
+        newStory = storyRepository.save(Story.builder()
+                .title("Other Mystery")
+                .build());
+        config = configRepository.save(StoryConfiguration.builder()
+                .story(newStory)
+                .playerCount(3)
+                .configurationName("3 Player Config")
+                .build());
+        newStory.setConfigurations(Set.of(config));
+        storyRepository.save(newStory);
 
         session = Session.builder()
                 .host(host)
@@ -134,5 +159,92 @@ class SessionControlerTest {
         mockMvc.perform(get("/api/sessions")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createSession_returnsUnauthorized_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/sessions")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "invaliduser", roles = { "USER" })
+    void createSession_returnsBadRequest_whenNoContent() throws Exception {
+        mockMvc.perform(post("/api/sessions")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "invaliduser", roles = { "USER" })
+    void createSession_returnsNotFound_whenUserNotFound() throws Exception {
+        SessionCreationDTO dto = SessionCreationDTO.builder()
+                .build();
+        mockMvc.perform(post("/api/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = { "USER" })
+    void createSession_returnsBadRequest_whenUserAlreadyPlayed() throws JsonProcessingException, Exception {
+        SessionCreationDTO dto = SessionCreationDTO.builder()
+                .storyId(session.getStory().getId())
+                .build();
+        mockMvc.perform(post("/api/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = { "USER" })
+    void createSession_returnsNotFound_whenStoryNotFound() throws JsonProcessingException, Exception {
+        SessionCreationDTO dto = SessionCreationDTO.builder()
+                .storyId(UUID.randomUUID())
+                .build();
+        mockMvc.perform(post("/api/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = { "USER" })
+    void createSession_returnsNotFound_whenStoryConfigNotFound() throws JsonProcessingException, Exception {
+        SessionCreationDTO dto = SessionCreationDTO.builder()
+                .storyId(newStory.getId())
+                .storyConfigurationId(UUID.randomUUID())
+                .build();
+        String response = mockMvc.perform(post("/api/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = { "USER" })
+    void createSession_returnsSessionCreatedDTO_whenValidData()
+            throws JsonProcessingException, UnsupportedEncodingException, Exception {
+        SessionCreationDTO dto = SessionCreationDTO.builder()
+                .storyId(newStory.getId())
+                .storyConfigurationId(config.getId())
+                .build();
+        String response = mockMvc.perform(post("/api/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        NewSessionDTO newSession = objectMapper.readValue(response, NewSessionDTO.class);
+
+        assertThat(newSession.sessionId()).isNotNull();
     }
 }

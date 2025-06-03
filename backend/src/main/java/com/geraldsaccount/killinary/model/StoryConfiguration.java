@@ -37,11 +37,8 @@ public class StoryConfiguration {
     @JoinColumn(name = "story_id", nullable = false)
     private Story story;
 
-    @Column(name = "min_players", nullable = false)
-    private Integer minPlayers;
-
-    @Column(name = "max_players", nullable = false)
-    private Integer maxPlayers;
+    @Column(name = "player_count", nullable = false)
+    private Integer playerCount;
 
     @Column(name = "configuration_name", nullable = false)
     private String configurationName;
@@ -49,8 +46,4 @@ public class StoryConfiguration {
     @OneToMany(mappedBy = "storyConfiguration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<StoryConfigurationCharacter> charactersInConfig = new HashSet<>();
-
-    @OneToMany(mappedBy = "storyConfiguration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Session> sessions = new HashSet<>();
 }
