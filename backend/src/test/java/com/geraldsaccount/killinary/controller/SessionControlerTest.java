@@ -86,7 +86,7 @@ class SessionControlerTest {
         session = Session.builder()
                 .host(host)
                 .story(story)
-                .sessionCode("221b")
+                .code("221b")
                 .status(SessionStatus.CONCLUDED)
                 .startedAt(LocalDateTime.of(2025, 6, 2, 18, 0))
                 .build();
