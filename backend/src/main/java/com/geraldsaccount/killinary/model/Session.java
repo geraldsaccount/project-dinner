@@ -49,8 +49,8 @@ public class Session {
     @JoinColumn(name = "story_configuration_id")
     private StoryConfiguration storyConfiguration;
 
-    @Column(name = "session_code", unique = true, nullable = false)
-    private String sessionCode;
+    @Column(name = "code", unique = true, nullable = false)
+    private String code;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
