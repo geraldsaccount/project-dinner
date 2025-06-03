@@ -64,7 +64,7 @@ class SessionServiceTest {
         SessionSummaryDTO dto = result.iterator().next();
 
         SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
-                character.getName(), session.getStartedAt());
+                character.getName(), session.getStartedAt(), false);
 
         assertThat(dto)
                 .isEqualTo(expected);
@@ -82,7 +82,31 @@ class SessionServiceTest {
         SessionSummaryDTO dto = result.iterator().next();
 
         SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
-                null, session.getStartedAt());
+                null, session.getStartedAt(), false);
+
+        assertThat(dto)
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void getSessionSummariesFrom_isHostIsTrue_whenUserIsHost() {
+        createDummySession();
+        SessionCharacterAssignment assignment = SessionCharacterAssignment.builder()
+                .character(character)
+                .user(host)
+                .build();
+        session.setCharacterAssignments(Set.of(assignment));
+
+        session.setCharacterAssignments(Collections.emptySet());
+        when(sessionRepository.findAllByUserId(host.getOauthId())).thenReturn(List.of(session));
+
+        Set<SessionSummaryDTO> result = sessionService.getSessionSummariesFrom(host.getOauthId());
+
+        assertThat(result).hasSize(1);
+        SessionSummaryDTO dto = result.iterator().next();
+
+        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
+                null, session.getStartedAt(), true);
 
         assertThat(dto)
                 .isEqualTo(expected);
@@ -90,6 +114,7 @@ class SessionServiceTest {
 
     private void createDummySession() {
         host = User.builder()
+                .oauthId("UH")
                 .firstName("Host")
                 .build();
         user = User.builder()

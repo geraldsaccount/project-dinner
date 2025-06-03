@@ -32,6 +32,7 @@ public class SessionService {
                             .storyName(session.getStory().getTitle())
                             .assignedCharacterName(characterName)
                             .sessionDate(session.getStartedAt())
+                            .isHost(session.getHost().getOauthId().equals(oauthId))
                             .build();
                 })
                 .forEach(usersSessions::add);

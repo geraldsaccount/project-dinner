@@ -10,6 +10,7 @@ public record SessionSummaryDTO(UUID sessionId,
         String hostName,
         String storyName,
         String assignedCharacterName,
-        LocalDateTime sessionDate) {
+        LocalDateTime sessionDate,
+        Boolean isHost) {
 
 }
