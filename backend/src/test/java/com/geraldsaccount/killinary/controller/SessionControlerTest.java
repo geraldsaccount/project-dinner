@@ -24,6 +24,7 @@ import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.SessionCharacterAssignment;
 import com.geraldsaccount.killinary.model.SessionParticipant;
+import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
@@ -86,7 +87,7 @@ class SessionControlerTest {
                 .host(host)
                 .story(story)
                 .sessionCode("221b")
-                .status("Concluded")
+                .status(SessionStatus.CONCLUDED)
                 .startedAt(LocalDateTime.of(2025, 6, 2, 18, 0))
                 .build();
 
