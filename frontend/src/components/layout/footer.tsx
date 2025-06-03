@@ -6,7 +6,7 @@ const Footer = () => {
 
   return (
     <footer className="hidden md:block w-full border-t py-4 bg-background">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center md:px-8 px-4">
         <div className="text-sm text-muted-foreground">
           © {currentYear} Killinary. All rights reserved.
         </div>
