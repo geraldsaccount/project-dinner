@@ -23,6 +23,7 @@ import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
+import com.geraldsaccount.killinary.repository.SessionRepository;
 import com.geraldsaccount.killinary.repository.StoryConfigurationCharacterRepository;
 import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
@@ -32,9 +33,12 @@ import jakarta.transaction.Transactional;
 @SpringBootTest(classes = KillinaryApplication.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@SuppressWarnings("unused")
 class StoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private SessionRepository sessionRepository;
     @Autowired
     private StoryRepository storyRepository;
     @Autowired
@@ -49,6 +53,7 @@ class StoryControllerTest {
     @BeforeEach
     @Transactional
     void setUp() {
+        sessionRepository.deleteAll();
         storyConfigurationCharacterRepository.deleteAll();
         storyConfigurationRepository.deleteAll();
         characterRepository.deleteAll();
@@ -102,6 +107,7 @@ class StoryControllerTest {
 
     @Test
     void getStorySummaries_returnsEmpty_whenNoStories() throws Exception {
+        sessionRepository.deleteAll();
         storyConfigurationCharacterRepository.deleteAll();
         storyConfigurationRepository.deleteAll();
         characterRepository.deleteAll();
