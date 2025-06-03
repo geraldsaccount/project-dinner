@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -24,7 +23,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-row justify-center">
-      <div className="container mx-auto flex h-16 items-center justify-between">
+      <div className="container mx-auto flex h-16 items-center justify-between md:px-8 px-4">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center">
             <span className="font-bold text-xl">Killinary</span>
@@ -35,12 +34,9 @@ const Navbar = () => {
               <Link
                 key={item.to}
                 to={item.to}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
-                  item.to === activeItem
-                    ? "text-foreground"
-                    : "text-muted-foreground"
-                )}
+                className={
+                  "text-sm font-medium transition-colors hover:text-primary text-muted-foreground"
+                }
                 onClick={() => setActiveItem(item.to)}
               >
                 {item.title}
