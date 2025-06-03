@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ClerkUserData {
+public class OAuthUserData {
     @JsonProperty("email_addresses")
     private ClerkEmailAddress[] emailAddresses;
 

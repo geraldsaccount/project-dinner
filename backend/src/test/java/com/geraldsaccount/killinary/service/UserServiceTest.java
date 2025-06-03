@@ -6,33 +6,39 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.mock;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.repository.UserRepository;
 
+@ActiveProfiles("test")
+@SuppressWarnings("unused")
 class UserServiceTest {
 
-    private UserRepository userRepository;
+    @Mock
     private UserMapper userMapper;
+    @Mock
+    private UserRepository userRepository;
+    @InjectMocks
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userRepository = mock(UserRepository.class);
-        userMapper = mock(UserMapper.class);
-        userService = new UserService(userRepository, userMapper);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     void deleteUser_shouldDeleteUser_whenUserExists() throws Exception {
         String clerkId = "clerk123";
         User user = new User();
-        when(userRepository.findByClerkId(clerkId)).thenReturn(Optional.of(user));
+        when(userRepository.findByOauthId(clerkId)).thenReturn(Optional.of(user));
 
         userService.deleteUser(clerkId);
 
@@ -42,7 +48,7 @@ class UserServiceTest {
     @Test
     void deleteUser_shouldThrowException_whenUserDoesNotExist() {
         String clerkId = "notfound";
-        when(userRepository.findByClerkId(clerkId)).thenReturn(Optional.empty());
+        when(userRepository.findByOauthId(clerkId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.deleteUser(clerkId))
                 .isInstanceOf(UserNotFoundException.class)

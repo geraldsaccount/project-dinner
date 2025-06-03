@@ -37,7 +37,7 @@ public class User {
     private UUID id;
 
     @Column(unique = true, nullable = false)
-    private String clerkId;
+    private String oauthId;
 
     @Column(unique = true, nullable = true)
     private String username;

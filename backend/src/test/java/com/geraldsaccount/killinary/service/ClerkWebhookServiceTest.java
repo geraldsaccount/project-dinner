@@ -13,24 +13,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.exceptions.ClerkWebhookException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserData;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserPayload;
+import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
 import com.svix.Webhook;
 import com.svix.exceptions.WebhookVerificationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+@ActiveProfiles("test")
 @SuppressWarnings("unused")
 class ClerkWebhookServiceTest {
     @Mock
@@ -45,12 +48,12 @@ class ClerkWebhookServiceTest {
     @Mock
     private Webhook webhook;
 
+    @InjectMocks
     private ClerkWebhookService webhookService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        webhookService = new ClerkWebhookService(userService, userMapper, objectMapper, webhook);
     }
 
     @Test
@@ -62,7 +65,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.created");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
 
         when(objectMapper.readValue(payload, ClerkUserPayload.class)).thenReturn(userPayload);
@@ -82,7 +85,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.updated");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
 
         when(objectMapper.readValue(payload, ClerkUserPayload.class)).thenReturn(userPayload);
@@ -102,7 +105,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.deleted");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
         when(clerkUserData.getId()).thenReturn("U1");
 
@@ -122,7 +125,7 @@ class ClerkWebhookServiceTest {
 
         ClerkUserPayload userPayload = mock(ClerkUserPayload.class);
         when(userPayload.getType()).thenReturn("user.unknown");
-        ClerkUserData clerkUserData = mock(ClerkUserData.class);
+        OAuthUserData clerkUserData = mock(OAuthUserData.class);
         when(userPayload.getData()).thenReturn(clerkUserData);
 
         when(objectMapper.readValue(payload, ClerkUserPayload.class)).thenReturn(userPayload);

@@ -30,7 +30,7 @@ class UserRepositoryTest {
 
         userRepository.deleteAll();
         testUser = User.builder()
-                .clerkId("T1")
+                .oauthId("T1")
                 .email("test@example.com")
                 .username("testuser")
                 .firstName("test")
@@ -43,7 +43,7 @@ class UserRepositoryTest {
     @Test
     void shouldSaveAndFindUser() {
         User newUser = User.builder()
-                .clerkId("U1")
+                .oauthId("U1")
                 .email("john@example.com")
                 .username("john.doe")
                 .firstName("john")

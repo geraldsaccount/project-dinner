@@ -10,7 +10,7 @@ import com.geraldsaccount.killinary.model.User;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByUsername(String username);
 
-    Optional<User> findByClerkId(String clerkId);
+    Optional<User> findByOauthId(String oauthId);
 
     Optional<User> findByEmail(String email);
 

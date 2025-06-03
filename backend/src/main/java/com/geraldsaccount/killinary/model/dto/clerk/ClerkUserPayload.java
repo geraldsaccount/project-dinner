@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class ClerkUserPayload {
-    private ClerkUserData data;
+    private OAuthUserData data;
     private String type;
 }

@@ -3,12 +3,14 @@ package com.geraldsaccount.killinary.mappers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkEmailAddress;
-import com.geraldsaccount.killinary.model.dto.clerk.ClerkUserData;
+import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
 
+@ActiveProfiles("test")
 class UserMapperTest {
 
     private final UserMapper userMapper = new UserMapper();
@@ -16,7 +18,7 @@ class UserMapperTest {
     @Test
     void withUpdatedClerkUserData_shouldUpdateFields() {
         User source = User.builder()
-                .clerkId("U1")
+                .oauthId("U1")
                 .firstName("John")
                 .lastName("Doe")
                 .username("johndoe")
@@ -36,7 +38,7 @@ class UserMapperTest {
         assertThat(result.getLastName()).isEqualTo("Smith");
         assertThat(result.getUsername()).isEqualTo("janesmith");
         assertThat(result.getEmail()).isEqualTo("jane@example.com");
-        assertThat(result.getClerkId()).isEqualTo("U1");
+        assertThat(result.getOauthId()).isEqualTo("U1");
     }
 
     @Test
@@ -46,7 +48,7 @@ class UserMapperTest {
                 .emailAddress("alice@wonderland.com")
                 .build();
 
-        ClerkUserData clerkUser = ClerkUserData.builder()
+        OAuthUserData clerkUser = OAuthUserData.builder()
                 .id("U1")
                 .firstName("Alice")
                 .lastName("Wonderland")
@@ -57,7 +59,7 @@ class UserMapperTest {
 
         User user = userMapper.fromClerkUser(clerkUser);
 
-        assertThat(user.getClerkId()).isEqualTo(clerkUser.getId());
+        assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
         assertThat(user.getFirstName()).isEqualTo(clerkUser.getFirstName());
         assertThat(user.getLastName()).isEqualTo(clerkUser.getLastName());
         assertThat(user.getUsername()).isEqualTo(clerkUser.getUsername());
@@ -66,7 +68,7 @@ class UserMapperTest {
 
     @Test
     void fromClerkUser_shouldThrowException_whenIdIsNull() {
-        ClerkUserData clerkUser = ClerkUserData.builder()
+        OAuthUserData clerkUser = OAuthUserData.builder()
                 .id(null)
                 .primaryEmailAddressID("E1")
                 .emailAddresses(new ClerkEmailAddress[] {})
@@ -79,7 +81,7 @@ class UserMapperTest {
 
     @Test
     void fromClerkUser_shouldThrowException_whenPrimaryEmailIsNull() {
-        ClerkUserData clerkUser = ClerkUserData.builder()
+        OAuthUserData clerkUser = OAuthUserData.builder()
                 .id("U1")
                 .primaryEmailAddressID(null)
                 .emailAddresses(new ClerkEmailAddress[] {})
@@ -101,7 +103,7 @@ class UserMapperTest {
                 .emailAddress("madhatter@wonderland.com")
                 .build();
 
-        ClerkUserData clerkUser = ClerkUserData.builder()
+        OAuthUserData clerkUser = OAuthUserData.builder()
                 .id("U1")
                 .primaryEmailAddressID("E3")
                 .emailAddresses(new ClerkEmailAddress[] { email1, email2 }).build();
@@ -112,7 +114,7 @@ class UserMapperTest {
 
     @Test
     void getPrimaryEmail_shouldReturnNullIfPrimaryEmailIdIsNull() throws Exception {
-        ClerkUserData clerkUser = ClerkUserData.builder()
+        OAuthUserData clerkUser = OAuthUserData.builder()
                 .id("userId")
                 .primaryEmailAddressID(null)
                 .emailAddresses(null)
