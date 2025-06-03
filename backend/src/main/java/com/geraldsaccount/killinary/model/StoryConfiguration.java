@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.With;
 
 @Entity
 @Table(name = "story_configurations")
@@ -28,6 +29,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@With
 public class StoryConfiguration {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -37,11 +39,8 @@ public class StoryConfiguration {
     @JoinColumn(name = "story_id", nullable = false)
     private Story story;
 
-    @Column(name = "min_players", nullable = false)
-    private Integer minPlayers;
-
-    @Column(name = "max_players", nullable = false)
-    private Integer maxPlayers;
+    @Column(name = "player_count", nullable = false)
+    private Integer playerCount;
 
     @Column(name = "configuration_name", nullable = false)
     private String configurationName;
