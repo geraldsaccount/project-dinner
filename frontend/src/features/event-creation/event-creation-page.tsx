@@ -1,110 +1,173 @@
-import { useState } from "react";
-import { PageHeader } from "@/components";
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { sampleStorySummary } from "@/data/sample-story-summary";
-import StoryCard from "./components/story-card";
-import type { StoryConfigSummary, StorySummary } from "@/types";
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuthenticatedApi } from "@/hooks";
+import type { StorySummary } from "@/types";
+
 import PlayerCountSlider from "./components/player-count-slider";
 import GridLayout from "@/components/layout/grid-layout";
 import CharacterCard from "./components/character-profile";
+import SectionHeader from "./components/section-header";
+import DateTimePicker from "@/components/ui/date-time-picker";
+import StoryPicker from "./components/story-picker";
+import StoryPickerSkeleton from "./components/story-picker-skeleton";
+
+const eventSchema = z.object({
+  storyId: z.string().min(1, "Please select a story"),
+  configId: z.string().min(1, "Please select player count"),
+  date: z.date({ required_error: "Please select a date and time" }),
+});
+
+type EventFormValues = z.infer<typeof eventSchema>;
 
 const EventCreationPage = () => {
-  const secondSample = {
-    ...sampleStorySummary,
-    id: "second",
-    storyId: "secondStory",
-  };
-  const thirdSample = {
-    ...sampleStorySummary,
-    id: "third",
-    storyId: "thridStory",
-  };
-  const stories: StorySummary[] = [
-    sampleStorySummary,
-    secondSample,
-    thirdSample,
-  ];
-  const [selectedStoryId, setSelectedStoryId] = useState<string | undefined>(
-    undefined
+  const {
+    data: stories,
+    loading: storiesLoading,
+    callApi: fetchStories,
+  } = useAuthenticatedApi<StorySummary[]>();
+
+  React.useEffect(() => {
+    fetchStories("/api/stories");
+  }, [fetchStories]);
+
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: {
+      storyId: "",
+      configId: "",
+      date: undefined,
+    },
+  });
+
+  const selectedStory = stories?.find(
+    (s) => s.storyId === form.watch("storyId")
+  );
+  const sortedConfigs = selectedStory
+    ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
+    : [];
+  const selectedConfig = sortedConfigs.find(
+    (cfg) => cfg.id === form.watch("configId")
   );
 
-  const toggleSelection = (storyId: string) => {
-    setSelectedStoryId(selectedStoryId === storyId ? undefined : storyId);
-  };
-
-  const selectedStory = stories.find((s) => s.storyId === selectedStoryId);
-  const [selectedConfig, setSelectedConfig] = useState<StoryConfigSummary>();
-
   return (
-    <div className="flex flex-col gap-4 items-baseline">
-      <PageHeader title="Create New Event" />
-      <div className="flex flex-col p-2 gap-2 w-full">
-        <h3 className="text-2xl font-semibold text-muted-foreground">
-          Step 1: Choose Story
-        </h3>
-        <Carousel className="w-full md:w-[90%] self-center">
-          <CarouselContent>
-            {stories.map((s) => (
-              <CarouselItem
-                key={s.storyId}
-                className="basis-2/3 lg:basis-1/2 xl:basis-1/3"
-              >
-                <button
-                  className={`transition-all cursor-pointer ${selectedStoryId === s.storyId ? "opacity-100 scale-100" : "opacity-40 scale-95"} hover:opacity-100`}
-                  onClick={() => toggleSelection(s.storyId)}
-                >
-                  <StoryCard summary={s} />
-                </button>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
-        </Carousel>
-      </div>
-      <div
-        className={`${selectedStoryId === undefined ? "hidden" : "flex"} flex-col p-2 gap-2 w-full`}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit((data) => {
+          // handle submit
+          console.log("Form submitted", data, selectedConfig);
+        })}
+        className="flex flex-col gap-4 items-baseline"
       >
-        <h3 className="text-2xl font-semibold text-muted-foreground">
-          Step 2: Player Count
-        </h3>
-        {selectedStory && selectedStory.configs.length > 0 && (
-          <PlayerCountSlider
-            minCount={selectedStory.minPlayers}
-            maxCount={selectedStory.maxPlayers}
-            configurations={selectedStory.configs}
-            selectedChanged={setSelectedConfig}
-          />
-        )}
-        {/* Optionally show the currently selected player count */}
-        {selectedStory && selectedConfig && (
-          <div className=" text-center text-muted-foreground self-end">
-            Selected player count:{" "}
-            <span className="font-bold">{selectedConfig.playerCount}</span>
-          </div>
-        )}
-        <h4 className="text-xl font-semibold">Suspects: </h4>
-        <GridLayout
-          className="pt-4 w-full"
-          gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}
+        <div className="flex flex-col p-2 gap-2 w-full">
+          <SectionHeader title="Step 1: Choose Story" />
+          {storiesLoading ? (
+            <div className="w-full md:w-[90%] self-center">
+              <StoryPickerSkeleton />
+            </div>
+          ) : stories && stories.length > 0 ? (
+            <FormField
+              control={form.control}
+              name="storyId"
+              render={({ field }) => (
+                <FormItem>
+                  <StoryPicker
+                    stories={stories}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : (
+            <div className="text-destructive">Failed to load stories.</div>
+          )}
+        </div>
+        <div
+          className={`${
+            form.watch("storyId") === "" ? "hidden" : "flex"
+          } flex-col p-2 gap-2 w-full`}
         >
-          {selectedConfig?.characterIds.map((cid) => {
-            const character = selectedStory?.characters.find(
-              (c) => c.id === cid
-            );
-            return character ? (
-              <CharacterCard key={cid} character={character} />
-            ) : null;
-          })}
-        </GridLayout>
-      </div>
-    </div>
+          <SectionHeader title="Step 2: Player Count" />
+          {selectedStory && sortedConfigs.length > 0 && (
+            <FormField
+              control={form.control}
+              name="configId"
+              render={({ field }) => (
+                <FormItem>
+                  <PlayerCountSlider
+                    minCount={selectedStory.minPlayers}
+                    maxCount={selectedStory.maxPlayers}
+                    configurations={sortedConfigs}
+                    selectedChanged={(cfg) => field.onChange(cfg.id)}
+                    selectedConfigId={field.value}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          {selectedConfig && (
+            <div className="text-muted-foreground self-end">
+              Selected player count:{" "}
+              <span className="font-bold">{selectedConfig.playerCount}</span>
+            </div>
+          )}
+          <h4 className="text-xl font-semibold">Suspects: </h4>
+          <GridLayout
+            className="pt-4 w-full"
+            gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}
+          >
+            {selectedConfig?.characterIds.map((cid: string) => {
+              const character = selectedStory?.characters.find(
+                (c: { id: string }) => c.id === cid
+              );
+              return character ? (
+                <CharacterCard key={cid} character={character} />
+              ) : null;
+            })}
+          </GridLayout>
+        </div>
+        <div
+          className={`${
+            form.watch("storyId") === "" ? "hidden" : "flex"
+          } flex-col p-2 gap-2 w-full`}
+        >
+          <SectionHeader title="Step 3: Event Details" />
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-light">Date & Time</FormLabel>
+                <FormControl>
+                  <DateTimePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    className="w-full sm:w-44"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Create Session
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

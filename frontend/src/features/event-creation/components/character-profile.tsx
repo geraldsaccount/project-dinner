@@ -1,5 +1,4 @@
 import type { CharacterSummary } from "@/types";
-import React from "react";
 
 type Props = {
   character: CharacterSummary;
