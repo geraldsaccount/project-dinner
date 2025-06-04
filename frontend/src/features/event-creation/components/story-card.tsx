@@ -26,9 +26,8 @@ const StoryCard = ({ summary, className }: Props) => {
           <CardHeader className="p-0 pb-2">
             <div className="font-bold text-lg">{title}</div>
             <div className="text-sm text-muted-foreground">
-              For{" "}
               {fixedPlayerCount ? minPlayers : `${minPlayers} - ${maxPlayers}`}{" "}
-              players.
+              Players
             </div>
           </CardHeader>
           <CardContent className="p-0">
