@@ -20,17 +20,15 @@ const StoryPicker = ({ stories, value, onChange }: Props) => {
       <CarouselContent>
         {stories.map((s) => (
           <CarouselItem
-            key={s.storyId}
+            key={s.id}
             className="basis-full md:basis-1/2 xl:basis-1/3"
           >
             <button
               type="button"
               className={`transition-all cursor-pointer ${
-                value === s.storyId
-                  ? "opacity-100 scale-100"
-                  : "opacity-40 scale-95"
+                value === s.id ? "opacity-100 scale-100" : "opacity-40 scale-95"
               } hover:opacity-100`}
-              onClick={() => onChange?.(s.storyId)}
+              onClick={() => onChange?.(s.id)}
             >
               <StoryCard summary={s} />
             </button>

@@ -1,4 +1,4 @@
-// imported from shadcn
+// imported from shadcn/ui
 
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";

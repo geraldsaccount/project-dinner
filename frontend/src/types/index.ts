@@ -12,7 +12,7 @@ export interface MobileNavProps {
 
 export type StorySummary = {
   id: string;
-  storyId: string;
+  // storyId: string;
   title: string;
   thumbnailDescription: string;
   minPlayers: number;
@@ -33,4 +33,14 @@ export type CharacterSummary = {
   name: string;
   characterDescription: string;
   gender: "MALE" | "FEMALE" | "OTHER";
+};
+
+export type SessionCreationDTO = {
+  sessionId: string;
+  eventStart: Date;
+  storyConfigurationId: string;
+};
+
+export type NewSessionDTO = {
+  sessionId: string;
 };

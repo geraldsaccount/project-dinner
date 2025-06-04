@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,7 +12,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthenticatedApi } from "@/hooks";
-import type { StorySummary } from "@/types";
+import { type NewSessionDTO, type StorySummary } from "@/types";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 import PlayerCountSlider from "./components/player-count-slider";
 import GridLayout from "@/components/layout/grid-layout";
@@ -21,10 +23,12 @@ import SectionHeader from "./components/section-header";
 import DateTimePicker from "@/components/ui/date-time-picker";
 import StoryPicker from "./components/story-picker";
 import StoryPickerSkeleton from "./components/story-picker-skeleton";
+import { PageHeader } from "@/components";
+import { sampleStorySummary } from "@/data/sample-story-summary";
 
 const eventSchema = z.object({
   storyId: z.string().min(1, "Please select a story"),
-  configId: z.string().min(1, "Please select player count"),
+  storyConfigurationId: z.string().min(1, "Please select player count"),
   date: z.date({ required_error: "Please select a date and time" }),
 });
 
@@ -37,7 +41,12 @@ const EventCreationPage = () => {
     callApi: fetchStories,
   } = useAuthenticatedApi<StorySummary[]>();
 
-  React.useEffect(() => {
+  const { loading: creationLoading, callApi: postSession } =
+    useAuthenticatedApi<NewSessionDTO>();
+
+  const navigate = useNavigate();
+  // const stories = [sampleStorySummary];
+  useEffect(() => {
     fetchStories("/api/stories");
   }, [fetchStories]);
 
@@ -45,28 +54,43 @@ const EventCreationPage = () => {
     resolver: zodResolver(eventSchema),
     defaultValues: {
       storyId: "",
-      configId: "",
+      storyConfigurationId: "",
       date: undefined,
     },
   });
 
-  const selectedStory = stories?.find(
-    (s) => s.storyId === form.watch("storyId")
-  );
+  const selectedStory = stories?.find((s) => s.id === form.watch("storyId"));
   const sortedConfigs = selectedStory
     ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
     : [];
   const selectedConfig = sortedConfigs.find(
-    (cfg) => cfg.id === form.watch("configId")
+    (cfg) => cfg.id === form.watch("storyConfigurationId")
   );
+
+  const handleSubmit = async (data: EventFormValues) => {
+    toast("Creating Session");
+    try {
+      const body = {
+        storyId: data.storyId,
+        storyConfigurationId: data.storyConfigurationId,
+        eventStart: data.date,
+      };
+      console.log(body);
+      const result = await postSession("/api/sessions", "POST", body);
+      if (result && result.sessionId) {
+        navigate(`/sessions/${result.sessionId}`);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
+      toast.error("Failed to create session");
+    }
+  };
 
   return (
     <Form {...form}>
+      <PageHeader title="Host New Event" />
       <form
-        onSubmit={form.handleSubmit((data) => {
-          // handle submit
-          console.log("Form submitted", data, selectedConfig);
-        })}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="flex flex-col gap-4 items-baseline"
       >
         <div className="flex flex-col p-2 gap-2 w-full">
@@ -91,7 +115,11 @@ const EventCreationPage = () => {
               )}
             />
           ) : (
-            <div className="text-destructive">Failed to load stories.</div>
+            <div className="text-destructive">
+              Failed to load stories.
+              <br />
+              Try again later.
+            </div>
           )}
         </div>
         <div
@@ -103,7 +131,7 @@ const EventCreationPage = () => {
           {selectedStory && sortedConfigs.length > 0 && (
             <FormField
               control={form.control}
-              name="configId"
+              name="storyConfigurationId"
               render={({ field }) => (
                 <FormItem>
                   <PlayerCountSlider
@@ -155,14 +183,18 @@ const EventCreationPage = () => {
                   <DateTimePicker
                     value={field.value}
                     onChange={field.onChange}
-                    className="w-full sm:w-44"
+                    className="w-full sm:w-[30%] min-w-52"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={!form.formState.isValid}>
+          <Button
+            type="submit"
+            disabled={!form.formState.isValid || creationLoading}
+            className="mt-4"
+          >
             Create Session
           </Button>
         </div>

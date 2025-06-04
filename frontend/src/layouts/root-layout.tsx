@@ -1,10 +1,12 @@
 import { Footer, Navbar } from "@/components";
 import type { PropsWithChildren } from "react";
 import { Outlet } from "react-router-dom";
+import { Toaster } from "sonner";
 
 const RootLayout: React.FC<PropsWithChildren> = () => {
   return (
     <div className="flex flex-col min-h-screen">
+      <Toaster position="top-right" />
       <Navbar />
       <main
         className={
