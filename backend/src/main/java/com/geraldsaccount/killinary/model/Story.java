@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.With;
 
 @Entity
 @Table(name = "stories")
@@ -29,6 +30,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@With
 public class Story {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -56,10 +58,6 @@ public class Story {
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<StoryConfiguration> configurations = new HashSet<>();
-
-    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Session> sessions = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
