@@ -20,23 +20,23 @@ import com.geraldsaccount.killinary.service.SessionService;
 
 @RestController
 @RequestMapping("/api/sessions")
-public class SessionControler {
+public class SessionController {
 
-    private final SessionService sessionService;
+  private final SessionService sessionService;
 
-    public SessionControler(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
+  public SessionController(SessionService sessionService) {
+    this.sessionService = sessionService;
+  }
 
-    @GetMapping()
-    public Set<SessionSummaryDTO> getSessionsForUser(Authentication authentication) {
-        return sessionService.getSessionSummariesFrom(authentication.getName());
-    }
+  @GetMapping()
+  public Set<SessionSummaryDTO> getSessionsForUser(Authentication authentication) {
+    return sessionService.getSessionSummariesFrom(authentication.getName());
+  }
 
-    @PostMapping()
-    public NewSessionDTO createNewSession(Authentication authentication, @RequestBody SessionCreationDTO creationDTO)
-            throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
-            NotAllowedException {
-        return sessionService.createSession(authentication.getName(), creationDTO);
-    }
+  @PostMapping()
+  public NewSessionDTO createNewSession(Authentication authentication, @RequestBody SessionCreationDTO creationDTO)
+      throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
+      NotAllowedException {
+    return sessionService.createSession(authentication.getName(), creationDTO);
+  }
 }

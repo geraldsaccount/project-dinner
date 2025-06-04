@@ -46,7 +46,7 @@ import jakarta.transaction.Transactional;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SuppressWarnings("unused")
-class SessionControlerTest {
+class SessionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
