@@ -9,3 +9,28 @@ export interface MobileNavProps {
   activeItem: string;
   setActiveItem: (to: string) => void;
 }
+
+export type StorySummary = {
+  id: string;
+  storyId: string;
+  title: string;
+  thumbnailDescription: string;
+  minPlayers: number;
+  maxPlayers: number;
+  configs: StoryConfigSummary[];
+  characters: CharacterSummary[];
+};
+
+export type StoryConfigSummary = {
+  id: string;
+  playerCount: number;
+  genderCounts: Record<string, number>;
+  characterIds: string[];
+};
+
+export type CharacterSummary = {
+  id: string;
+  name: string;
+  characterDescription: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
+};

@@ -3,7 +3,7 @@ type Props = {
 };
 
 const PageHeader = ({ title }: Props) => {
-  return <h2 className="text-3xl font-extrabold">{title}</h2>;
+  return <h2 className="text-5xl font-extrabold">{title}</h2>;
 };
 
 export default PageHeader;
