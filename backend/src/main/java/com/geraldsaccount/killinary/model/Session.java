@@ -8,6 +8,8 @@ import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -47,11 +49,12 @@ public class Session {
     @JoinColumn(name = "story_configuration_id")
     private StoryConfiguration storyConfiguration;
 
-    @Column(name = "session_code", unique = true, nullable = false)
-    private String sessionCode;
+    @Column(name = "code", unique = true, nullable = false)
+    private String code;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private SessionStatus status;
 
     @Column(name = "current_round")
     private Integer currentRound;

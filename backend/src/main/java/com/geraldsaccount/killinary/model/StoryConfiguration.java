@@ -48,8 +48,4 @@ public class StoryConfiguration {
     @OneToMany(mappedBy = "storyConfiguration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<StoryConfigurationCharacter> charactersInConfig = new HashSet<>();
-
-    @OneToMany(mappedBy = "storyConfiguration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Session> sessions = new HashSet<>();
 }
