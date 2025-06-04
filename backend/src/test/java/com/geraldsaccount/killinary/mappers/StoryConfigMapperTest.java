@@ -2,7 +2,6 @@ package com.geraldsaccount.killinary.mappers;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,6 @@ import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
-import com.geraldsaccount.killinary.model.dto.output.CharacterSummaryDTO;
 import com.geraldsaccount.killinary.model.dto.output.StoryConfigSummaryDTO;
 
 class StoryConfigMapperTest {
@@ -41,15 +39,11 @@ class StoryConfigMapperTest {
 
         config.setCharactersInConfig(Set.of(confChar1, confChar2));
 
-        Function<Character, CharacterSummaryDTO> characterMapper = c -> CharacterSummaryDTO.builder().id(c.getId())
-                .gender(c.getGender()).build();
-
-        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config, characterMapper);
+        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config);
 
         assertThat(dto.id()).isEqualTo(config.getId());
         assertThat(dto.playerCount()).isEqualTo(2);
-        assertThat(dto.characters()).hasSize(2)
-                .extracting(CharacterSummaryDTO::id)
+        assertThat(dto.characterIds()).hasSize(2)
                 .containsExactlyInAnyOrder(character1.getId(), character2.getId());
 
         assertThat(dto.genderCounts())
@@ -65,14 +59,11 @@ class StoryConfigMapperTest {
                 .charactersInConfig(Set.of())
                 .build();
 
-        Function<Character, CharacterSummaryDTO> characterMapper = c -> CharacterSummaryDTO.builder().id(c.getId())
-                .gender(c.getGender()).build();
-
-        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config, characterMapper);
+        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config);
 
         assertThat(dto.id()).isEqualTo(config.getId());
         assertThat(dto.playerCount()).isEqualTo(0);
-        assertThat(dto.characters()).isEmpty();
+        assertThat(dto.characterIds()).isEmpty();
         assertThat(dto.genderCounts()).isEmpty();
     }
 
@@ -98,10 +89,7 @@ class StoryConfigMapperTest {
 
         config.setCharactersInConfig(Set.of(confChar1, confChar2));
 
-        Function<Character, CharacterSummaryDTO> characterMapper = c -> CharacterSummaryDTO.builder().id(c.getId())
-                .gender(c.getGender()).build();
-
-        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config, characterMapper);
+        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config);
 
         assertThat(dto.genderCounts())
                 .containsEntry(Gender.MALE, 2);
