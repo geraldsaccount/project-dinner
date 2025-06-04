@@ -6,8 +6,9 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import "./index.css";
 import RootLayout from "./layouts/root-layout.tsx";
 import LandingPage from "./pages/landing-page.tsx";
-import EventsPage from "./pages/events-page.tsx";
+import EventsPage from "./features/event-gallery/events-page.tsx";
 import ProtectedRoute from "./components/protected-route.tsx";
+import EventCreationPage from "./features/event-creation/event-creation-page.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -24,6 +25,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<LandingPage />} />
             <Route path="events" element={<ProtectedRoute />}>
               <Route index element={<EventsPage />} />
+              <Route path="create" element={<EventCreationPage />} />
             </Route>
           </Route>
         </Routes>
