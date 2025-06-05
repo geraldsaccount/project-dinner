@@ -26,7 +26,7 @@ import com.geraldsaccount.killinary.KillinaryApplication;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionCharacterAssignment;
+import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
@@ -127,7 +127,7 @@ class SessionControllerTest {
                 .story(story)
                 .build());
 
-        SessionCharacterAssignment assignment = SessionCharacterAssignment.builder()
+        CharacterAssignment assignment = CharacterAssignment.builder()
                 .session(session)
                 .user(participant)
                 .character(character)

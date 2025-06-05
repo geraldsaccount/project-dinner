@@ -27,7 +27,7 @@ import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionCharacterAssignment;
+import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
@@ -115,7 +115,7 @@ class SessionServiceTest {
     @Test
     void getSessionSummariesFrom_isHostIsTrue_whenUserIsHost() {
         createDummySession();
-        SessionCharacterAssignment assignment = SessionCharacterAssignment.builder()
+        CharacterAssignment assignment = CharacterAssignment.builder()
                 .character(character)
                 .user(host)
                 .build();
@@ -279,7 +279,7 @@ class SessionServiceTest {
         character = Character.builder()
                 .name("Sir Archibald")
                 .build();
-        SessionCharacterAssignment assignment = SessionCharacterAssignment.builder()
+        CharacterAssignment assignment = CharacterAssignment.builder()
                 .character(character)
                 .user(user)
                 .build();

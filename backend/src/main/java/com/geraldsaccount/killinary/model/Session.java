@@ -74,7 +74,7 @@ public class Session {
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<SessionCharacterAssignment> characterAssignments = new HashSet<>();
+    private Set<CharacterAssignment> characterAssignments = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
