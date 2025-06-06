@@ -24,6 +24,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.With;
 
 @Entity
 @Table(name = "sessions")
@@ -32,6 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@With
 public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -48,9 +50,6 @@ public class Session {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "story_configuration_id")
     private StoryConfiguration storyConfiguration;
-
-    @Column(name = "code", unique = true, nullable = false)
-    private String code;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -74,7 +73,7 @@ public class Session {
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<SessionCharacterAssignment> characterAssignments = new HashSet<>();
+    private Set<CharacterAssignment> characterAssignments = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

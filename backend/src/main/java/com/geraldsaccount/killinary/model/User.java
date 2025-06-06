@@ -39,17 +39,14 @@ public class User {
     @Column(unique = true, nullable = false)
     private String oauthId;
 
-    @Column(unique = true, nullable = true)
-    private String username;
-
-    @Column(name = "first_name", unique = false, nullable = true)
-    private String firstName;
-
-    @Column(name = "last_name", unique = false, nullable = true)
-    private String lastName;
+    @Column(unique = false, nullable = true)
+    private String name;
 
     @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(unique = false, nullable = true)
+    private String avatarUrl;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

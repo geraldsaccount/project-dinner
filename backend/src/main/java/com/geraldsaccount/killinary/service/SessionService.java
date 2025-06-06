@@ -2,13 +2,16 @@ package com.geraldsaccount.killinary.service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
+import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
@@ -17,8 +20,6 @@ import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
 import com.geraldsaccount.killinary.model.dto.output.NewSessionDTO;
 import com.geraldsaccount.killinary.model.dto.output.SessionSummaryDTO;
 import com.geraldsaccount.killinary.repository.SessionRepository;
-import com.geraldsaccount.killinary.repository.StoryRepository;
-import com.geraldsaccount.killinary.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +28,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SessionService {
     private final SessionRepository sessionRepository;
-    private final UserRepository userRepository;
-    private final StoryRepository storyRepository;
-    private final SessionCodeService codeService;
+    private final UserService userService;
+    private final StoryService storyService;
+    private final CharacterAssignmentCodeService assignmentCodeService;
 
     public Set<SessionSummaryDTO> getSessionSummariesFrom(String oauthId) {
         Set<SessionSummaryDTO> usersSessions = new HashSet<>();
@@ -44,7 +45,7 @@ public class SessionService {
 
                     return SessionSummaryDTO.builder()
                             .sessionId(session.getId())
-                            .hostName(session.getHost().getFirstName())
+                            .hostName(session.getHost().getName())
                             .storyName(session.getStory().getTitle())
                             .assignedCharacterName(characterName)
                             .sessionDate(session.getStartedAt())
@@ -60,19 +61,18 @@ public class SessionService {
     public NewSessionDTO createSession(String oauthId, SessionCreationDTO creationDTO)
             throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
             NotAllowedException {
-        User host = userRepository.findByOauthId(oauthId)
-                .orElseThrow(() -> new UserNotFoundException("Could not find host."));
+        User host = userService.getUserOrThrow(oauthId);
+        userService.validateHasNotPlayedStory(host, creationDTO.storyId());
 
-        boolean hasAlreadyPlayed = host.getSessionParticipations().stream()
-                .anyMatch(s -> s.getSession().getStory().getId().equals(creationDTO.storyId()));
+        Story story = storyService.getStoryOrThrow(creationDTO.storyId());
+        Session session = buildSession(host, story, creationDTO);
+        session = addEmptyCharacterAssignment(session);
+        return new NewSessionDTO(session.getId());
+    }
 
-        if (hasAlreadyPlayed) {
-            throw new NotAllowedException("User cannot play a Story multiple times");
-        }
-
-        Story story = storyRepository.findById(creationDTO.storyId())
-                .orElseThrow(() -> new StoryNotFoundException("Could not find Story."));
-        Session session = sessionRepository.save(Session.builder()
+    private Session buildSession(User host, Story story, SessionCreationDTO creationDTO)
+            throws StoryConfigurationNotFoundException {
+        return sessionRepository.save(Session.builder()
                 .host(host)
                 .startedAt(creationDTO.eventStart())
                 .story(story)
@@ -82,9 +82,37 @@ public class SessionService {
                         .findFirst()
                         .orElseThrow(
                                 () -> new StoryConfigurationNotFoundException("Could not find Story Configuration")))
-                .code(codeService.generateCode())
                 .build());
-        return new NewSessionDTO(session.getId());
+    }
+
+    private Session addEmptyCharacterAssignment(Session session) {
+        int maxAttempts = 5;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            Set<String> codes = new HashSet<>();
+            Set<CharacterAssignment> assignments = session.getStoryConfiguration().getCharactersInConfig().stream()
+                    .map(confChar -> {
+                        String code = "";
+                        do {
+                            code = assignmentCodeService.generateCode();
+                        } while (codes.contains(code));
+                        codes.add(code);
+                        return CharacterAssignment.builder()
+                                .session(session)
+                                .code(code)
+                                .build();
+                    })
+                    .collect(Collectors.toSet());
+            try {
+                return sessionRepository.save(session.withCharacterAssignments(assignments));
+            } catch (DataIntegrityViolationException e) {
+                if (attempt == maxAttempts) {
+                    throw new RuntimeException("Could not generate a unique code after " +
+                            maxAttempts + " attempts",
+                            e);
+                }
+            }
+        }
+        throw new IllegalStateException("Should not reach here");
     }
 
 }

@@ -8,12 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.geraldsaccount.killinary.model.User;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByUsername(String username);
+    Optional<User> findByName(String username);
 
     Optional<User> findByOauthId(String oauthId);
 
     Optional<User> findByEmail(String email);
 
-    boolean existsByUsername(String username);
+    boolean existsByName(String username);
 
 }

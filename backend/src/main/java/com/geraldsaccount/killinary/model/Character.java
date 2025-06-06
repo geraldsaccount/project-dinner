@@ -71,7 +71,7 @@ public class Character {
 
     @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<SessionCharacterAssignment> characterAssignments = new HashSet<>();
+    private Set<CharacterAssignment> characterAssignments = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

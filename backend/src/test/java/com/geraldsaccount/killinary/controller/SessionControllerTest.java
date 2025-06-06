@@ -24,9 +24,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
 import com.geraldsaccount.killinary.model.Character;
+import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionCharacterAssignment;
 import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
@@ -84,12 +84,12 @@ class SessionControllerTest {
 
         host = userRepository.save(User.builder()
                 .oauthId("hostuser")
-                .firstName("Sherlock")
+                .name("Sherlock")
                 .email("sherlock@holmes.com")
                 .build());
         participant = userRepository.save(User.builder()
                 .oauthId("testuser")
-                .firstName("Mycroft")
+                .name("Mycroft")
                 .email("mycroft@holmes.com")
                 .build());
 
@@ -111,7 +111,6 @@ class SessionControllerTest {
         session = Session.builder()
                 .host(host)
                 .story(story)
-                .code("221b")
                 .status(SessionStatus.CONCLUDED)
                 .startedAt(LocalDateTime.of(2025, 6, 2, 18, 0))
                 .build();
@@ -127,7 +126,7 @@ class SessionControllerTest {
                 .story(story)
                 .build());
 
-        SessionCharacterAssignment assignment = SessionCharacterAssignment.builder()
+        CharacterAssignment assignment = CharacterAssignment.builder()
                 .session(session)
                 .user(participant)
                 .character(character)

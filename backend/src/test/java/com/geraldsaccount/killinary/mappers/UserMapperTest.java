@@ -1,5 +1,7 @@
 package com.geraldsaccount.killinary.mappers;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
@@ -19,24 +21,18 @@ class UserMapperTest {
     void withUpdatedClerkUserData_shouldUpdateFields() {
         User source = User.builder()
                 .oauthId("U1")
-                .firstName("John")
-                .lastName("Doe")
-                .username("johndoe")
+                .name("johndoe")
                 .email("john@example.com")
                 .build();
 
         User updated = User.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .username("janesmith")
+                .name("janesmith")
                 .email("jane@example.com")
                 .build();
 
         User result = userMapper.withUpdatedClerkUserData(source, updated);
 
-        assertThat(result.getFirstName()).isEqualTo("Jane");
-        assertThat(result.getLastName()).isEqualTo("Smith");
-        assertThat(result.getUsername()).isEqualTo("janesmith");
+        assertThat(result.getName()).isEqualTo("janesmith");
         assertThat(result.getEmail()).isEqualTo("jane@example.com");
         assertThat(result.getOauthId()).isEqualTo("U1");
     }
@@ -50,9 +46,7 @@ class UserMapperTest {
 
         OAuthUserData clerkUser = OAuthUserData.builder()
                 .id("U1")
-                .firstName("Alice")
-                .lastName("Wonderland")
-                .username("alicew")
+                .name("alicew")
                 .primaryEmailAddressID(email.getId())
                 .emailAddresses(new ClerkEmailAddress[] { email })
                 .build();
@@ -60,9 +54,7 @@ class UserMapperTest {
         User user = userMapper.fromClerkUser(clerkUser);
 
         assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
-        assertThat(user.getFirstName()).isEqualTo(clerkUser.getFirstName());
-        assertThat(user.getLastName()).isEqualTo(clerkUser.getLastName());
-        assertThat(user.getUsername()).isEqualTo(clerkUser.getUsername());
+        assertThat(user.getName()).isEqualTo(clerkUser.getName());
         assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
     }
 
@@ -122,5 +114,35 @@ class UserMapperTest {
 
         assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
                 .isInstanceOf(UserMapperException.class);
+    }
+
+    @Test
+    void asDTO_shouldMapFieldsCorrectly() {
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .name("bob")
+                .avatarUrl("http://avatar.com/bob.png")
+                .build();
+
+        var dto = userMapper.asDTO(user);
+
+        assertThat(dto.id()).isEqualTo(user.getId());
+        assertThat(dto.name()).isEqualTo("bob");
+        assertThat(dto.avatarUrl()).isEqualTo("http://avatar.com/bob.png");
+    }
+
+    @Test
+    void asDTO_shouldHandleNullAvatarUrl() {
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .name("eve")
+                .avatarUrl(null)
+                .build();
+
+        var dto = userMapper.asDTO(user);
+
+        assertThat(dto.id()).isEqualTo(user.getId());
+        assertThat(dto.name()).isEqualTo("eve");
+        assertThat(dto.avatarUrl()).isNull();
     }
 }
