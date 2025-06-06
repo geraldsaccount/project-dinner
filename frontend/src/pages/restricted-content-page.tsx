@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components";
+import PageHeader from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { SignInButton } from "@clerk/clerk-react";
 
