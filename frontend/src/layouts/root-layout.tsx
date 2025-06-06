@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 
 const RootLayout: React.FC<PropsWithChildren> = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen items-center">
       <Toaster position="top-right" />
       <Navbar />
       <main
