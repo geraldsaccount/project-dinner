@@ -26,6 +26,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="events" element={<ProtectedRoute />}>
               <Route index element={<EventsPage />} />
               <Route path="create" element={<EventCreationPage />} />
+              Lazy Loading
             </Route>
           </Route>
         </Routes>

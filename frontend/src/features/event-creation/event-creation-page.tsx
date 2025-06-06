@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,7 +12,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthenticatedApi } from "@/hooks";
-import { type NewSessionDTO, type StorySummary } from "@/types";
+import { NewSessionDTO, StorySummary } from "@/types";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -23,8 +23,7 @@ import SectionHeader from "./components/section-header";
 import DateTimePicker from "@/components/ui/date-time-picker";
 import StoryPicker from "./components/story-picker";
 import StoryPickerSkeleton from "./components/story-picker-skeleton";
-import { PageHeader } from "@/components";
-import { sampleStorySummary } from "@/data/sample-story-summary";
+import PageHeader from "@/components/shared/page-header";
 
 const eventSchema = z.object({
   storyId: z.string().min(1, "Please select a story"),
@@ -96,8 +95,8 @@ const EventCreationPage = () => {
         <div className="flex flex-col p-2 gap-2 w-full">
           <SectionHeader title="Step 1: Choose Story" />
           {storiesLoading ? (
-            <div className="w-full md:w-[90%] self-center">
-              <StoryPickerSkeleton />
+            <div className="w-full md:w-[90%] flex">
+              <StoryPickerSkeleton className="self-center" />
             </div>
           ) : stories && stories.length > 0 ? (
             <FormField
