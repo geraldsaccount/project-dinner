@@ -2,7 +2,6 @@ package com.geraldsaccount.killinary.service;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -46,7 +45,7 @@ public class SessionService {
 
                     return SessionSummaryDTO.builder()
                             .sessionId(session.getId())
-                            .hostName(session.getHost().getFirstName())
+                            .hostName(session.getHost().getName())
                             .storyName(session.getStory().getTitle())
                             .assignedCharacterName(characterName)
                             .sessionDate(session.getStartedAt())
@@ -63,16 +62,17 @@ public class SessionService {
             throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
             NotAllowedException {
         User host = userService.getUserOrThrow(oauthId);
-        validateUserHasNotPlayedStory(host, creationDTO.storyId());
+        userService.validateHasNotPlayedStory(host, creationDTO.storyId());
 
-        Story story = storyService.getStoryByIdOrThrow(creationDTO.storyId());
+        Story story = storyService.getStoryOrThrow(creationDTO.storyId());
         Session session = buildSession(host, story, creationDTO);
         session = addEmptyCharacterAssignment(session);
         return new NewSessionDTO(session.getId());
-
     }
 
-    public String assignToCharacter(String oauthId, String code) {
+    public String assignToCharacter(String oauthId, String code) throws UserNotFoundException {
+        User user = userService.getUserOrThrow(oauthId);
+
         return "";
     }
 
@@ -121,12 +121,4 @@ public class SessionService {
         throw new IllegalStateException("Should not reach here");
     }
 
-    private void validateUserHasNotPlayedStory(User user, UUID storyId) throws NotAllowedException {
-        boolean hasAlreadyPlayed = user.getSessionParticipations().stream()
-                .anyMatch(s -> s.getSession().getStory().getId().equals(storyId));
-
-        if (hasAlreadyPlayed) {
-            throw new NotAllowedException("User cannot play a Story multiple times");
-        }
-    }
 }

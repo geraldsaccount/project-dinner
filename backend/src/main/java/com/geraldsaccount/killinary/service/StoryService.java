@@ -51,8 +51,7 @@ public class StoryService {
         return summaries;
     }
 
-    public Story getStoryByIdOrThrow(UUID id) throws StoryNotFoundException {
+    public Story getStoryOrThrow(UUID id) throws StoryNotFoundException {
         return storyRepository.findById(id).orElseThrow(() -> new StoryNotFoundException("Could not find Story."));
     }
-
 }

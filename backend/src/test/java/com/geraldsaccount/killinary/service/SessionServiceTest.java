@@ -171,7 +171,7 @@ class SessionServiceTest {
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyService.getStoryByIdOrThrow(any())).thenThrow(new StoryNotFoundException("Could not find Story."));
+        when(storyService.getStoryOrThrow(any())).thenThrow(new StoryNotFoundException("Could not find Story."));
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
                 .storyId(UUID.randomUUID())
                 .build();
@@ -193,7 +193,7 @@ class SessionServiceTest {
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
+        when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(UUID.randomUUID());
 
@@ -216,7 +216,7 @@ class SessionServiceTest {
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
+        when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of());
 
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
@@ -240,7 +240,7 @@ class SessionServiceTest {
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
+        when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(configId);
 
@@ -269,7 +269,7 @@ class SessionServiceTest {
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
+        when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(configId);
         when(sessionRepository.save(any())).thenReturn(session);
