@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,7 +28,6 @@ import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.User;
@@ -81,7 +81,7 @@ class SessionServiceTest {
         assertThat(result).hasSize(1);
         SessionSummaryDTO dto = result.iterator().next();
 
-        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
+        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getName(), story.getTitle(),
                 character.getName(), session.getStartedAt(), false);
 
         assertThat(dto)
@@ -99,7 +99,7 @@ class SessionServiceTest {
         assertThat(result).hasSize(1);
         SessionSummaryDTO dto = result.iterator().next();
 
-        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
+        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getName(), story.getTitle(),
                 null, session.getStartedAt(), false);
 
         assertThat(dto)
@@ -123,7 +123,7 @@ class SessionServiceTest {
         assertThat(result).hasSize(1);
         SessionSummaryDTO dto = result.iterator().next();
 
-        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getFirstName(), story.getTitle(),
+        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getName(), story.getTitle(),
                 null, session.getStartedAt(), true);
 
         assertThat(dto)
@@ -147,17 +147,13 @@ class SessionServiceTest {
         String validOauthId = "valid-oauth-id";
         UUID participatedId = UUID.randomUUID();
         User testHost = mock(User.class);
-        SessionParticipant participant = mock(SessionParticipant.class);
-        Session participatedSession = mock(Session.class);
-        Story participatedStory = mock(Story.class);
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
                 .storyId(participatedId)
                 .build();
+
         when(userService.getUserOrThrow(validOauthId)).thenReturn(testHost);
-        when(testHost.getSessionParticipations()).thenReturn(Set.of(participant));
-        when(participant.getSession()).thenReturn(participatedSession);
-        when(participatedSession.getStory()).thenReturn(participatedStory);
-        when(participatedStory.getId()).thenReturn(participatedId);
+        doThrow(new NotAllowedException("User cannot play a Story multiple times"))
+                .when(userService).validateHasNotPlayedStory(testHost, participatedId);
 
         assertThatThrownBy(() -> sessionService.createSession(validOauthId, creationDTO))
                 .isInstanceOf(NotAllowedException.class)
@@ -290,7 +286,7 @@ class SessionServiceTest {
     private void createDummySession() {
         host = User.builder()
                 .oauthId("UH")
-                .firstName("Host")
+                .name("Host")
                 .build();
         user = User.builder()
                 .oauthId("U1")

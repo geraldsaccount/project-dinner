@@ -84,12 +84,12 @@ class SessionControllerTest {
 
         host = userRepository.save(User.builder()
                 .oauthId("hostuser")
-                .firstName("Sherlock")
+                .name("Sherlock")
                 .email("sherlock@holmes.com")
                 .build());
         participant = userRepository.save(User.builder()
                 .oauthId("testuser")
-                .firstName("Mycroft")
+                .name("Mycroft")
                 .email("mycroft@holmes.com")
                 .build());
 

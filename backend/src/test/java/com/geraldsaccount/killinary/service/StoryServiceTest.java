@@ -91,7 +91,7 @@ class StoryServiceTest {
         Story story = mock(Story.class);
         when(storyRepository.findById(storyId)).thenReturn(Optional.of(story));
 
-        Story result = storyService.getStoryByIdOrThrow(storyId);
+        Story result = storyService.getStoryOrThrow(storyId);
 
         assertThat(result).isSameAs(story);
         verify(storyRepository).findById(storyId);
@@ -102,10 +102,10 @@ class StoryServiceTest {
         UUID storyId = UUID.randomUUID();
         when(storyRepository.findById(storyId)).thenReturn(Optional.empty());
 
-        org.assertj.core.api.ThrowableAssert.ThrowingCallable call = () -> storyService.getStoryByIdOrThrow(storyId);
+        org.assertj.core.api.ThrowableAssert.ThrowingCallable call = () -> storyService.getStoryOrThrow(storyId);
 
         assertThatThrownBy(() -> {
-            storyService.getStoryByIdOrThrow(storyId);
+            storyService.getStoryOrThrow(storyId);
         }).isInstanceOf(StoryNotFoundException.class)
                 .hasMessageContaining("Could not find Story.");
         verify(storyRepository).findById(storyId);

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
 import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
+import com.geraldsaccount.killinary.model.dto.output.InvitationDTO;
 import com.geraldsaccount.killinary.service.CharacterAssignmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,9 @@ public class InviteController {
     }
 
     @GetMapping("{code}")
-    public String getInvitation(Authentication authentication, @PathVariable String code) {
-        return new String();
+    public InvitationDTO getInvitation(Authentication authentication, @PathVariable String code)
+            throws UserNotFoundException, CharacterAssignmentNotFoundException {
+        return assignmentService.getInvitation(authentication, code);
     }
 
 }

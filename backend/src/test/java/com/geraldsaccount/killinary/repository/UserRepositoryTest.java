@@ -32,9 +32,8 @@ class UserRepositoryTest {
         testUser = User.builder()
                 .oauthId("T1")
                 .email("test@example.com")
-                .username("testuser")
-                .firstName("test")
-                .lastName("user")
+                .name("testuser")
+
                 .build();
         entityManager.persist(testUser);
         entityManager.flush();
@@ -45,41 +44,39 @@ class UserRepositoryTest {
         User newUser = User.builder()
                 .oauthId("U1")
                 .email("john@example.com")
-                .username("john.doe")
-                .firstName("john")
-                .lastName("doe")
+                .name("john.doe")
                 .build();
 
         User savedUser = userRepository.save(newUser);
 
         assertThat(savedUser).isNotNull();
         assertThat(savedUser.getId()).isNotNull();
-        assertThat(savedUser.getUsername()).isEqualTo("john.doe");
+        assertThat(savedUser.getName()).isEqualTo("john.doe");
 
         Optional<User> foundUser = userRepository.findById(savedUser.getId());
         assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getUsername()).isEqualTo("john.doe");
+        assertThat(foundUser.get().getName()).isEqualTo("john.doe");
     }
 
     @Test
     void shouldFindUserByUsername() {
-        Optional<User> foundUser = userRepository.findByUsername("testuser");
+        Optional<User> foundUser = userRepository.findByName("testuser");
         assertThat(foundUser).isPresent();
         assertThat(foundUser.get().getEmail()).isEqualTo("test@example.com");
     }
 
     @Test
     void shouldReturnEmptyWhenUserNotFound() {
-        Optional<User> foundUser = userRepository.findByUsername("nonexistent");
+        Optional<User> foundUser = userRepository.findByName("nonexistent");
         assertThat(foundUser).isNotPresent();
     }
 
     @Test
     void shouldCheckIfUsernameExists() {
-        boolean exists = userRepository.existsByUsername("testuser");
+        boolean exists = userRepository.existsByName("testuser");
         assertThat(exists).isTrue();
 
-        boolean notExists = userRepository.existsByUsername("anotheruser");
+        boolean notExists = userRepository.existsByName("anotheruser");
         assertThat(notExists).isFalse();
     }
 

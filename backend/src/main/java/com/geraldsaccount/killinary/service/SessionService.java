@@ -70,12 +70,6 @@ public class SessionService {
         return new NewSessionDTO(session.getId());
     }
 
-    public String assignToCharacter(String oauthId, String code) throws UserNotFoundException {
-        User user = userService.getUserOrThrow(oauthId);
-
-        return "";
-    }
-
     private Session buildSession(User host, Story story, SessionCreationDTO creationDTO)
             throws StoryConfigurationNotFoundException {
         return sessionRepository.save(Session.builder()

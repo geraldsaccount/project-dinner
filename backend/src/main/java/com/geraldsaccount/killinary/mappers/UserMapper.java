@@ -6,14 +6,14 @@ import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkEmailAddress;
 import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
+import com.geraldsaccount.killinary.model.dto.output.UserDTO;
 
 @Component
 public class UserMapper {
 
     public User withUpdatedClerkUserData(User source, User updated) {
-        return source.withFirstName(updated.getFirstName())
-                .withLastName(updated.getLastName())
-                .withUsername(updated.getUsername())
+        return source.withName(updated.getName())
+                .withAvatarUrl(updated.getAvatarUrl())
                 .withEmail(updated.getEmail());
     }
 
@@ -26,10 +26,9 @@ public class UserMapper {
 
         return User.builder()
                 .oauthId(oauthUser.getId())
-                .firstName(oauthUser.getFirstName())
-                .lastName(oauthUser.getLastName())
+                .name(oauthUser.getName())
+                .avatarUrl(oauthUser.getAvatar())
                 .email(getPrimaryEmail(oauthUser))
-                .username(oauthUser.getUsername())
                 .build();
     }
 
@@ -44,5 +43,9 @@ public class UserMapper {
             }
         }
         return null;
+    }
+
+    public UserDTO asDTO(User user) {
+        return new UserDTO(user.getId(), user.getName(), user.getAvatarUrl());
     }
 }
