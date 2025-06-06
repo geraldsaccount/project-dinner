@@ -12,6 +12,6 @@ import lombok.Builder;
 public record StoryConfigSummaryDTO(UUID id,
         Integer playerCount,
         Map<Gender, Integer> genderCounts,
-        Set<CharacterSummaryDTO> characters) {
+        Set<UUID> characterIds) {
 
 }

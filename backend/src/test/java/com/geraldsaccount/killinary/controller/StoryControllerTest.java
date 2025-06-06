@@ -102,7 +102,7 @@ class StoryControllerTest {
                 .andExpect(jsonPath("$[0].minPlayers").value(2))
                 .andExpect(jsonPath("$[0].maxPlayers").value(2))
                 .andExpect(jsonPath("$[0].configs[0].playerCount").value(2))
-                .andExpect(jsonPath("$[0].configs[0].characters[0].name").exists());
+                .andExpect(jsonPath("$[0].configs[0].characterIds[0]").exists());
     }
 
     @Test
