@@ -43,4 +43,8 @@ public class UserService {
         userRepository.save(updatedUser);
     }
 
+    public User getUserOrThrow(String oauthId) throws UserNotFoundException {
+        return userRepository.findByOauthId(oauthId)
+                .orElseThrow(() -> new UserNotFoundException("Could not find user."));
+    }
 }

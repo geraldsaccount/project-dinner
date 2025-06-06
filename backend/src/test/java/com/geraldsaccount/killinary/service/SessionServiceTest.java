@@ -3,7 +3,6 @@ package com.geraldsaccount.killinary.service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,8 +25,8 @@ import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundExcepti
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
+import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
@@ -35,8 +34,6 @@ import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
 import com.geraldsaccount.killinary.model.dto.output.SessionSummaryDTO;
 import com.geraldsaccount.killinary.repository.SessionRepository;
-import com.geraldsaccount.killinary.repository.StoryRepository;
-import com.geraldsaccount.killinary.repository.UserRepository;
 
 @ActiveProfiles("test")
 @SuppressWarnings("unused")
@@ -46,13 +43,10 @@ class SessionServiceTest {
     private SessionRepository sessionRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private StoryRepository storyRepository;
-
-    @Mock
-    private SessionCodeService codeService;
+    private StoryService storyService;
 
     @InjectMocks
     private SessionService sessionService;
@@ -137,9 +131,9 @@ class SessionServiceTest {
     }
 
     @Test
-    void createSession_throwsUserNotFound_withInvalidOathId() {
+    void createSession_throwsUserNotFound_withInvalidOathId() throws Exception {
         String invalidId = "invalid-id";
-        when(userRepository.findByOauthId(invalidId)).thenReturn(Optional.empty());
+        when(userService.getUserOrThrow(invalidId)).thenThrow(new UserNotFoundException("Could not find host."));
         SessionCreationDTO creationDTO = mock(SessionCreationDTO.class);
 
         assertThatThrownBy(() -> {
@@ -149,7 +143,7 @@ class SessionServiceTest {
     }
 
     @Test
-    void createSession_throwsNotAllowed_whenHostAlreadyKnowsStory() {
+    void createSession_throwsNotAllowed_whenHostAlreadyKnowsStory() throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID participatedId = UUID.randomUUID();
         User testHost = mock(User.class);
@@ -159,7 +153,7 @@ class SessionServiceTest {
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
                 .storyId(participatedId)
                 .build();
-        when(userRepository.findByOauthId(validOauthId)).thenReturn(Optional.of(testHost));
+        when(userService.getUserOrThrow(validOauthId)).thenReturn(testHost);
         when(testHost.getSessionParticipations()).thenReturn(Set.of(participant));
         when(participant.getSession()).thenReturn(participatedSession);
         when(participatedSession.getStory()).thenReturn(participatedStory);
@@ -171,13 +165,13 @@ class SessionServiceTest {
     }
 
     @Test
-    void createSession_throwsStoryNotFound_withInvalidStoryId() {
+    void createSession_throwsStoryNotFound_withInvalidStoryId() throws Exception {
         String validOauthId = "valid-oauth-id";
         host = mock(User.class);
 
-        when(userRepository.findByOauthId(validOauthId)).thenReturn(Optional.of(host));
+        when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyRepository.findById(any())).thenReturn(Optional.empty());
+        when(storyService.getStoryByIdOrThrow(any())).thenThrow(new StoryNotFoundException("Could not find Story."));
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
                 .storyId(UUID.randomUUID())
                 .build();
@@ -189,16 +183,17 @@ class SessionServiceTest {
     }
 
     @Test
-    void createSession_throwsStoryConfigurationNotFound_withInvalidConfigurationId() {
+    void createSession_throwsStoryConfigurationNotFound_withInvalidConfigurationId()
+            throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
         host = mock(User.class);
         story = mock(Story.class);
         StoryConfiguration config = mock(StoryConfiguration.class);
 
-        when(userRepository.findByOauthId(validOauthId)).thenReturn(Optional.of(host));
+        when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyRepository.findById(storyId)).thenReturn(Optional.of(story));
+        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(UUID.randomUUID());
 
@@ -213,15 +208,15 @@ class SessionServiceTest {
     }
 
     @Test
-    void createSession_throwsStoryConfigurationNotFound_withStoryContainingNoConfigs() {
+    void createSession_throwsStoryConfigurationNotFound_withStoryContainingNoConfigs() throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
         host = mock(User.class);
         story = mock(Story.class);
 
-        when(userRepository.findByOauthId(validOauthId)).thenReturn(Optional.of(host));
+        when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyRepository.findById(storyId)).thenReturn(Optional.of(story));
+        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of());
 
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
@@ -235,6 +230,33 @@ class SessionServiceTest {
     }
 
     @Test
+    void createSession_throwsRuntime_whenTooManyCodeGenerationAttempts() throws Exception {
+        String validOauthId = "valid-oauth-id";
+        UUID storyId = UUID.randomUUID();
+        UUID configId = UUID.randomUUID();
+        host = mock(User.class);
+        story = mock(Story.class);
+        StoryConfiguration config = mock(StoryConfiguration.class);
+
+        when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
+        when(host.getSessionParticipations()).thenReturn(Set.of());
+        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
+        when(story.getConfigurations()).thenReturn(Set.of(config));
+        when(config.getId()).thenReturn(configId);
+
+        when(sessionRepository.save(any())).thenThrow(new RuntimeException("Duplicate code"));
+
+        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+                .storyId(storyId)
+                .storyConfigurationId(configId)
+                .build();
+
+        assertThatThrownBy(() -> sessionService.createSession(validOauthId, creationDTO))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Duplicate code");
+    }
+
+    @Test
     void createSession_returnsSessionDTO_withValidInputs() throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
@@ -245,13 +267,14 @@ class SessionServiceTest {
         session = mock(Session.class);
         StoryConfiguration config = mock(StoryConfiguration.class);
 
-        when(userRepository.findByOauthId(validOauthId)).thenReturn(Optional.of(host));
+        when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
-        when(storyRepository.findById(storyId)).thenReturn(Optional.of(story));
+        when(storyService.getStoryByIdOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(configId);
         when(sessionRepository.save(any())).thenReturn(session);
         when(session.getId()).thenReturn(sessionId);
+        when(session.getStoryConfiguration()).thenReturn(config);
 
         SessionCreationDTO creationDTO = SessionCreationDTO.builder()
                 .storyId(storyId)
@@ -261,8 +284,7 @@ class SessionServiceTest {
         assertThat(sessionService.createSession(validOauthId, creationDTO).sessionId())
                 .isEqualTo(sessionId);
 
-        verify(sessionRepository, times(1)).save(any());
-        verify(codeService, times(1)).generateCode();
+        verify(sessionRepository, times(2)).save(any());
     }
 
     private void createDummySession() {

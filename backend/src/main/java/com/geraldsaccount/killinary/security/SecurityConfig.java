@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/protected/**").authenticated()
                         .requestMatchers("/api/sessions/**").authenticated()
+                        .requestMatchers("/api/invite/**").authenticated()
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
                 }))

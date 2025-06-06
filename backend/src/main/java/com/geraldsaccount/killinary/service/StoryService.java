@@ -2,11 +2,14 @@ package com.geraldsaccount.killinary.service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.StoryConfigMapper;
+import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.dto.output.StoryConfigSummaryDTO;
 import com.geraldsaccount.killinary.model.dto.output.StorySummaryDTO;
@@ -46,6 +49,10 @@ public class StoryService {
         }).forEach(summaries::add);
 
         return summaries;
+    }
+
+    public Story getStoryByIdOrThrow(UUID id) throws StoryNotFoundException {
+        return storyRepository.findById(id).orElseThrow(() -> new StoryNotFoundException("Could not find Story."));
     }
 
 }

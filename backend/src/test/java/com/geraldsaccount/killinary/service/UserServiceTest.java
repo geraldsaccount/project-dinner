@@ -3,6 +3,7 @@ package com.geraldsaccount.killinary.service;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,5 +94,27 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updateUserData(updatedUser))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User could not be found.");
+    }
+
+    @Test
+    void getUserOrThrow_returnsUser_whenUserExists() throws Exception {
+        String oauthId = "oauth123";
+        User user = new User();
+        when(userRepository.findByOauthId(oauthId)).thenReturn(Optional.of(user));
+
+        User result = userService.getUserOrThrow(oauthId);
+
+        assertThat(result).isEqualTo(user);
+        verify(userRepository).findByOauthId(oauthId);
+    }
+
+    @Test
+    void getUserOrThrow_throwsUsernotFound_whenUserDoesNotExist() {
+        String oauthId = "missing";
+        when(userRepository.findByOauthId(oauthId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.getUserOrThrow(oauthId))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("Could not find user.");
     }
 }

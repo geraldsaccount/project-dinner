@@ -1,18 +1,22 @@
 package com.geraldsaccount.killinary.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.StoryConfigMapper;
 import com.geraldsaccount.killinary.model.Story;
@@ -79,5 +83,31 @@ class StoryServiceTest {
         assertThat(dto.maxPlayers()).isEqualTo(5);
         assertThat(dto.configs()).containsExactlyInAnyOrder(summaryDTO1,
                 summaryDTO2);
+    }
+
+    @Test
+    void getStoryByIdOrThrow_returnsStory_whenStoryExists() throws Exception {
+        UUID storyId = UUID.randomUUID();
+        Story story = mock(Story.class);
+        when(storyRepository.findById(storyId)).thenReturn(Optional.of(story));
+
+        Story result = storyService.getStoryByIdOrThrow(storyId);
+
+        assertThat(result).isSameAs(story);
+        verify(storyRepository).findById(storyId);
+    }
+
+    @Test
+    void getStoryByIdOrThrow_throwsException_whenStoryDoesNotExist() {
+        UUID storyId = UUID.randomUUID();
+        when(storyRepository.findById(storyId)).thenReturn(Optional.empty());
+
+        org.assertj.core.api.ThrowableAssert.ThrowingCallable call = () -> storyService.getStoryByIdOrThrow(storyId);
+
+        assertThatThrownBy(() -> {
+            storyService.getStoryByIdOrThrow(storyId);
+        }).isInstanceOf(StoryNotFoundException.class)
+                .hasMessageContaining("Could not find Story.");
+        verify(storyRepository).findById(storyId);
     }
 }
