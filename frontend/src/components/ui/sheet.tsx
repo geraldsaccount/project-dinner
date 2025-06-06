@@ -1,4 +1,4 @@
-// imported from shadcn
+// imported from shadcn/ui
 
 "use client";
 

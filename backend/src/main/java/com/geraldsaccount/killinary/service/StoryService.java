@@ -3,6 +3,7 @@ package com.geraldsaccount.killinary.service;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.StoryConfigMapper;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
+import com.geraldsaccount.killinary.model.dto.output.CharacterSummaryDTO;
 import com.geraldsaccount.killinary.model.dto.output.StoryConfigSummaryDTO;
 import com.geraldsaccount.killinary.model.dto.output.StorySummaryDTO;
 import com.geraldsaccount.killinary.repository.StoryRepository;
@@ -35,8 +37,13 @@ public class StoryService {
                 int playerCount = config.getPlayerCount();
                 minPlayers = Math.min(minPlayers, playerCount);
                 maxPlayers = Math.max(maxPlayers, playerCount);
-                configs.add(configMapper.asSummaryDTO(config, characterMapper::asSummaryDTO));
+                configs.add(configMapper.asSummaryDTO(config));
             }
+
+            Set<CharacterSummaryDTO> characters = s.getConfigurations().stream()
+                    .flatMap(cfg -> cfg.getCharactersInConfig().stream())
+                    .map(scc -> characterMapper.asSummaryDTO(scc.getCharacter()))
+                    .collect(Collectors.toSet());
 
             return StorySummaryDTO.builder()
                     .id(s.getId())
@@ -45,6 +52,7 @@ public class StoryService {
                     .minPlayers(minPlayers)
                     .maxPlayers(maxPlayers)
                     .configs(configs)
+                    .characters(characters)
                     .build();
         }).forEach(summaries::add);
 

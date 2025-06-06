@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -68,8 +67,8 @@ class StoryServiceTest {
         StoryConfigSummaryDTO summaryDTO1 = mock(StoryConfigSummaryDTO.class);
         StoryConfigSummaryDTO summaryDTO2 = mock(StoryConfigSummaryDTO.class);
 
-        when(configMapper.asSummaryDTO(eq(config1), any())).thenReturn(summaryDTO1);
-        when(configMapper.asSummaryDTO(eq(config2), any())).thenReturn(summaryDTO2);
+        when(configMapper.asSummaryDTO(eq(config1))).thenReturn(summaryDTO1);
+        when(configMapper.asSummaryDTO(eq(config2))).thenReturn(summaryDTO2);
 
         when(storyRepository.findAll()).thenReturn(List.of(story));
 
