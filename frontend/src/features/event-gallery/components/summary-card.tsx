@@ -1,55 +1,48 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DinnerSummaryDto } from "@/types";
 import { NavLink } from "react-router-dom";
 
-export type SessionSummary = {
-  sessionId: string;
-  hostName: string;
-  storyName: string;
-  assignedCharacterName: string | null;
-  sessionDate: string;
-  isHost: boolean;
+
+type Props = {
+  summary: DinnerSummaryDto;
 };
 
-type SessionSummaryCardProps = {
-  summary: SessionSummary;
-};
-
-const SessionSummaryCard = ({ summary }: SessionSummaryCardProps) => {
+const SessionSummaryCard = ({ summary }: Props) => {
   const {
-    sessionId,
-    hostName,
-    storyName,
-    assignedCharacterName,
-    sessionDate,
-    isHost,
+    uuid,
+    dateTime,
+    host,
+    storyTitle,
+    yourAssignedCharacterName,
   } = summary;
 
+
   return (
-    <NavLink to={sessionId} className="h-auto">
+    <NavLink to={uuid} className="h-auto">
       <Card className="py-0 overflow-clip h-full">
         <div className="flex h-full">
           <div className="w-1/3 flex-shrink-0 flex items-center justify-center bg-gray-100">
             <img
               src="https://placehold.co/100x100"
-              alt={storyName}
+              alt={storyTitle}
               className="object-cover w-full h-full"
             />
           </div>
           <div className="w-2/3 p-4">
             <CardHeader className="p-0 pb-2">
-              <div className="font-bold text-lg">{storyName}</div>
+              <div className="font-bold text-lg">{storyTitle}</div>
               <div className="text-sm text-muted-foreground">
-                Host: {isHost ? "You" : hostName}
+                Host: {host.name}
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div>
                 <span className="font-medium">Date:</span>{" "}
-                {new Date(sessionDate).toLocaleString()}
+                {new Date(dateTime).toLocaleString()}
               </div>
               <div>
                 <span className="font-medium">Your Character:</span>{" "}
-                {assignedCharacterName ?? (
+                {yourAssignedCharacterName ?? (
                   <span className="italic text-muted-foreground">
                     Not assigned
                   </span>

@@ -10,7 +10,7 @@ import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
-import com.geraldsaccount.killinary.model.dto.output.StoryConfigSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 
 class StoryConfigMapperTest {
 
@@ -39,7 +39,7 @@ class StoryConfigMapperTest {
 
         config.setCharactersInConfig(Set.of(confChar1, confChar2));
 
-        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config);
+        ConfigDto dto = mapper.asSummaryDTO(config);
 
         assertThat(dto.id()).isEqualTo(config.getId());
         assertThat(dto.playerCount()).isEqualTo(2);
@@ -59,7 +59,7 @@ class StoryConfigMapperTest {
                 .charactersInConfig(Set.of())
                 .build();
 
-        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config);
+        ConfigDto dto = mapper.asSummaryDTO(config);
 
         assertThat(dto.id()).isEqualTo(config.getId());
         assertThat(dto.playerCount()).isEqualTo(0);
@@ -89,7 +89,7 @@ class StoryConfigMapperTest {
 
         config.setCharactersInConfig(Set.of(confChar1, confChar2));
 
-        StoryConfigSummaryDTO dto = mapper.asSummaryDTO(config);
+        ConfigDto dto = mapper.asSummaryDTO(config);
 
         assertThat(dto.genderCounts())
                 .containsEntry(Gender.MALE, 2);

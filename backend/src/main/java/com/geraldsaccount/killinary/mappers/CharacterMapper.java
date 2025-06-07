@@ -3,16 +3,16 @@ package com.geraldsaccount.killinary.mappers;
 import org.springframework.stereotype.Component;
 
 import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.dto.output.CharacterSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
+import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
 
 @Component
 public class CharacterMapper {
-    public CharacterSummaryDTO asSummaryDTO(Character input) {
-        return CharacterSummaryDTO.builder()
-                .id(input.getId())
-                .name(input.getName())
-                .characterDescription(input.getCharacterDescription())
-                .gender(input.getGender())
-                .build();
+    public CharacterSummaryDto asSummaryDTO(Character input) {
+        return new CharacterSummaryDto(input.getId(), input.getName(), input.getAvatarUrl());
+    }
+
+    public CharacterDetailDto asDetailDTO(Character input) {
+        return new CharacterDetailDto(input.getId(), input.getName(), input.getShopDescription(), input.getAvatarUrl());
     }
 }

@@ -15,10 +15,8 @@ import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.output.InvitationDTO;
-import com.geraldsaccount.killinary.model.dto.output.RoleAssignmentDTO;
-import com.geraldsaccount.killinary.model.dto.output.SessionPreviewDTO;
-import com.geraldsaccount.killinary.model.dto.output.StoryPreviewDTO;
+import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerParticipantDto;
+import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 
 import jakarta.transaction.Transactional;
@@ -46,7 +44,7 @@ public class CharacterAssignmentService {
                 .withUser(user));
     }
 
-    public InvitationDTO getInvitation(Authentication auth, String inviteCode)
+    public InvitationViewDto getInvitation(Authentication auth, String inviteCode)
             throws UserNotFoundException, CharacterAssignmentNotFoundException {
         boolean canAccept = true;
         CharacterAssignment assignment = repository.findByCode(inviteCode)
@@ -64,20 +62,18 @@ public class CharacterAssignmentService {
         Session session = assignment.getSession();
         Story story = session.getStory();
 
-        Set<RoleAssignmentDTO> assignments = session.getCharacterAssignments().stream()
-                .map(a -> new RoleAssignmentDTO(characterMapper.asSummaryDTO(a.getCharacter()),
-                        userMapper.asDTO(a.getUser())))
+        Set<DinnerParticipantDto> otherParticipants = session.getCharacterAssignments().stream()
+                .map(charAs -> new DinnerParticipantDto(userMapper.asDTO(charAs.getUser()), null))
                 .collect(Collectors.toSet());
 
-        SessionPreviewDTO sessionPreview = SessionPreviewDTO.builder()
-                .host(userMapper.asDTO(session.getHost()))
-                .story(new StoryPreviewDTO(story.getShopDescription()))
-                .assignedRoles(assignments)
-                .build();
-
-        return new InvitationDTO(inviteCode,
-                sessionPreview,
-                characterMapper.asSummaryDTO(assignment.getCharacter()),
+        return new InvitationViewDto(inviteCode,
+                session.getStartedAt(),
+                userMapper.asDTO(session.getHost()),
+                story.getTitle(),
+                story.getBannerUrl(),
+                story.getDinnerStoryBrief(),
+                characterMapper.asDetailDTO(assignment.getCharacter()),
+                otherParticipants,
                 canAccept);
     }
 

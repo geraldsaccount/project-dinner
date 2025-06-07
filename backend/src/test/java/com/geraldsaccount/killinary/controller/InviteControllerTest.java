@@ -24,7 +24,7 @@ import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.output.InvitationDTO;
+import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.SessionRepository;
@@ -112,9 +112,9 @@ class InviteControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(result -> {
                     String json = result.getResponse().getContentAsString();
-                    InvitationDTO dto = objectMapper.readValue(json, InvitationDTO.class);
+                    InvitationViewDto dto = objectMapper.readValue(json, InvitationViewDto.class);
                     assertThat(dto).isNotNull();
-                    assertThat(dto.code()).isEqualTo(inviteCode);
+                    assertThat(dto.inviteCode()).isEqualTo(inviteCode);
                 });
     }
 

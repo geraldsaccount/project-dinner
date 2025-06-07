@@ -1,10 +1,10 @@
 import GridLayout from "@/components/layout/grid-layout";
 import PageHeader from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import type { SessionSummary } from "@/features/event-gallery/components/summary-card";
 import SessionSummaryCard from "@/features/event-gallery/components/summary-card";
 import SessionSummaryCardSkeleton from "@/features/event-gallery/components/summary-card-skeleton";
 import { useAuthenticatedApi } from "@/hooks";
+import { DinnerSummaryDto } from "@/types";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
@@ -14,7 +14,7 @@ const EventsPage = () => {
     data: summaries,
     loading,
     error,
-  } = useAuthenticatedApi<SessionSummary[]>();
+  } = useAuthenticatedApi<DinnerSummaryDto[]>();
 
   useEffect(() => {
     fetchEvents("/api/sessions");
@@ -61,7 +61,7 @@ const EventsPage = () => {
           <Link to={"create"}>Host new event</Link>
         </Button>
         {summaries.map((e) => (
-          <SessionSummaryCard key={e.sessionId} summary={e} />
+          <SessionSummaryCard key={e.uuid} summary={e} />
         ))}
       </GridLayout>
     );

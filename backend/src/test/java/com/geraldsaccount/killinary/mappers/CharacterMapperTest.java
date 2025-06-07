@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
-import com.geraldsaccount.killinary.model.dto.output.CharacterSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
 
 class CharacterMapperTest {
 
@@ -18,15 +18,14 @@ class CharacterMapperTest {
         Character character = new Character();
         character.setId(UUID.randomUUID());
         character.setName("John Doe");
-        character.setCharacterDescription("A brave hero");
+        character.setShopDescription("A brave hero");
         character.setGender(Gender.MALE);
 
-        CharacterSummaryDTO dto = characterMapper.asSummaryDTO(character);
+        CharacterSummaryDto dto = characterMapper.asSummaryDTO(character);
 
-        assertThat(dto.id()).isEqualTo(character.getId());
+        assertThat(dto.uuid()).isEqualTo(character.getId());
         assertThat(dto.name()).isEqualTo(character.getName());
-        assertThat(dto.characterDescription()).isEqualTo(character.getCharacterDescription());
-        assertThat(dto.gender()).isEqualTo(character.getGender());
+        assertThat(dto.avatarUrl()).isEqualTo(character.getAvatarUrl());
     }
 
     @Test
@@ -34,14 +33,13 @@ class CharacterMapperTest {
         Character character = new Character();
         character.setId(null);
         character.setName(null);
-        character.setCharacterDescription(null);
+        character.setShopDescription(null);
         character.setGender(null);
 
-        CharacterSummaryDTO dto = characterMapper.asSummaryDTO(character);
+        CharacterSummaryDto dto = characterMapper.asSummaryDTO(character);
 
-        assertThat(dto.id()).isNull();
+        assertThat(dto.uuid()).isNull();
         assertThat(dto.name()).isNull();
-        assertThat(dto.characterDescription()).isNull();
-        assertThat(dto.gender()).isNull();
+        assertThat(dto.avatarUrl()).isNull();
     }
 }

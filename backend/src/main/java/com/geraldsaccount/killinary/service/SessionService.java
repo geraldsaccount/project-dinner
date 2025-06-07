@@ -11,14 +11,15 @@ import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
+import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
-import com.geraldsaccount.killinary.model.dto.output.NewSessionDTO;
-import com.geraldsaccount.killinary.model.dto.output.SessionSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
 import com.geraldsaccount.killinary.repository.SessionRepository;
 
 import jakarta.transaction.Transactional;
@@ -31,34 +32,31 @@ public class SessionService {
     private final UserService userService;
     private final StoryService storyService;
     private final CharacterAssignmentCodeService assignmentCodeService;
+    private final UserMapper userMapper;
 
-    public Set<SessionSummaryDTO> getSessionSummariesFrom(String oauthId) {
-        Set<SessionSummaryDTO> usersSessions = new HashSet<>();
-
-        sessionRepository.findAllByUserId(oauthId).stream()
+    public Set<DinnerSummaryDto> getSessionSummariesFrom(String oauthId) {
+        Set<DinnerSummaryDto> usersDinners = sessionRepository.findAllByUserId(oauthId).stream()
                 .map(session -> {
                     String characterName = session.getCharacterAssignments().stream()
                             .filter(a -> a.getUser().getOauthId().equals(oauthId))
                             .findFirst()
                             .map(a -> a.getCharacter().getName())
                             .orElse(null);
-
-                    return SessionSummaryDTO.builder()
-                            .sessionId(session.getId())
-                            .hostName(session.getHost().getName())
-                            .storyName(session.getStory().getTitle())
-                            .assignedCharacterName(characterName)
-                            .sessionDate(session.getStartedAt())
-                            .isHost(session.getHost().getOauthId().equals(oauthId))
-                            .build();
+                    Story story = session.getStory();
+                    return new DinnerSummaryDto(session.getId(),
+                            session.getStartedAt(),
+                            userMapper.asDTO(session.getHost()),
+                            story.getTitle(),
+                            story.getBannerUrl(),
+                            characterName);
                 })
-                .forEach(usersSessions::add);
+                .collect(Collectors.toSet());
 
-        return usersSessions;
+        return usersDinners;
     }
 
     @Transactional
-    public NewSessionDTO createSession(String oauthId, SessionCreationDTO creationDTO)
+    public CreatedSessionDto createSession(String oauthId, CreateSessionDto creationDTO)
             throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
             NotAllowedException {
         User host = userService.getUserOrThrow(oauthId);
@@ -67,10 +65,10 @@ public class SessionService {
         Story story = storyService.getStoryOrThrow(creationDTO.storyId());
         Session session = buildSession(host, story, creationDTO);
         session = addEmptyCharacterAssignment(session);
-        return new NewSessionDTO(session.getId());
+        return new CreatedSessionDto(session.getId());
     }
 
-    private Session buildSession(User host, Story story, SessionCreationDTO creationDTO)
+    private Session buildSession(User host, Story story, CreateSessionDto creationDTO)
             throws StoryConfigurationNotFoundException {
         return sessionRepository.save(Session.builder()
                 .host(host)

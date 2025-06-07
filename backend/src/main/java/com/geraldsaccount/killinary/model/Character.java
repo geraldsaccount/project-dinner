@@ -45,11 +45,14 @@ public class Character {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(name = "character_description", columnDefinition = "TEXT")
-    private String characterDescription;
+    @Column(name = "shop_description", columnDefinition = "TEXT")
+    private String shopDescription;
 
     @Column(name = "private_briefing", columnDefinition = "TEXT")
     private String privateBriefing;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "story_id", nullable = false)
