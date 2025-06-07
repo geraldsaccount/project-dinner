@@ -15,6 +15,7 @@ import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
+import com.geraldsaccount.killinary.model.dto.output.shared.StorySummaryDto;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -44,10 +45,11 @@ public class StoryService {
                     .map(scc -> characterMapper.asDetailDTO(scc.getCharacter()))
                     .collect(Collectors.toSet());
 
-            return new StoryForCreationDto(s.getId(),
-                    s.getTitle(),
-                    s.getThumbnailDescription(),
-                    s.getBannerUrl(),
+            return new StoryForCreationDto(
+                    new StorySummaryDto(s.getId(),
+                            s.getTitle(),
+                            s.getBannerUrl(),
+                            s.getThumbnailDescription()),
                     minPlayers,
                     maxPlayers,
                     characters,

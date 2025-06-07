@@ -76,8 +76,8 @@ class StoryServiceTest {
 
         assertThat(result).hasSize(1);
         StoryForCreationDto dto = result.iterator().next();
-        assertThat(dto.uuid()).isEqualTo(storyId);
-        assertThat(dto.title()).isEqualTo("Test Story");
+        assertThat(dto.story().uuid()).isEqualTo(storyId);
+        assertThat(dto.story().title()).isEqualTo("Test Story");
         assertThat(dto.minPlayerCount()).isEqualTo(3);
         assertThat(dto.maxPlayerCount()).isEqualTo(5);
         assertThat(dto.configs()).containsExactlyInAnyOrder(summaryDTO1,
