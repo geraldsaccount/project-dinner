@@ -6,7 +6,7 @@ import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkEmailAddress;
 import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
-import com.geraldsaccount.killinary.model.dto.output.UserDTO;
+import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
 
 @Component
 public class UserMapper {
@@ -45,7 +45,7 @@ public class UserMapper {
         return null;
     }
 
-    public UserDTO asDTO(User user) {
-        return new UserDTO(user.getId(), user.getName(), user.getAvatarUrl());
+    public UserDto asDTO(User user) {
+        return new UserDto(user.getId(), user.getName(), user.getAvatarUrl());
     }
 }

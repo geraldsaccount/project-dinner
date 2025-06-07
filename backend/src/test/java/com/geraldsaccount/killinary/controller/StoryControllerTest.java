@@ -61,7 +61,7 @@ class StoryControllerTest {
 
         Story story = storyRepository.save(Story.builder()
                 .title("Test Story")
-                .shopDescription("A thrilling adventure")
+                .thumbnailDescription("A thrilling adventure")
                 .build());
 
         Character character1 = characterRepository.save(Character.builder()
@@ -99,8 +99,8 @@ class StoryControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].title").value("Test Story"))
                 .andExpect(jsonPath("$[0].thumbnailDescription").value("A thrilling adventure"))
-                .andExpect(jsonPath("$[0].minPlayers").value(2))
-                .andExpect(jsonPath("$[0].maxPlayers").value(2))
+                .andExpect(jsonPath("$[0].minPlayerCount").value(2))
+                .andExpect(jsonPath("$[0].maxPlayerCount").value(2))
                 .andExpect(jsonPath("$[0].configs[0].playerCount").value(2))
                 .andExpect(jsonPath("$[0].configs[0].characterIds[0]").exists());
     }

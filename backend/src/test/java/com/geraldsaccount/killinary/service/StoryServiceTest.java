@@ -20,8 +20,8 @@ import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.StoryConfigMapper;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
-import com.geraldsaccount.killinary.model.dto.output.StoryConfigSummaryDTO;
-import com.geraldsaccount.killinary.model.dto.output.StorySummaryDTO;
+import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
+import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 @ActiveProfiles("test")
@@ -45,7 +45,7 @@ class StoryServiceTest {
     void getStorySummaries_returnsEmptySet_whenNoStories() {
         when(storyRepository.findAll()).thenReturn(List.of());
 
-        Set<StorySummaryDTO> result = storyService.getStorySummaries();
+        Set<StoryForCreationDto> result = storyService.getStorySummaries();
 
         assertThat(result).isEmpty();
     }
@@ -64,22 +64,22 @@ class StoryServiceTest {
         when(story.getTitle()).thenReturn("Test Story");
         when(story.getConfigurations()).thenReturn(Set.of(config1, config2));
 
-        StoryConfigSummaryDTO summaryDTO1 = mock(StoryConfigSummaryDTO.class);
-        StoryConfigSummaryDTO summaryDTO2 = mock(StoryConfigSummaryDTO.class);
+        ConfigDto summaryDTO1 = mock(ConfigDto.class);
+        ConfigDto summaryDTO2 = mock(ConfigDto.class);
 
         when(configMapper.asSummaryDTO(eq(config1))).thenReturn(summaryDTO1);
         when(configMapper.asSummaryDTO(eq(config2))).thenReturn(summaryDTO2);
 
         when(storyRepository.findAll()).thenReturn(List.of(story));
 
-        Set<StorySummaryDTO> result = storyService.getStorySummaries();
+        Set<StoryForCreationDto> result = storyService.getStorySummaries();
 
         assertThat(result).hasSize(1);
-        StorySummaryDTO dto = result.iterator().next();
-        assertThat(dto.id()).isEqualTo(storyId);
+        StoryForCreationDto dto = result.iterator().next();
+        assertThat(dto.uuid()).isEqualTo(storyId);
         assertThat(dto.title()).isEqualTo("Test Story");
-        assertThat(dto.minPlayers()).isEqualTo(3);
-        assertThat(dto.maxPlayers()).isEqualTo(5);
+        assertThat(dto.minPlayerCount()).isEqualTo(3);
+        assertThat(dto.maxPlayerCount()).isEqualTo(5);
         assertThat(dto.configs()).containsExactlyInAnyOrder(summaryDTO1,
                 summaryDTO2);
     }

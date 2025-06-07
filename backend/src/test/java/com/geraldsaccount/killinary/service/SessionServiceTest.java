@@ -25,14 +25,16 @@ import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
+import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
-import com.geraldsaccount.killinary.model.dto.output.SessionSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
+import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
 import com.geraldsaccount.killinary.repository.SessionRepository;
 
 @ActiveProfiles("test")
@@ -47,6 +49,9 @@ class SessionServiceTest {
 
     @Mock
     private StoryService storyService;
+
+    @Mock
+    private UserMapper userMapper;
 
     @InjectMocks
     private SessionService sessionService;
@@ -66,7 +71,7 @@ class SessionServiceTest {
     void getSessionSummariesFrom_returnsEmptySet_whenNoSessions() {
         when(sessionRepository.findAllByUserId("U1")).thenReturn(Collections.emptyList());
 
-        Set<SessionSummaryDTO> result = sessionService.getSessionSummariesFrom("U1");
+        Set<DinnerSummaryDto> result = sessionService.getSessionSummariesFrom("U1");
 
         assertThat(result).isEmpty();
     }
@@ -76,13 +81,21 @@ class SessionServiceTest {
         createDummySession();
         when(sessionRepository.findAllByUserId(user.getOauthId())).thenReturn(List.of(session));
 
-        Set<SessionSummaryDTO> result = sessionService.getSessionSummariesFrom(user.getOauthId());
+        UserDto hostDto = new UserDto(user.getId(), user.getName(), user.getAvatarUrl());
+        when(userMapper.asDTO(host)).thenReturn(hostDto);
+
+        Set<DinnerSummaryDto> result = sessionService.getSessionSummariesFrom(user.getOauthId());
 
         assertThat(result).hasSize(1);
-        SessionSummaryDTO dto = result.iterator().next();
+        DinnerSummaryDto dto = result.iterator().next();
 
-        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getName(), story.getTitle(),
-                character.getName(), session.getStartedAt(), false);
+        DinnerSummaryDto expected = new DinnerSummaryDto(
+                session.getId(),
+                session.getStartedAt(),
+                userMapper.asDTO(host),
+                story.getTitle(),
+                story.getBannerUrl(),
+                character.getName());
 
         assertThat(dto)
                 .isEqualTo(expected);
@@ -94,47 +107,65 @@ class SessionServiceTest {
         session.setCharacterAssignments(Collections.emptySet());
         when(sessionRepository.findAllByUserId(user.getOauthId())).thenReturn(List.of(session));
 
-        Set<SessionSummaryDTO> result = sessionService.getSessionSummariesFrom(user.getOauthId());
+        UserDto hostDto = new UserDto(user.getId(), user.getName(), user.getAvatarUrl());
+        when(userMapper.asDTO(host)).thenReturn(hostDto);
+
+        Set<DinnerSummaryDto> result = sessionService.getSessionSummariesFrom(user.getOauthId());
 
         assertThat(result).hasSize(1);
-        SessionSummaryDTO dto = result.iterator().next();
+        DinnerSummaryDto dto = result.iterator().next();
 
-        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getName(), story.getTitle(),
-                null, session.getStartedAt(), false);
+        DinnerSummaryDto expected = new DinnerSummaryDto(
+                session.getId(),
+                session.getStartedAt(),
+                userMapper.asDTO(host),
+                story.getTitle(),
+                story.getBannerUrl(),
+                null);
 
         assertThat(dto)
                 .isEqualTo(expected);
     }
 
-    @Test
-    void getSessionSummariesFrom_isHostIsTrue_whenUserIsHost() {
-        createDummySession();
-        CharacterAssignment assignment = CharacterAssignment.builder()
-                .character(character)
-                .user(host)
-                .build();
-        session.setCharacterAssignments(Set.of(assignment));
+    // @Test
+    // void getSessionSummariesFrom_isHostIsTrue_whenUserIsHost() {
+    // createDummySession();
+    // CharacterAssignment assignment = CharacterAssignment.builder()
+    // .character(character)
+    // .user(host)
+    // .build();
+    // session.setCharacterAssignments(Set.of(assignment));
 
-        session.setCharacterAssignments(Collections.emptySet());
-        when(sessionRepository.findAllByUserId(host.getOauthId())).thenReturn(List.of(session));
+    // session.setCharacterAssignments(Collections.emptySet());
+    // when(sessionRepository.findAllByUserId(host.getOauthId())).thenReturn(List.of(session));
 
-        Set<SessionSummaryDTO> result = sessionService.getSessionSummariesFrom(host.getOauthId());
+    // Set<DinnerSummaryDto> result =
+    // sessionService.getSessionSummariesFrom(host.getOauthId());
 
-        assertThat(result).hasSize(1);
-        SessionSummaryDTO dto = result.iterator().next();
+    // assertThat(result).hasSize(1);
+    // DinnerSummaryDto dto = result.iterator().next();
 
-        SessionSummaryDTO expected = new SessionSummaryDTO(session.getId(), host.getName(), story.getTitle(),
-                null, session.getStartedAt(), true);
+    // DinnerSummaryDto expected = new DinnerSummaryDto(
+    // session.getId(),
+    // session.getStartedAt(),
+    // userMapper.asDTO(host),
+    // story.getTitle(),
+    // story.getBannerUrl(),
+    // null);
 
-        assertThat(dto)
-                .isEqualTo(expected);
-    }
+    // DinnerSummaryDto expected = new SessionSummaryDTO(session.getId(),
+    // host.getName(), story.getTitle(),
+    // null, session.getStartedAt(), true);
+
+    // assertThat(dto)
+    // .isEqualTo(expected);
+    // }
 
     @Test
     void createSession_throwsUserNotFound_withInvalidOathId() throws Exception {
         String invalidId = "invalid-id";
         when(userService.getUserOrThrow(invalidId)).thenThrow(new UserNotFoundException("Could not find host."));
-        SessionCreationDTO creationDTO = mock(SessionCreationDTO.class);
+        CreateSessionDto creationDTO = mock(CreateSessionDto.class);
 
         assertThatThrownBy(() -> {
             sessionService.createSession(invalidId, creationDTO);
@@ -147,7 +178,7 @@ class SessionServiceTest {
         String validOauthId = "valid-oauth-id";
         UUID participatedId = UUID.randomUUID();
         User testHost = mock(User.class);
-        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+        CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(participatedId)
                 .build();
 
@@ -168,7 +199,7 @@ class SessionServiceTest {
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getSessionParticipations()).thenReturn(Set.of());
         when(storyService.getStoryOrThrow(any())).thenThrow(new StoryNotFoundException("Could not find Story."));
-        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+        CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(UUID.randomUUID())
                 .build();
 
@@ -193,7 +224,7 @@ class SessionServiceTest {
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(UUID.randomUUID());
 
-        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+        CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(UUID.randomUUID())
                 .build();
@@ -215,7 +246,7 @@ class SessionServiceTest {
         when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of());
 
-        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+        CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(UUID.randomUUID())
                 .build();
@@ -242,7 +273,7 @@ class SessionServiceTest {
 
         when(sessionRepository.save(any())).thenThrow(new RuntimeException("Duplicate code"));
 
-        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+        CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(configId)
                 .build();
@@ -272,7 +303,7 @@ class SessionServiceTest {
         when(session.getId()).thenReturn(sessionId);
         when(session.getStoryConfiguration()).thenReturn(config);
 
-        SessionCreationDTO creationDTO = SessionCreationDTO.builder()
+        CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(configId)
                 .build();
