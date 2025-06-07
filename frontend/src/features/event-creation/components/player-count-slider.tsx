@@ -1,12 +1,12 @@
 import { Slider } from "@/components/ui/slider";
-import type { StoryConfigSummary } from "@/types";
+import type { ConfigDto } from "@/types";
 import { useEffect, useState } from "react";
 
 type Props = {
   minCount: number;
   maxCount: number;
-  configurations: StoryConfigSummary[];
-  selectedChanged: (selected: StoryConfigSummary) => void;
+  configurations: ConfigDto[];
+  selectedChanged: (selected: ConfigDto) => void;
   selectedConfigId?: string;
 };
 

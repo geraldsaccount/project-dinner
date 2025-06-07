@@ -1,16 +1,18 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { StorySummary } from "@/types";
+import type { StorySummaryDto } from "@/types";
 
 type Props = {
-  summary: StorySummary;
+  summary: StorySummaryDto;
+  minPlayerCount: number;
+  maxPlayerCount: number;
   className?: string;
 };
 
-const StoryCard = ({ summary, className }: Props) => {
-  const { title, thumbnailDescription, minPlayers, maxPlayers } = summary;
+const StoryCard = ({ summary, minPlayerCount, maxPlayerCount, className }: Props) => {
+  const { title, thumbnailDescription } = summary;
   const description = thumbnailDescription;
-  const fixedPlayerCount = minPlayers === maxPlayers;
+  const fixedPlayerCount = minPlayerCount === maxPlayerCount;
 
   return (
     <Card className={cn("py-0 overflow-clip h-full", className)}>
@@ -26,7 +28,7 @@ const StoryCard = ({ summary, className }: Props) => {
           <CardHeader className="p-0 pb-2">
             <div className="font-bold text-lg">{title}</div>
             <div className="text-sm text-muted-foreground">
-              {fixedPlayerCount ? minPlayers : `${minPlayers} - ${maxPlayers}`}{" "}
+              {fixedPlayerCount ? minPlayerCount : `${minPlayerCount} - ${maxPlayerCount}`}{" "}
               Players
             </div>
           </CardHeader>

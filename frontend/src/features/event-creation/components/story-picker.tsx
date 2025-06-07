@@ -6,10 +6,10 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import StoryCard from "./story-card";
-import type { StorySummary } from "@/types";
+import type { StoryForCreationDto } from "@/types";
 
 type Props = {
-  stories: StorySummary[];
+  stories: StoryForCreationDto[];
   value?: string;
   onChange?: (storyId: string | undefined) => void;
 };
@@ -20,17 +20,17 @@ const StoryPicker = ({ stories, value, onChange }: Props) => {
       <CarouselContent>
         {stories.map((s) => (
           <CarouselItem
-            key={s.id}
+            key={s.story.uuid}
             className="basis-full md:basis-1/2 xl:basis-1/3"
           >
             <button
               type="button"
               className={`transition-all cursor-pointer ${
-                value === s.id ? "opacity-100 scale-100" : "opacity-40 scale-95"
+                value === s.story.uuid ? "opacity-100 scale-100" : "opacity-40 scale-95"
               } hover:opacity-100`}
-              onClick={() => onChange?.(s.id)}
+              onClick={() => onChange?.(s.story.uuid)}
             >
-              <StoryCard summary={s} />
+              <StoryCard summary={s.story} minPlayerCount={s.minPlayerCount} maxPlayerCount={s.maxPlayerCount}/>
             </button>
           </CarouselItem>
         ))}

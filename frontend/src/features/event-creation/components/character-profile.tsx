@@ -1,7 +1,7 @@
-import type { CharacterSummary } from "@/types";
+import { CharacterDetailDto } from "@/types";
 
 type Props = {
-  character: CharacterSummary;
+  character: CharacterDetailDto;
 };
 
 const CharacterCard = ({ character }: Props) => {
@@ -15,7 +15,7 @@ const CharacterCard = ({ character }: Props) => {
       <div className="flex flex-col">
         <span className="font-semibold text-lg">{character.name}</span>
         <span className="text-muted-foreground text-sm">
-          {character.characterDescription}
+          {character.shopDescription}
         </span>
       </div>
     </div>
