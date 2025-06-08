@@ -127,40 +127,6 @@ class SessionServiceTest {
                 .isEqualTo(expected);
     }
 
-    // @Test
-    // void getSessionSummariesFrom_isHostIsTrue_whenUserIsHost() {
-    // createDummySession();
-    // CharacterAssignment assignment = CharacterAssignment.builder()
-    // .character(character)
-    // .user(host)
-    // .build();
-    // session.setCharacterAssignments(Set.of(assignment));
-
-    // session.setCharacterAssignments(Collections.emptySet());
-    // when(sessionRepository.findAllByUserId(host.getOauthId())).thenReturn(List.of(session));
-
-    // Set<DinnerSummaryDto> result =
-    // sessionService.getSessionSummariesFrom(host.getOauthId());
-
-    // assertThat(result).hasSize(1);
-    // DinnerSummaryDto dto = result.iterator().next();
-
-    // DinnerSummaryDto expected = new DinnerSummaryDto(
-    // session.getId(),
-    // session.getStartedAt(),
-    // userMapper.asDTO(host),
-    // story.getTitle(),
-    // story.getBannerUrl(),
-    // null);
-
-    // DinnerSummaryDto expected = new SessionSummaryDTO(session.getId(),
-    // host.getName(), story.getTitle(),
-    // null, session.getStartedAt(), true);
-
-    // assertThat(dto)
-    // .isEqualTo(expected);
-    // }
-
     @Test
     void createSession_throwsUserNotFound_withInvalidOathId() throws Exception {
         String invalidId = "invalid-id";

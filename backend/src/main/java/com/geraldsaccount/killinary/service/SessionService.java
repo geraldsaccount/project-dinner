@@ -35,7 +35,7 @@ public class SessionService {
     private final UserMapper userMapper;
 
     public Set<DinnerSummaryDto> getSessionSummariesFrom(String oauthId) {
-        Set<DinnerSummaryDto> usersDinners = sessionRepository.findAllByUserId(oauthId).stream()
+        return sessionRepository.findAllByUserId(oauthId).stream()
                 .map(session -> {
                     String characterName = session.getCharacterAssignments().stream()
                             .filter(a -> a.getUser().getOauthId().equals(oauthId))
@@ -51,8 +51,6 @@ public class SessionService {
                             characterName);
                 })
                 .collect(Collectors.toSet());
-
-        return usersDinners;
     }
 
     @Transactional
@@ -103,14 +101,9 @@ public class SessionService {
             try {
                 return sessionRepository.save(session.withCharacterAssignments(assignments));
             } catch (DataIntegrityViolationException e) {
-                if (attempt == maxAttempts) {
-                    throw new RuntimeException("Could not generate a unique code after " +
-                            maxAttempts + " attempts",
-                            e);
-                }
             }
         }
-        throw new IllegalStateException("Should not reach here");
+        throw new RuntimeException("Could not generate a unique code after " + maxAttempts + " attempts");
     }
 
 }

@@ -28,7 +28,7 @@ public class StoryService {
     private final CharacterMapper characterMapper;
 
     public Set<StoryForCreationDto> getStorySummaries() {
-        Set<StoryForCreationDto> summaries = storyRepository.findAll().stream().map(s -> {
+        return storyRepository.findAll().stream().map(s -> {
             int minPlayers = Integer.MAX_VALUE;
             int maxPlayers = Integer.MIN_VALUE;
             Set<ConfigDto> configs = new HashSet<>();
@@ -55,8 +55,6 @@ public class StoryService {
                     characters,
                     configs);
         }).collect(Collectors.toSet());
-
-        return summaries;
     }
 
     public Story getStoryOrThrow(UUID id) throws StoryNotFoundException {
