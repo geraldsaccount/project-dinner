@@ -12,11 +12,11 @@ import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
-import com.geraldsaccount.killinary.model.dto.output.StoryConfigSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 
 @Component
 public class StoryConfigMapper {
-    public StoryConfigSummaryDTO asSummaryDTO(StoryConfiguration input) {
+    public ConfigDto asSummaryDTO(StoryConfiguration input) {
         Set<StoryConfigurationCharacter> charactersInConfig = input.getCharactersInConfig();
         Set<UUID> characterIds = charactersInConfig.stream()
                 .map(c -> c.getCharacter().getId())
@@ -29,11 +29,9 @@ public class StoryConfigMapper {
         Map<Gender, Integer> genderCountsInt = new HashMap<>();
         genderCounts.forEach((k, v) -> genderCountsInt.put(k, v.intValue()));
 
-        return StoryConfigSummaryDTO.builder()
-                .id(input.getId())
-                .playerCount(input.getPlayerCount())
-                .genderCounts(genderCountsInt)
-                .characterIds(characterIds)
-                .build();
+        return new ConfigDto(input.getId(),
+                input.getPlayerCount(),
+                genderCountsInt,
+                characterIds);
     }
 }

@@ -13,30 +13,30 @@ import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
-import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
-import com.geraldsaccount.killinary.model.dto.output.NewSessionDTO;
-import com.geraldsaccount.killinary.model.dto.output.SessionSummaryDTO;
+import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
 import com.geraldsaccount.killinary.service.SessionService;
 
 @RestController
 @RequestMapping("/api/sessions")
 public class SessionController {
 
-  private final SessionService sessionService;
+    private final SessionService sessionService;
 
-  public SessionController(SessionService sessionService) {
-    this.sessionService = sessionService;
-  }
+    public SessionController(SessionService sessionService) {
+        this.sessionService = sessionService;
+    }
 
-  @GetMapping()
-  public Set<SessionSummaryDTO> getSessionsForUser(Authentication authentication) {
-    return sessionService.getSessionSummariesFrom(authentication.getName());
-  }
+    @GetMapping()
+    public Set<DinnerSummaryDto> getSessionsForUser(Authentication authentication) {
+        return sessionService.getSessionSummariesFrom(authentication.getName());
+    }
 
-  @PostMapping()
-  public NewSessionDTO createNewSession(Authentication authentication, @RequestBody SessionCreationDTO creationDTO)
-      throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
-      NotAllowedException {
-    return sessionService.createSession(authentication.getName(), creationDTO);
-  }
+    @PostMapping()
+    public CreatedSessionDto createNewSession(Authentication authentication, @RequestBody CreateSessionDto creationDTO)
+            throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
+            NotAllowedException {
+        return sessionService.createSession(authentication.getName(), creationDTO);
+    }
 }

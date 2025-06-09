@@ -12,7 +12,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthenticatedApi } from "@/hooks";
-import { NewSessionDTO, StorySummary } from "@/types";
+import { NewSessionDTO, StoryForCreationDto } from "@/types";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -38,7 +38,7 @@ const EventCreationPage = () => {
     data: stories,
     loading: storiesLoading,
     callApi: fetchStories,
-  } = useAuthenticatedApi<StorySummary[]>();
+  } = useAuthenticatedApi<StoryForCreationDto[]>();
 
   const { loading: creationLoading, callApi: postSession } =
     useAuthenticatedApi<NewSessionDTO>();
@@ -58,7 +58,7 @@ const EventCreationPage = () => {
     },
   });
 
-  const selectedStory = stories?.find((s) => s.id === form.watch("storyId"));
+  const selectedStory = stories?.find((s) => s.story.uuid === form.watch("storyId"));
   const sortedConfigs = selectedStory
     ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
     : [];
@@ -134,8 +134,8 @@ const EventCreationPage = () => {
               render={({ field }) => (
                 <FormItem>
                   <PlayerCountSlider
-                    minCount={selectedStory.minPlayers}
-                    maxCount={selectedStory.maxPlayers}
+                    minCount={selectedStory.minPlayerCount}
+                    maxCount={selectedStory.maxPlayerCount}
                     configurations={sortedConfigs}
                     selectedChanged={(cfg) => field.onChange(cfg.id)}
                     selectedConfigId={field.value}
@@ -158,7 +158,7 @@ const EventCreationPage = () => {
           >
             {selectedConfig?.characterIds.map((cid: string) => {
               const character = selectedStory?.characters.find(
-                (c: { id: string }) => c.id === cid
+                (c) => c.uuid === cid
               );
               return character ? (
                 <CharacterCard key={cid} character={character} />

@@ -39,11 +39,17 @@ public class Story {
     @Column(nullable = false)
     private String title;
 
+    @Column(name = "thumbnail_description", columnDefinition = "TEXT")
+    private String thumbnailDescription;
+
     @Column(name = "shop_description", columnDefinition = "TEXT")
     private String shopDescription;
 
-    @Column(name = "setting_description", columnDefinition = "TEXT")
-    private String settingDescription;
+    @Column(name = "story_brief", columnDefinition = "TEXT")
+    private String dinnerStoryBrief;
+
+    @Column(name = "banner_url", columnDefinition = "TEXT")
+    private String bannerUrl;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

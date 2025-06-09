@@ -32,8 +32,8 @@ import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.input.SessionCreationDTO;
-import com.geraldsaccount.killinary.model.dto.output.NewSessionDTO;
+import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.SessionRepository;
 import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
@@ -178,7 +178,7 @@ class SessionControllerTest {
     @Test
     @WithMockUser(username = "invaliduser", roles = { "USER" })
     void createSession_returnsNotFound_whenUserNotFound() throws Exception {
-        SessionCreationDTO dto = SessionCreationDTO.builder()
+        CreateSessionDto dto = CreateSessionDto.builder()
                 .build();
         mockMvc.perform(post("/api/sessions")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -190,7 +190,7 @@ class SessionControllerTest {
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
     void createSession_returnsBadRequest_whenUserAlreadyPlayed() throws JsonProcessingException, Exception {
-        SessionCreationDTO dto = SessionCreationDTO.builder()
+        CreateSessionDto dto = CreateSessionDto.builder()
                 .storyId(session.getStory().getId())
                 .build();
         mockMvc.perform(post("/api/sessions")
@@ -203,7 +203,7 @@ class SessionControllerTest {
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
     void createSession_returnsNotFound_whenStoryNotFound() throws JsonProcessingException, Exception {
-        SessionCreationDTO dto = SessionCreationDTO.builder()
+        CreateSessionDto dto = CreateSessionDto.builder()
                 .storyId(UUID.randomUUID())
                 .build();
         mockMvc.perform(post("/api/sessions")
@@ -216,7 +216,7 @@ class SessionControllerTest {
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
     void createSession_returnsNotFound_whenStoryConfigNotFound() throws JsonProcessingException, Exception {
-        SessionCreationDTO dto = SessionCreationDTO.builder()
+        CreateSessionDto dto = CreateSessionDto.builder()
                 .storyId(newStory.getId())
                 .storyConfigurationId(UUID.randomUUID())
                 .build();
@@ -232,7 +232,7 @@ class SessionControllerTest {
     @WithMockUser(username = "testuser", roles = { "USER" })
     void createSession_returnsSessionCreatedDTO_whenValidData()
             throws JsonProcessingException, UnsupportedEncodingException, Exception {
-        SessionCreationDTO dto = SessionCreationDTO.builder()
+        CreateSessionDto dto = CreateSessionDto.builder()
                 .storyId(newStory.getId())
                 .storyConfigurationId(config.getId())
                 .build();
@@ -242,7 +242,7 @@ class SessionControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        NewSessionDTO newSession = objectMapper.readValue(response, NewSessionDTO.class);
+        CreatedSessionDto newSession = objectMapper.readValue(response, CreatedSessionDto.class);
 
         assertThat(newSession.sessionId()).isNotNull();
     }

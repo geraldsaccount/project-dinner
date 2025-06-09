@@ -11,6 +11,7 @@ import com.geraldsaccount.killinary.exceptions.UserMapperException;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dto.clerk.ClerkEmailAddress;
 import com.geraldsaccount.killinary.model.dto.clerk.OAuthUserData;
+import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
 
 @ActiveProfiles("test")
 class UserMapperTest {
@@ -124,9 +125,9 @@ class UserMapperTest {
                 .avatarUrl("http://avatar.com/bob.png")
                 .build();
 
-        var dto = userMapper.asDTO(user);
+        UserDto dto = userMapper.asDTO(user);
 
-        assertThat(dto.id()).isEqualTo(user.getId());
+        assertThat(dto.uuid()).isEqualTo(user.getId());
         assertThat(dto.name()).isEqualTo("bob");
         assertThat(dto.avatarUrl()).isEqualTo("http://avatar.com/bob.png");
     }
@@ -139,9 +140,9 @@ class UserMapperTest {
                 .avatarUrl(null)
                 .build();
 
-        var dto = userMapper.asDTO(user);
+        UserDto dto = userMapper.asDTO(user);
 
-        assertThat(dto.id()).isEqualTo(user.getId());
+        assertThat(dto.uuid()).isEqualTo(user.getId());
         assertThat(dto.name()).isEqualTo("eve");
         assertThat(dto.avatarUrl()).isNull();
     }

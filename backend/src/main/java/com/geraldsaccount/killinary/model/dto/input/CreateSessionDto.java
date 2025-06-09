@@ -6,6 +6,8 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record SessionCreationDTO(UUID storyId, LocalDateTime eventStart, UUID storyConfigurationId) {
-
+public record CreateSessionDto(
+        UUID storyId,
+        LocalDateTime eventStart,
+        UUID storyConfigurationId) {
 }

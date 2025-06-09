@@ -32,9 +32,9 @@ import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.output.CharacterSummaryDTO;
-import com.geraldsaccount.killinary.model.dto.output.InvitationDTO;
-import com.geraldsaccount.killinary.model.dto.output.UserDTO;
+import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
+import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
+import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 
 @ActiveProfiles("test")
@@ -133,14 +133,14 @@ class CharacterAssignmentServiceTest {
 
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
-        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDTO.class));
-        when(userMapper.asDTO(any())).thenReturn(mock(UserDTO.class));
+        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDto.class));
+        when(userMapper.asDTO(any())).thenReturn(mock(UserDto.class));
 
-        InvitationDTO dto = service.getInvitation(auth, inviteCode);
+        InvitationViewDto dto = service.getInvitation(auth, inviteCode);
 
         assertThat(dto).isNotNull();
-        assertThat(dto.code()).isEqualTo(inviteCode);
-        assertThat(dto.canJoin()).isTrue();
+        assertThat(dto.inviteCode()).isEqualTo(inviteCode);
+        assertThat(dto.canAccept()).isTrue();
         verify(userService).validateHasNotPlayedStory(user, story.getId());
     }
 
@@ -170,13 +170,13 @@ class CharacterAssignmentServiceTest {
         doThrow(new NotAllowedException("not allowed")).when(userService).validateHasNotPlayedStory(user,
                 story.getId());
 
-        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDTO.class));
-        when(userMapper.asDTO(any())).thenReturn(mock(UserDTO.class));
+        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDto.class));
+        when(userMapper.asDTO(any())).thenReturn(mock(UserDto.class));
 
-        InvitationDTO dto = service.getInvitation(auth, inviteCode);
+        InvitationViewDto dto = service.getInvitation(auth, inviteCode);
 
         assertThat(dto).isNotNull();
-        assertThat(dto.canJoin()).isFalse();
+        assertThat(dto.canAccept()).isFalse();
     }
 
     @Test
@@ -226,14 +226,14 @@ class CharacterAssignmentServiceTest {
         when(assignment.getCharacter()).thenReturn(character);
 
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
-        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDTO.class));
-        when(userMapper.asDTO(any())).thenReturn(mock(UserDTO.class));
+        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDto.class));
+        when(userMapper.asDTO(any())).thenReturn(mock(UserDto.class));
 
-        InvitationDTO dto = service.getInvitation(auth, inviteCode);
+        InvitationViewDto dto = service.getInvitation(auth, inviteCode);
 
         assertThat(dto).isNotNull();
-        assertThat(dto.code()).isEqualTo(inviteCode);
-        assertThat(dto.canJoin()).isTrue();
+        assertThat(dto.inviteCode()).isEqualTo(inviteCode);
+        assertThat(dto.canAccept()).isTrue();
         verify(userService, never()).validateHasNotPlayedStory(any(), any());
     }
 
@@ -256,14 +256,14 @@ class CharacterAssignmentServiceTest {
         when(assignment.getCharacter()).thenReturn(character);
 
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
-        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDTO.class));
-        when(userMapper.asDTO(any())).thenReturn(mock(UserDTO.class));
+        when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDto.class));
+        when(userMapper.asDTO(any())).thenReturn(mock(UserDto.class));
 
-        InvitationDTO dto = service.getInvitation(null, inviteCode);
+        InvitationViewDto dto = service.getInvitation(null, inviteCode);
 
         assertThat(dto).isNotNull();
-        assertThat(dto.code()).isEqualTo(inviteCode);
-        assertThat(dto.canJoin()).isTrue();
+        assertThat(dto.inviteCode()).isEqualTo(inviteCode);
+        assertThat(dto.canAccept()).isTrue();
         verify(userService, never()).validateHasNotPlayedStory(any(), any());
     }
 }
