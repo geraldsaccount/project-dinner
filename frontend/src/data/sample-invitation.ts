@@ -10,7 +10,7 @@ export const sampleInvitation: InvitationViewDto = {
   },
   storyTitle: "A Mysterious Evening",
   storyBannerUrl:
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+    "https://images.unsplash.com/photo-1736156725121-027231636f9d",
   dinnerStoryBrief:
     "Join us for a night of intrigue, secrets, and delicious food as you step into your character's shoes.",
   yourAssignedCharacter: {
@@ -48,30 +48,24 @@ export const sampleInvitation: InvitationViewDto = {
     },
     // Not yet RSVP'd: Detective Rowan (the invitation is for this character)
     {
-      user: {
-        uuid: "",
-        name: "",
-        avatarUrl: "",
-      },
+      user: undefined,
       character: {
         uuid: "char-uuid-1",
         name: "Detective Rowan",
-        shopDescription: "A sharp-minded detective with a knack for solving the unsolvable.",
+        shopDescription:
+          "A sharp-minded detective with a knack for solving the unsolvable.",
       },
     },
     // Not yet RSVP'd: Professor Sterling
     {
-      user: {
-        uuid: "",
-        name: "",
-        avatarUrl: "",
-      },
+      user: undefined,
       character: {
         uuid: "char-uuid-4",
         name: "Professor Sterling",
-        shopDescription: "A brilliant professor whose knowledge may hold the key to the evening's mystery.",
+        shopDescription:
+          "A brilliant professor whose knowledge may hold the key to the evening's mystery.",
       },
     },
   ],
-  canAccept: true,
+  canAccept: false,
 };

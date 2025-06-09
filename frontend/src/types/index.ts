@@ -14,7 +14,7 @@ export interface MobileNavProps {
  */
 export interface NewSessionDTO {
   sessionId: string;
-};
+}
 
 /**
  * Represents basic, publicly available information about a user.
@@ -92,8 +92,8 @@ export interface DinnerSummaryDto {
  * Used for the "starring" view in both the dinner and invitation pages.
  */
 export interface DinnerParticipantDto {
-  user: UserDto;
-  character: CharacterSummaryDto;
+  user: UserDto | undefined;
+  character: CharacterDetailDto;
 }
 
 /**
@@ -126,7 +126,7 @@ export interface CharacterAssignmentDto {
  */
 export interface HostDinnerViewDto {
   uuid: string;
-  dateTime: string; 
+  dateTime: string;
   host: UserDto;
   storyTitle: string;
   storyBannerUrl: string;
