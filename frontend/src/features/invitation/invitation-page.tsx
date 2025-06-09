@@ -1,14 +1,56 @@
 import PageHeader from "@/components/shared/page-header";
-import { sampleInvitation } from "@/data/sample-invitation";
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import HostCallout from "./components/host-callout";
 import CastGrid from "./components/cast-grid";
 import YourCharacter from "./components/your-character";
 import AlreadyPlayedMessage from "./components/already-played-message";
+import StoryBanner from "./components/story-banner";
+import useApi from "@/hooks/useApi";
+import { InvitationViewDto } from "@/types";
+import { useParams } from "react-router-dom";
+import React from "react";
+import { InviteCodeForm } from "./invite-code-page";
 
 const InvitationPage = () => {
-  const invitation = sampleInvitation;
+  const { inviteCode } = useParams();
+  const {
+    data: invitation,
+    loading,
+    error,
+    callApi: fetchApi,
+  } = useApi<InvitationViewDto>();
+  React.useEffect(() => {
+    if (inviteCode) {
+      fetchApi(`/api/invite/${inviteCode}`);
+    }
+    // eslint-disable-next-line
+  }, [inviteCode]);
+
+  function handleRetry(code: string) {
+    fetchApi(`/api/invite/${code}`);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <PageHeader title="Loading invitation..." className="animate-pulse" />
+      </div>
+    );
+  }
+
+  if (error || !invitation) {
+    return (
+      <div className="flex flex-col gap-4">
+        <PageHeader title="Something went wrong" />
+        <div className=" text-destructive font-semibold py-4">
+          Could not load invitation.
+        </div>
+        <InviteCodeForm onSubmit={handleRetry} />
+      </div>
+    );
+  }
+
   const sortedParticipants = [
     ...invitation.otherParticipants.filter(
       (p) => p.character.uuid !== invitation.yourAssignedCharacter.uuid
@@ -17,26 +59,12 @@ const InvitationPage = () => {
       (p) => p.character.uuid === invitation.yourAssignedCharacter.uuid
     ),
   ];
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title="You're invited to dinner!" />
       <HostCallout host={invitation.host} dateTime={invitation.dateTime} />
-      <div className="relative w-full h-40 sm:h-60 md:h-80 lg:h-96 mb-4 rounded-xl shadow overflow-hidden">
-        <img
-          src={invitation.storyBannerUrl}
-          alt={invitation.storyTitle}
-          className="w-full h-full object-cover absolute inset-0"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full p-4 text-primary-foreground">
-          <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-lg">
-            {invitation.storyTitle}
-          </h3>
-          <div className="text-base font-medium drop-shadow-lg">
-            {invitation.dinnerStoryBrief}
-          </div>
-        </div>
-      </div>
+      <StoryBanner invitation={invitation} />
       <div className="flex flex-col">
         <h3 className="text-2xl font-extrabold">Meet the Cast</h3>
         <CastGrid
