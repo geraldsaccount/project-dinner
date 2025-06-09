@@ -197,7 +197,7 @@ class SessionControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -246,4 +246,5 @@ class SessionControllerTest {
 
         assertThat(newSession.sessionId()).isNotNull();
     }
+
 }

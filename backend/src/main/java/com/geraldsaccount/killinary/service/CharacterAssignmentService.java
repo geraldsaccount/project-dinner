@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
-import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
@@ -32,7 +32,7 @@ public class CharacterAssignmentService {
 
     @Transactional
     public void acceptInvitation(String oauthId, String inviteCode)
-            throws UserNotFoundException, CharacterAssignmentNotFoundException, NotAllowedException {
+            throws UserNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException {
         User user = userService.getUserOrThrow(oauthId);
 
         CharacterAssignment assignment = repository.findByCode(inviteCode)
@@ -54,7 +54,7 @@ public class CharacterAssignmentService {
 
             try {
                 userService.validateHasNotPlayedStory(user, assignment.getSession().getStory().getId());
-            } catch (NotAllowedException e) {
+            } catch (AccessDeniedException e) {
                 canAccept = false;
             }
         }

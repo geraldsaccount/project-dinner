@@ -15,6 +15,6 @@ public record GuestDinnerViewDto(
         String storyBannerUrl,
         String dinnerStoryBrief,
         Set<DinnerParticipantDto> participants,
-        PrivateCharacterInfo yourPrivateInfo) {
+        PrivateCharacterInfo yourPrivateInfo) implements DinnerView {
 
 }

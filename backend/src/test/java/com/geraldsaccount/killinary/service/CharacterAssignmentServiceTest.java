@@ -22,8 +22,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
-import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
@@ -167,7 +167,7 @@ class CharacterAssignmentServiceTest {
         session.setCharacterAssignments(Set.of(assignment));
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
-        doThrow(new NotAllowedException("not allowed")).when(userService).validateHasNotPlayedStory(user,
+        doThrow(new AccessDeniedException("not allowed")).when(userService).validateHasNotPlayedStory(user,
                 story.getId());
 
         when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDto.class));
