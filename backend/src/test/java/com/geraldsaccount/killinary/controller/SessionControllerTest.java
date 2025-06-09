@@ -92,6 +92,11 @@ class SessionControllerTest {
                 .name("Mycroft")
                 .email("mycroft@holmes.com")
                 .build());
+        userRepository.save(User.builder()
+                .oauthId("notparticipating")
+                .name("Lestrade")
+                .email("lestrade@holmes.com")
+                .build());
 
         story = storyRepository.save(Story.builder()
                 .title("Murder Mystery")
@@ -117,8 +122,9 @@ class SessionControllerTest {
 
         session = sessionRepository.save(session);
 
+        SessionParticipant hostParticipant = new SessionParticipant(session, host);
         SessionParticipant sessionParticipant = new SessionParticipant(session, participant);
-        session.setParticipants(Set.of(sessionParticipant));
+        session.setParticipants(Set.of(hostParticipant, sessionParticipant));
 
         Character character = characterRepository.save(Character.builder()
                 .name("Watson")
@@ -132,7 +138,19 @@ class SessionControllerTest {
                 .character(character)
                 .build();
 
-        session.setCharacterAssignments(Set.of(assignment));
+        Character hostCharacter = characterRepository.save(Character.builder()
+                .name("Holmes")
+                .gender(Gender.MALE)
+                .story(story)
+                .build());
+
+        CharacterAssignment hostAssignment = CharacterAssignment.builder()
+                .session(session)
+                .user(host)
+                .character(hostCharacter)
+                .build();
+
+        session.setCharacterAssignments(Set.of(assignment, hostAssignment));
         sessionRepository.save(session);
     }
 
@@ -247,4 +265,63 @@ class SessionControllerTest {
         assertThat(newSession.sessionId()).isNotNull();
     }
 
+    @Test
+    void getSessionView_returnsUnauthorized_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/sessions/" + session.getId())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = { "USER" })
+    void getSessionView_returnsSessionView_forAuthenticatedParticipant() throws Exception {
+        mockMvc.perform(get("/api/sessions/" + session.getId())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains("Murder Mystery");
+                    assertThat(json).contains("Sherlock");
+                    assertThat(json).contains("Watson");
+                });
+    }
+
+    @Test
+    @WithMockUser(username = "hostuser", roles = { "USER" })
+    void getSessionView_returnsSessionView_forHost() throws Exception {
+        mockMvc.perform(get("/api/sessions/" + session.getId())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains("Murder Mystery");
+                    assertThat(json).contains("Sherlock");
+                });
+    }
+
+    @Test
+    @WithMockUser(username = "unknownuser", roles = { "USER" })
+    void getSessionView_returnsForbidden_whenUserDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/sessions/" + session.getId())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "notparticipating", roles = { "USER" })
+    void getSessionView_returnsForbidden_whenUserNotParticipantOrHost() throws Exception {
+        mockMvc.perform(get("/api/sessions/" + session.getId())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = { "USER" })
+    void getSessionView_returnsNotFound_whenSessionDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/sessions/" + UUID.randomUUID())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 }

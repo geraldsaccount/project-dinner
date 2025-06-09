@@ -494,7 +494,6 @@ class SessionServiceTest {
         assertThat(dto.yourPrivateInfo().characterId()).isEqualTo(characterId);
         assertThat(dto.yourPrivateInfo().privateDescription()).isEqualTo("private");
 
-        // Assert participants
         assertThat(dto.participants()).hasSize(1);
         DinnerParticipantDto participantDto = dto.participants().iterator().next();
         assertThat(participantDto.user().uuid()).isEqualTo(userId);
