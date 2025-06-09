@@ -146,7 +146,6 @@ public class SessionService {
 
                     Character character = a.getCharacter();
                     CharacterDetailDto characterDto = characterMapper.asDetailDTO(character);
-                    ;
 
                     return new DinnerParticipantDto(userDto, characterDto);
                 })
@@ -181,7 +180,6 @@ public class SessionService {
                     assignmentDtos,
                     null);
         }
-        User host = session.getHost();
         UserDto hostDto = userMapper.asDTO(session.getHost());
         return new GuestDinnerViewDto(dinnerId,
                 session.getStartedAt(),
