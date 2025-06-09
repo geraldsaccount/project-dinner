@@ -69,7 +69,12 @@ const EventsPage = () => {
 
   return (
     <div className="flex flex-col gap-2 items-baseline">
-      <PageHeader title="My Events" />
+      <div className="w-full flex justify-between">
+        <PageHeader title="My Events" />
+        <Link to="/invite" className="self-end">
+          <Button>Join</Button>
+        </Link>
+      </div>
       {buildSummaries()}
     </div>
   );
