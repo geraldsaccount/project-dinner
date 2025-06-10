@@ -6,8 +6,8 @@ export const navItems: NavItem[] = [
     to: "/",
   },
   {
-    title: "My Events",
-    to: "/events",
+    title: "My Dinners",
+    to: "/dinners",
   },
 ];
 
