@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
-import com.geraldsaccount.killinary.exceptions.NotAllowedException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.service.CharacterAssignmentService;
@@ -23,7 +23,7 @@ public class InviteController {
 
     @PutMapping("{code}")
     public void acceptInvitation(Authentication authentication, @PathVariable String code)
-            throws UserNotFoundException, CharacterAssignmentNotFoundException, NotAllowedException {
+            throws UserNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException {
         assignmentService.acceptInvitation(authentication.getName(), code);
     }
 

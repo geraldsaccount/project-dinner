@@ -15,11 +15,12 @@ public record HostDinnerViewDto(
         String storyBannerUrl,
         String dinnerStoryBrief,
         Set<DinnerParticipantDto> participants,
+        PrivateCharacterInfo yourPrivateInfo,
 
         // Host-specific information
         Set<CharacterAssignmentDto> assignments, // All assignments and invite codes
         Set<PrivateCharacterInfo> allPrivateInfo // All secrets, for host reference
 // Object extraHostInformation // Placeholder for recipes, etc.
-) {
+) implements DinnerView {
 
 }

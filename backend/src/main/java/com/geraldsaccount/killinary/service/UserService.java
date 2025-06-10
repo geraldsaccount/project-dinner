@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.geraldsaccount.killinary.exceptions.NotAllowedException;
+import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
@@ -51,12 +51,12 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Could not find user."));
     }
 
-    public void validateHasNotPlayedStory(User user, UUID storyId) throws NotAllowedException {
+    public void validateHasNotPlayedStory(User user, UUID storyId) throws AccessDeniedException {
         boolean hasAlreadyPlayed = user.getSessionParticipations().stream()
                 .anyMatch(s -> s.getSession().getStory().getId().equals(storyId));
 
         if (hasAlreadyPlayed) {
-            throw new NotAllowedException("User cannot play a Story multiple times");
+            throw new AccessDeniedException("User cannot play a Story multiple times");
         }
     }
 }
