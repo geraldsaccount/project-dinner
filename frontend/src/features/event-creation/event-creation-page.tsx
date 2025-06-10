@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import PlayerCountSlider from "./components/player-count-slider";
 import GridLayout from "@/components/layout/grid-layout";
 import CharacterCard from "./components/character-profile";
-import SectionHeader from "./components/section-header";
+import SectionHeader from "../../components/shared/section-header";
 import DateTimePicker from "@/components/ui/date-time-picker";
 import StoryPicker from "./components/story-picker";
 import StoryPickerSkeleton from "./components/story-picker-skeleton";
