@@ -9,10 +9,11 @@ import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
 @Component
 public class CharacterMapper {
     public CharacterSummaryDto asSummaryDTO(Character input) {
-        return new CharacterSummaryDto(input.getId(), input.getName(), input.getAvatarUrl());
+        return new CharacterSummaryDto(input.getId(), input.getName(), input.getAvatarUrl(), input.getRole());
     }
 
     public CharacterDetailDto asDetailDTO(Character input) {
-        return new CharacterDetailDto(input.getId(), input.getName(), input.getShopDescription(), input.getAvatarUrl());
+        return new CharacterDetailDto(input.getId(), input.getName(), input.getShopDescription(), input.getAvatarUrl(),
+                input.getRole());
     }
 }

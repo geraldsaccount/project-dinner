@@ -5,6 +5,7 @@ import java.util.UUID;
 public record CharacterSummaryDto(
         UUID uuid,
         String name,
-        String avatarUrl) {
+        String avatarUrl,
+        String role) {
 
 }
