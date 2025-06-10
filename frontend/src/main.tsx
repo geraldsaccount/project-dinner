@@ -9,6 +9,8 @@ import LandingPage from "./pages/landing-page.tsx";
 import EventsPage from "./features/event-gallery/events-page.tsx";
 import ProtectedRoute from "./components/protected-route.tsx";
 import EventCreationPage from "./features/event-creation/event-creation-page.tsx";
+import InvitationPage from "./features/invitation/invitation-page.tsx";
+import InviteCodePage from "./features/invitation/invite-code-page.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -27,6 +29,10 @@ createRoot(document.getElementById("root")!).render(
               <Route index element={<EventsPage />} />
               <Route path="create" element={<EventCreationPage />} />
               Lazy Loading
+            </Route>
+            <Route path="invite">
+              <Route index element={<InviteCodePage />} />
+              <Route path=":inviteCode" element={<InvitationPage />} />
             </Route>
           </Route>
         </Routes>
