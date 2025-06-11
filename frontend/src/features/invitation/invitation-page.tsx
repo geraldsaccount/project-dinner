@@ -9,8 +9,10 @@ import StoryBanner from "./components/story-banner";
 import useApi from "@/hooks/useApi";
 import { InvitationViewDto } from "@/types";
 import { useParams } from "react-router-dom";
-import React from "react";
+import { useEffect } from "react";
 import { InviteCodeForm } from "./invite-code-page";
+import LoadingHeader from "@/components/shared/loading-header";
+import ErrorPage from "@/pages/error-page";
 
 const InvitationPage = () => {
   const { inviteCode } = useParams();
@@ -20,7 +22,7 @@ const InvitationPage = () => {
     error,
     callApi: fetchApi,
   } = useApi<InvitationViewDto>();
-  React.useEffect(() => {
+  useEffect(() => {
     if (inviteCode) {
       fetchApi(`/api/invite/${inviteCode}`);
     }
@@ -32,22 +34,14 @@ const InvitationPage = () => {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <PageHeader title="Loading invitation..." className="animate-pulse" />
-      </div>
-    );
+    return <LoadingHeader title="Loading invitation..." />;
   }
 
   if (error || !invitation) {
     return (
-      <div className="flex flex-col gap-4">
-        <PageHeader title="Something went wrong" />
-        <div className=" text-destructive font-semibold py-4">
-          Could not load invitation.
-        </div>
+      <ErrorPage message="Could not load invitation.">
         <InviteCodeForm onSubmit={handleRetry} />
-      </div>
+      </ErrorPage>
     );
   }
 

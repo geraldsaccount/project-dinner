@@ -31,6 +31,7 @@ export interface UserDto {
 export interface CharacterSummaryDto {
   uuid: string;
   name: string;
+  role: string;
 }
 
 /**
@@ -50,7 +51,9 @@ export interface StorySummaryDto {
 export interface CharacterDetailDto {
   uuid: string;
   name: string;
+  role: string;
   shopDescription: string;
+  avatarUrl: string;
 }
 
 /**
@@ -117,7 +120,7 @@ export interface GuestDinnerViewDto {
 export interface CharacterAssignmentDto {
   characterId: string;
   userId?: string; // Optional because a character might not be assigned yet
-  inviteCode: string;
+  inviteCode?: string;
 }
 
 /**
@@ -132,6 +135,7 @@ export interface HostDinnerViewDto {
   storyBannerUrl: string;
   dinnerStoryBrief: string;
   participants: DinnerParticipantDto[];
+  yourPrivateInfo: PrivateCharacterInfo; // Only the guest's own private data.
 
   // Host-specific information
   assignments: CharacterAssignmentDto[];

@@ -12,12 +12,14 @@ export const sampleInvitation: InvitationViewDto = {
   storyBannerUrl:
     "https://images.unsplash.com/photo-1736156725121-027231636f9d",
   dinnerStoryBrief:
-    "Join us for a night of intrigue, secrets, and delicious food as you step into your character's shoes.",
+    "Join us for a night of intrigue, secrets, and delicious food as you step into your character's shoes.\n\nThe evening will be filled with unexpected twists, hidden motives, and opportunities to uncover the truth.\n\nWill you solve the mystery, or become part of it?",
   yourAssignedCharacter: {
     uuid: "char-uuid-1",
     name: "Detective Rowan",
+    role: "Detective",
     shopDescription:
       "A sharp-minded detective with a knack for solving the unsolvable.",
+    avatarUrl: "https://randomuser.me/api/portraits/men/8.jpg",
   },
   otherParticipants: [
     {
@@ -29,8 +31,10 @@ export const sampleInvitation: InvitationViewDto = {
       character: {
         uuid: "char-uuid-2",
         name: "Chef Lucien",
+        role: "Chef",
         shopDescription:
           "A world-renowned chef with a secret recipe and a mysterious past.",
+        avatarUrl: "https://randomuser.me/api/portraits/men/10.jpg",
       },
     },
     {
@@ -42,8 +46,10 @@ export const sampleInvitation: InvitationViewDto = {
       character: {
         uuid: "char-uuid-3",
         name: "Heiress Vivienne",
+        role: "Heiress",
         shopDescription:
           "An elegant heiress with a fortune—and a few secrets of her own.",
+        avatarUrl: "https://randomuser.me/api/portraits/women/12.jpg",
       },
     },
     // Not yet RSVP'd: Detective Rowan (the invitation is for this character)
@@ -52,8 +58,10 @@ export const sampleInvitation: InvitationViewDto = {
       character: {
         uuid: "char-uuid-1",
         name: "Detective Rowan",
+        role: "Detective",
         shopDescription:
           "A sharp-minded detective with a knack for solving the unsolvable.",
+        avatarUrl: "https://randomuser.me/api/portraits/men/8.jpg",
       },
     },
     // Not yet RSVP'd: Professor Sterling
@@ -62,10 +70,12 @@ export const sampleInvitation: InvitationViewDto = {
       character: {
         uuid: "char-uuid-4",
         name: "Professor Sterling",
+        role: "Professor",
         shopDescription:
           "A brilliant professor whose knowledge may hold the key to the evening's mystery.",
+        avatarUrl: "https://randomuser.me/api/portraits/men/11.jpg",
       },
     },
   ],
-  canAccept: false,
+  canAccept: true,
 };

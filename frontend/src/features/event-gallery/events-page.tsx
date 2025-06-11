@@ -44,9 +44,9 @@ const EventsPage = () => {
     if (summaries.length === 0) {
       return (
         <div className="flex flex-col gap-4">
-          <p>You have not attended any events yet.</p>
+          <p>You have not attended any dinners yet.</p>
           <Button>
-            <Link to={"create"}>Host event</Link>
+            <Link to={"create"}>Host Dinner</Link>
           </Button>
         </div>
       );
@@ -58,7 +58,7 @@ const EventsPage = () => {
         gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}
       >
         <Button className="h-auto text-xl font-bold align-top">
-          <Link to={"create"}>Host new event</Link>
+          <Link to={"create"}>Host new dinner</Link>
         </Button>
         {summaries.map((e) => (
           <SessionSummaryCard key={e.uuid} summary={e} />
@@ -70,7 +70,7 @@ const EventsPage = () => {
   return (
     <div className="flex flex-col gap-2 items-baseline">
       <div className="w-full flex justify-between">
-        <PageHeader title="My Events" />
+        <PageHeader title="My Dinners" />
         <Link to="/invite" className="self-end">
           <Button>Join</Button>
         </Link>

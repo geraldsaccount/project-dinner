@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import PlayerCountSlider from "./components/player-count-slider";
 import GridLayout from "@/components/layout/grid-layout";
 import CharacterCard from "./components/character-profile";
-import SectionHeader from "./components/section-header";
+import SectionHeader from "../../components/shared/section-header";
 import DateTimePicker from "@/components/ui/date-time-picker";
 import StoryPicker from "./components/story-picker";
 import StoryPickerSkeleton from "./components/story-picker-skeleton";
@@ -58,7 +58,9 @@ const EventCreationPage = () => {
     },
   });
 
-  const selectedStory = stories?.find((s) => s.story.uuid === form.watch("storyId"));
+  const selectedStory = stories?.find(
+    (s) => s.story.uuid === form.watch("storyId")
+  );
   const sortedConfigs = selectedStory
     ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
     : [];
@@ -87,7 +89,7 @@ const EventCreationPage = () => {
 
   return (
     <Form {...form}>
-      <PageHeader title="Host New Event" />
+      <PageHeader title="Host New Dinner" />
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className="flex flex-col gap-4 items-baseline"
@@ -171,7 +173,7 @@ const EventCreationPage = () => {
             form.watch("storyId") === "" ? "hidden" : "flex"
           } flex-col p-2 gap-2 w-full`}
         >
-          <SectionHeader title="Step 3: Event Details" />
+          <SectionHeader title="Step 3: Dinner Details" />
           <FormField
             control={form.control}
             name="date"
@@ -194,7 +196,7 @@ const EventCreationPage = () => {
             disabled={!form.formState.isValid || creationLoading}
             className="mt-4"
           >
-            Create Session
+            Create Dinner
           </Button>
         </div>
       </form>

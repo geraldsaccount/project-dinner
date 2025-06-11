@@ -45,6 +45,9 @@ public class Character {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @Column(nullable = true)
+    private String role;
+
     @Column(name = "shop_description", columnDefinition = "TEXT")
     private String shopDescription;
 
