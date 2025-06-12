@@ -29,8 +29,6 @@ class StoryConfigMapperTest {
 
         StoryConfiguration config = StoryConfiguration.builder()
                 .id(UUID.randomUUID())
-                .configurationName("Config")
-                .playerCount(2)
                 .build();
 
         config.setCharacters(Set.of(character1, character2));
@@ -51,7 +49,6 @@ class StoryConfigMapperTest {
     void asSummaryDTO_shouldHandleEmptyCharacters() {
         StoryConfiguration config = StoryConfiguration.builder()
                 .id(UUID.randomUUID())
-                .playerCount(0)
                 .characters(Set.of())
                 .build();
 
@@ -77,7 +74,6 @@ class StoryConfigMapperTest {
 
         StoryConfiguration config = StoryConfiguration.builder()
                 .id(UUID.randomUUID())
-                .playerCount(2)
                 .build();
 
         config.setCharacters(Set.of(character1, character2));

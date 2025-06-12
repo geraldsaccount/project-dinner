@@ -1,5 +1,6 @@
 package com.geraldsaccount.killinary.controller;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,18 +12,22 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
+import com.geraldsaccount.killinary.TestDatabaseResetUtil;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
+import com.geraldsaccount.killinary.model.dto.input.CreateCharacterDto;
+import com.geraldsaccount.killinary.model.dto.input.CreateConfigDto;
+import com.geraldsaccount.killinary.model.dto.input.CreateStoryDto;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
-import com.geraldsaccount.killinary.repository.SessionRepository;
 import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
@@ -36,8 +41,6 @@ class StoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private SessionRepository sessionRepository;
-    @Autowired
     private StoryRepository storyRepository;
     @Autowired
     private StoryConfigurationRepository storyConfigurationRepository;
@@ -46,13 +49,13 @@ class StoryControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private TestDatabaseResetUtil databaseResetUtil;
+
     @BeforeEach
     @Transactional
     void setUp() {
-        sessionRepository.deleteAll();
-        storyConfigurationRepository.deleteAll();
-        characterRepository.deleteAll();
-        storyRepository.deleteAll();
+        databaseResetUtil.resetDatabase();
 
         Story story = storyRepository.save(Story.builder()
                 .title("Test Story")
@@ -71,13 +74,9 @@ class StoryControllerTest {
                 .build());
 
         StoryConfiguration config = storyConfigurationRepository.save(StoryConfiguration.builder()
+                .characters(Set.of(character1, character2))
                 .story(story)
-                .playerCount(2)
-                .configurationName("Default")
                 .build());
-
-        config = storyConfigurationRepository
-                .save(config.withCharacters(Set.of(character1, character2)));
 
         storyRepository.save(story.withCharacters(Set.of(character1, character2))
                 .withConfigurations(Set.of(config)));
@@ -98,13 +97,52 @@ class StoryControllerTest {
 
     @Test
     void getStorySummaries_returnsEmpty_whenNoStories() throws Exception {
-        sessionRepository.deleteAll();
-        storyConfigurationRepository.deleteAll();
-        characterRepository.deleteAll();
-        storyRepository.deleteAll();
+        databaseResetUtil.resetDatabase();
         mockMvc.perform(get("/api/stories").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("[]"));
     }
+
+    @Test
+    void createStory_createsStoryWithCharactersAndConfigs() throws Exception {
+        var charDto1 = new CreateCharacterDto(0, "Alice", Gender.FEMALE, "desc", "private", "url1");
+        var charDto2 = new CreateCharacterDto(1, "Bob", Gender.MALE, "desc2", "private2", "url2");
+        var configDto = new CreateConfigDto(java.util.List.of(0, 1));
+        var dto = new CreateStoryDto(
+                "New Story",
+                "A new adventure",
+                "Shop desc",
+                "Dinner brief",
+                "banner.png",
+                Set.of(charDto1, charDto2),
+                Set.of(configDto));
+        String requestBody = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/stories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void createStory_returnsBadRequest_whenConfigReferencesUnknownCharacterIndex() throws Exception {
+        var charDto = new CreateCharacterDto(0, "Alice", Gender.FEMALE, "desc", "private", "url1");
+        var configDto = new CreateConfigDto(List.of(1));
+        var dto = new CreateStoryDto(
+                "Invalid Story",
+                "desc",
+                "shop",
+                "brief",
+                "banner",
+                Set.of(charDto),
+                Set.of(configDto));
+        String requestBody = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/stories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+
 }

@@ -21,6 +21,7 @@ public class CharacterMapper {
     public Character asCharacter(CreateCharacterDto create) {
         return Character.builder()
                 .name(create.name())
+                .gender(create.gender())
                 .shopDescription(create.shopDescription())
                 .privateBriefing(create.privateDescription())
                 .avatarUrl(create.avatarUrl())

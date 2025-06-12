@@ -28,7 +28,7 @@ public class StoryConfigMapper {
         genderCounts.forEach((k, v) -> genderCountsInt.put(k, v.intValue()));
 
         return new ConfigDto(input.getId(),
-                input.getPlayerCount(),
+                input.getCharacters().size(),
                 genderCountsInt,
                 characterIds);
     }

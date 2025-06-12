@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -38,12 +37,6 @@ public class StoryConfiguration {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "story_id", nullable = false)
     private Story story;
-
-    @Column(name = "player_count", nullable = false)
-    private Integer playerCount;
-
-    @Column(name = "configuration_name", nullable = false)
-    private String configurationName;
 
     @ManyToMany
     @JoinTable(name = "story_configuration_character", joinColumns = @JoinColumn(name = "story_configuration_id"), inverseJoinColumns = @JoinColumn(name = "character_id"))

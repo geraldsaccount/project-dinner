@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.geraldsaccount.killinary.exceptions.StoryConfigurationCreationException;
 import com.geraldsaccount.killinary.model.dto.input.CreateStoryDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.service.StoryService;
@@ -28,7 +29,8 @@ public class StoryController {
     }
 
     @PostMapping()
-    public void createStory(Authentication auth, @RequestBody CreateStoryDto input) {
+    public void createStory(Authentication auth, @RequestBody CreateStoryDto input)
+            throws StoryConfigurationCreationException {
         service.createStory(input);
     }
 }
