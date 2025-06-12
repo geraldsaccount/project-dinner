@@ -216,3 +216,12 @@ export interface CreateStoryDto {
   maxPlayerCount: number;
   characters: CreateCharacterDto[];
 }
+
+export interface StoryCoreCreationDto {
+  title: string;
+  shopDescription: string;
+  bannerImage: string | null;
+  rules: string;
+  setting: string;
+  briefing: string;
+}
