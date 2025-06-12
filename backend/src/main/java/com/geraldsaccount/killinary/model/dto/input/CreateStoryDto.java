@@ -8,8 +8,7 @@ public record CreateStoryDto(
         String shopDescription,
         String dinnerStoryBrief,
         String bannerUrl,
-        int minPlayerCount,
-        int maxPlayerCount,
-        Set<CreateCharacterDto> characters) {
+        Set<CreateCharacterDto> characters,
+        Set<CreateConfigDto> configs) {
 
 }

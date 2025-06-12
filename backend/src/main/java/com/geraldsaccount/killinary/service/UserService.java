@@ -52,8 +52,8 @@ public class UserService {
     }
 
     public void validateHasNotPlayedStory(User user, UUID storyId) throws AccessDeniedException {
-        boolean hasAlreadyPlayed = user.getSessionParticipations().stream()
-                .anyMatch(s -> s.getSession().getStory().getId().equals(storyId));
+        boolean hasAlreadyPlayed = user.getSessions().stream()
+                .anyMatch(s -> s.getStory().getId().equals(storyId));
 
         if (hasAlreadyPlayed) {
             throw new AccessDeniedException("User cannot play a Story multiple times");

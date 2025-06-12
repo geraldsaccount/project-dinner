@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
+import com.geraldsaccount.killinary.TestDatabaseResetUtil;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Gender;
@@ -53,6 +54,9 @@ class InviteControllerTest {
     @Autowired
     private CharacterAssignmentRepository assignmentRepository;
 
+    @Autowired
+    private TestDatabaseResetUtil databaseResetUtil;
+
     private User user;
     private User host;
     private Story story;
@@ -64,11 +68,7 @@ class InviteControllerTest {
     @BeforeEach
     @Transactional
     void setUp() {
-        assignmentRepository.deleteAll();
-        sessionRepository.deleteAll();
-        userRepository.deleteAll();
-        storyRepository.deleteAll();
-        characterRepository.deleteAll();
+        databaseResetUtil.resetDatabase();
 
         user = userRepository.save(User.builder()
                 .oauthId("testuser")

@@ -2,6 +2,7 @@ package com.geraldsaccount.killinary.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,11 +24,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
+import com.geraldsaccount.killinary.TestDatabaseResetUtil;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
@@ -68,6 +69,8 @@ class SessionControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private TestDatabaseResetUtil databaseResetUtil;
 
     private User host;
     private User participant;
@@ -79,8 +82,7 @@ class SessionControllerTest {
     @BeforeEach
     @Transactional
     void setUp() {
-        sessionRepository.deleteAll();
-        userRepository.deleteAll();
+        databaseResetUtil.resetDatabase();
 
         host = userRepository.save(User.builder()
                 .oauthId("hostuser")
@@ -107,8 +109,6 @@ class SessionControllerTest {
                 .build());
         config = configRepository.save(StoryConfiguration.builder()
                 .story(newStory)
-                .playerCount(3)
-                .configurationName("3 Player Config")
                 .build());
         newStory.setConfigurations(Set.of(config));
         storyRepository.save(newStory);
@@ -122,9 +122,7 @@ class SessionControllerTest {
 
         session = sessionRepository.save(session);
 
-        SessionParticipant hostParticipant = new SessionParticipant(session, host);
-        SessionParticipant sessionParticipant = new SessionParticipant(session, participant);
-        session.setParticipants(Set.of(hostParticipant, sessionParticipant));
+        session.setParticipants(Set.of(host, participant));
 
         Character character = characterRepository.save(Character.builder()
                 .name("Watson")
@@ -152,6 +150,7 @@ class SessionControllerTest {
 
         session.setCharacterAssignments(Set.of(assignment, hostAssignment));
         sessionRepository.save(session);
+        userRepository.saveAll(List.of(host.withSessions(Set.of(session)), participant.withSessions(Set.of(session))));
     }
 
     @Test
