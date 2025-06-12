@@ -11,19 +11,17 @@ import org.springframework.stereotype.Component;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
-import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 
 @Component
 public class StoryConfigMapper {
     public ConfigDto asSummaryDTO(StoryConfiguration input) {
-        Set<StoryConfigurationCharacter> charactersInConfig = input.getCharactersInConfig();
-        Set<UUID> characterIds = charactersInConfig.stream()
-                .map(c -> c.getCharacter().getId())
+        Set<Character> characters = input.getCharacters();
+        Set<UUID> characterIds = characters.stream()
+                .map(c -> c.getId())
                 .collect(Collectors.toSet());
 
-        Map<Gender, Long> genderCounts = charactersInConfig.stream()
-                .map(cic -> cic.getCharacter())
+        Map<Gender, Long> genderCounts = characters.stream()
                 .collect(Collectors.groupingBy(Character::getGender,
                         Collectors.counting()));
         Map<Gender, Integer> genderCountsInt = new HashMap<>();

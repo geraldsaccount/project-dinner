@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import com.geraldsaccount.killinary.model.Session;
 
 public interface SessionRepository extends JpaRepository<Session, UUID> {
-    @Query("SELECT s FROM Session s JOIN s.participants p WHERE p.user.oauthId = :oauthId")
+    @Query("SELECT s FROM Session s JOIN s.participants u WHERE u.oauthId = :oauthId")
     List<Session> findAllByUserId(String oauthId);
 }

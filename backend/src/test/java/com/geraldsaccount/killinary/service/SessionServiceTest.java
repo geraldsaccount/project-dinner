@@ -23,7 +23,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
-import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
@@ -32,7 +31,6 @@ import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.User;
@@ -179,7 +177,7 @@ class SessionServiceTest {
         host = mock(User.class);
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
-        when(host.getSessionParticipations()).thenReturn(Set.of());
+        when(host.getSessions()).thenReturn(Set.of());
         when(storyService.getStoryOrThrow(any())).thenThrow(new StoryNotFoundException("Could not find Story."));
         CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(UUID.randomUUID())
@@ -201,7 +199,7 @@ class SessionServiceTest {
         StoryConfiguration config = mock(StoryConfiguration.class);
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
-        when(host.getSessionParticipations()).thenReturn(Set.of());
+        when(host.getSessions()).thenReturn(Set.of());
         when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(UUID.randomUUID());
@@ -224,7 +222,7 @@ class SessionServiceTest {
         story = mock(Story.class);
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
-        when(host.getSessionParticipations()).thenReturn(Set.of());
+        when(host.getSessions()).thenReturn(Set.of());
         when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of());
 
@@ -248,7 +246,7 @@ class SessionServiceTest {
         StoryConfiguration config = mock(StoryConfiguration.class);
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
-        when(host.getSessionParticipations()).thenReturn(Set.of());
+        when(host.getSessions()).thenReturn(Set.of());
         when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(configId);
@@ -277,7 +275,7 @@ class SessionServiceTest {
         StoryConfiguration config = mock(StoryConfiguration.class);
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
-        when(host.getSessionParticipations()).thenReturn(Set.of());
+        when(host.getSessions()).thenReturn(Set.of());
         when(storyService.getStoryOrThrow(storyId)).thenReturn(story);
         when(story.getConfigurations()).thenReturn(Set.of(config));
         when(config.getId()).thenReturn(configId);
@@ -362,27 +360,6 @@ class SessionServiceTest {
     }
 
     @Test
-    void getDinnerView_throwsCharacterAssignmentNotFound_whenUserHasNoAssignment() throws Exception {
-        String oauthId = "user-oauth";
-        UUID dinnerId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        user = User.builder().id(userId).oauthId(oauthId).build();
-        SessionParticipant participant = SessionParticipant.builder().user(user).build();
-        session = Session.builder()
-                .id(dinnerId)
-                .participants(Set.of(participant))
-                .host(User.builder().id(UUID.randomUUID()).build())
-                .characterAssignments(Set.of())
-                .build();
-        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
-        when(sessionRepository.findById(dinnerId)).thenReturn(Optional.of(session));
-
-        assertThatThrownBy(() -> sessionService.getDinnerView(oauthId, dinnerId))
-                .isInstanceOf(CharacterAssignmentNotFoundException.class)
-                .hasMessage("User should have been assigned to a character.");
-    }
-
-    @Test
     void getDinnerView_returnsHostDinnerView_whenUserIsHost() throws Exception {
         String oauthId = "host-oauth";
         UUID dinnerId = UUID.randomUUID();
@@ -398,14 +375,13 @@ class SessionServiceTest {
                 .build();
         CharacterAssignment pending = CharacterAssignment.builder().user(null).character(pendingCharacter)
                 .code("INVITE456").build();
-        SessionParticipant participant = SessionParticipant.builder().user(hostUser).build();
         session = Session.builder()
                 .id(dinnerId)
                 .host(hostUser)
                 .story(story)
                 .startedAt(LocalDateTime.now())
                 .characterAssignments(Set.of(assigned, pending))
-                .participants(Set.of(participant))
+                .participants(Set.of(hostUser))
                 .build();
 
         CharacterDetailDto characterDetailDto = mock(CharacterDetailDto.class);
@@ -464,14 +440,13 @@ class SessionServiceTest {
         story = Story.builder().title("Story Title").bannerUrl("banner.png").dinnerStoryBrief("brief").build();
         character = Character.builder().id(characterId).privateBriefing("private").build();
         CharacterAssignment assignment = CharacterAssignment.builder().user(guest).character(character).build();
-        SessionParticipant participant = SessionParticipant.builder().user(guest).build();
         session = Session.builder()
                 .id(dinnerId)
                 .host(hostUser)
                 .story(story)
                 .startedAt(LocalDateTime.now())
                 .characterAssignments(Set.of(assignment))
-                .participants(Set.of(participant))
+                .participants(Set.of(guest))
                 .build();
 
         CharacterDetailDto characterDetailDto = mock(

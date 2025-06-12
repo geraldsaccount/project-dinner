@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,8 +11,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +45,8 @@ public class StoryConfiguration {
     @Column(name = "configuration_name", nullable = false)
     private String configurationName;
 
-    @OneToMany(mappedBy = "storyConfiguration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(name = "story_configuration_character", joinColumns = @JoinColumn(name = "story_configuration_id"), inverseJoinColumns = @JoinColumn(name = "character_id"))
     @Builder.Default
-    private Set<StoryConfigurationCharacter> charactersInConfig = new HashSet<>();
+    private Set<Character> characters = new HashSet<>();
 }

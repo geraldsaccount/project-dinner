@@ -21,10 +21,8 @@ import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
-import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.SessionRepository;
-import com.geraldsaccount.killinary.repository.StoryConfigurationCharacterRepository;
 import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
@@ -46,15 +44,12 @@ class StoryControllerTest {
     @Autowired
     private CharacterRepository characterRepository;
     @Autowired
-    private StoryConfigurationCharacterRepository storyConfigurationCharacterRepository;
-    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     @Transactional
     void setUp() {
         sessionRepository.deleteAll();
-        storyConfigurationCharacterRepository.deleteAll();
         storyConfigurationRepository.deleteAll();
         characterRepository.deleteAll();
         storyRepository.deleteAll();
@@ -81,12 +76,8 @@ class StoryControllerTest {
                 .configurationName("Default")
                 .build());
 
-        StoryConfigurationCharacter configCharacter1 = storyConfigurationCharacterRepository
-                .save(new StoryConfigurationCharacter(config, character1));
-        StoryConfigurationCharacter configCharacter2 = storyConfigurationCharacterRepository
-                .save(new StoryConfigurationCharacter(config, character2));
         config = storyConfigurationRepository
-                .save(config.withCharactersInConfig(Set.of(configCharacter1, configCharacter2)));
+                .save(config.withCharacters(Set.of(character1, character2)));
 
         storyRepository.save(story.withCharacters(Set.of(character1, character2))
                 .withConfigurations(Set.of(config)));
@@ -108,7 +99,6 @@ class StoryControllerTest {
     @Test
     void getStorySummaries_returnsEmpty_whenNoStories() throws Exception {
         sessionRepository.deleteAll();
-        storyConfigurationCharacterRepository.deleteAll();
         storyConfigurationRepository.deleteAll();
         characterRepository.deleteAll();
         storyRepository.deleteAll();

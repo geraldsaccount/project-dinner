@@ -49,6 +49,7 @@ public class SessionService {
     private final UserMapper userMapper;
     private final CharacterMapper characterMapper;
 
+    @Transactional
     public Set<DinnerSummaryDto> getSessionSummariesFrom(String oauthId) {
         return sessionRepository.findAllByUserId(oauthId).stream()
                 .map(session -> {
@@ -96,12 +97,13 @@ public class SessionService {
                 .build());
     }
 
+    @Transactional
     private Session addEmptyCharacterAssignment(Session session) {
         int maxAttempts = 5;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             Set<String> codes = new HashSet<>();
-            Set<CharacterAssignment> assignments = session.getStoryConfiguration().getCharactersInConfig().stream()
-                    .map(confChar -> {
+            Set<CharacterAssignment> assignments = session.getStoryConfiguration().getCharacters().stream()
+                    .map(character -> {
                         String code = "";
                         do {
                             code = assignmentCodeService.generateCode();
@@ -109,6 +111,7 @@ public class SessionService {
                         codes.add(code);
                         return CharacterAssignment.builder()
                                 .session(session)
+                                .character(character)
                                 .code(code)
                                 .build();
                     })
@@ -121,6 +124,7 @@ public class SessionService {
         throw new RuntimeException("Could not generate a unique code after " + maxAttempts + " attempts");
     }
 
+    @Transactional
     public DinnerView getDinnerView(String oauthId, UUID dinnerId)
             throws UserNotFoundException, SessionNotFoundException, AccessDeniedException,
             CharacterAssignmentNotFoundException {
@@ -129,7 +133,8 @@ public class SessionService {
         Session session = sessionRepository.findById(dinnerId)
                 .orElseThrow(() -> new SessionNotFoundException("Could not find session"));
 
-        boolean isInSession = session.getParticipants().stream().anyMatch(p -> p.getUser().equals(user));
+        boolean isInSession = session.getCharacterAssignments().stream()
+                .anyMatch(a -> a.getUser() != null && a.getUser().equals(user));
 
         if (!isInSession) {
             throw new AccessDeniedException("Cannot access session data.");

@@ -2,6 +2,7 @@ package com.geraldsaccount.killinary.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,7 +28,6 @@ import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.CharacterAssignment;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionParticipant;
 import com.geraldsaccount.killinary.model.SessionStatus;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
@@ -79,6 +79,14 @@ class SessionControllerTest {
     @BeforeEach
     @Transactional
     void setUp() {
+        for (User user : userRepository.findAll()) {
+            user.getSessions().clear();
+            userRepository.save(user);
+        }
+        for (Session session : sessionRepository.findAll()) {
+            session.getParticipants().clear();
+            sessionRepository.save(session);
+        }
         sessionRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -122,9 +130,7 @@ class SessionControllerTest {
 
         session = sessionRepository.save(session);
 
-        SessionParticipant hostParticipant = new SessionParticipant(session, host);
-        SessionParticipant sessionParticipant = new SessionParticipant(session, participant);
-        session.setParticipants(Set.of(hostParticipant, sessionParticipant));
+        session.setParticipants(Set.of(host, participant));
 
         Character character = characterRepository.save(Character.builder()
                 .name("Watson")
@@ -152,6 +158,7 @@ class SessionControllerTest {
 
         session.setCharacterAssignments(Set.of(assignment, hostAssignment));
         sessionRepository.save(session);
+        userRepository.saveAll(List.of(host.withSessions(Set.of(session)), participant.withSessions(Set.of(session))));
     }
 
     @Test

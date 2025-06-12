@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
-import com.geraldsaccount.killinary.model.StoryConfigurationCharacter;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 
 class StoryConfigMapperTest {
@@ -34,10 +33,7 @@ class StoryConfigMapperTest {
                 .playerCount(2)
                 .build();
 
-        StoryConfigurationCharacter confChar1 = new StoryConfigurationCharacter(config, character1);
-        StoryConfigurationCharacter confChar2 = new StoryConfigurationCharacter(config, character2);
-
-        config.setCharactersInConfig(Set.of(confChar1, confChar2));
+        config.setCharacters(Set.of(character1, character2));
 
         ConfigDto dto = mapper.asSummaryDTO(config);
 
@@ -56,7 +52,7 @@ class StoryConfigMapperTest {
         StoryConfiguration config = StoryConfiguration.builder()
                 .id(UUID.randomUUID())
                 .playerCount(0)
-                .charactersInConfig(Set.of())
+                .characters(Set.of())
                 .build();
 
         ConfigDto dto = mapper.asSummaryDTO(config);
@@ -84,10 +80,7 @@ class StoryConfigMapperTest {
                 .playerCount(2)
                 .build();
 
-        StoryConfigurationCharacter confChar1 = new StoryConfigurationCharacter(config, character1);
-        StoryConfigurationCharacter confChar2 = new StoryConfigurationCharacter(config, character2);
-
-        config.setCharactersInConfig(Set.of(confChar1, confChar2));
+        config.setCharacters(Set.of(character1, character2));
 
         ConfigDto dto = mapper.asSummaryDTO(config);
 

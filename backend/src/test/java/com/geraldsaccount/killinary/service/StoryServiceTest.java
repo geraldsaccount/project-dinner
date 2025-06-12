@@ -22,6 +22,7 @@ import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
+import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 @ActiveProfiles("test")
@@ -29,6 +30,7 @@ import com.geraldsaccount.killinary.repository.StoryRepository;
 class StoryServiceTest {
 
     private StoryRepository storyRepository;
+    private CharacterRepository characterRepository;
     private StoryConfigMapper configMapper;
     private CharacterMapper characterMapper;
     private StoryService storyService;
@@ -38,7 +40,7 @@ class StoryServiceTest {
         storyRepository = mock(StoryRepository.class);
         configMapper = mock(StoryConfigMapper.class);
         characterMapper = mock(CharacterMapper.class);
-        storyService = new StoryService(storyRepository, configMapper, characterMapper);
+        storyService = new StoryService(storyRepository, characterRepository, configMapper, characterMapper);
     }
 
     @Test

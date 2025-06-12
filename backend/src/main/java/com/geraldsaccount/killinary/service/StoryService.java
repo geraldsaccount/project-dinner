@@ -1,6 +1,7 @@
 package com.geraldsaccount.killinary.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,12 +11,15 @@ import org.springframework.stereotype.Service;
 import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.StoryConfigMapper;
+import com.geraldsaccount.killinary.model.Character;
 import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.StoryConfiguration;
+import com.geraldsaccount.killinary.model.dto.input.CreateStoryDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.StorySummaryDto;
+import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StoryService {
     private final StoryRepository storyRepository;
+    private final CharacterRepository characterRepository;
     private final StoryConfigMapper configMapper;
     private final CharacterMapper characterMapper;
 
@@ -41,8 +46,8 @@ public class StoryService {
             }
 
             Set<CharacterDetailDto> characters = s.getConfigurations().stream()
-                    .flatMap(cfg -> cfg.getCharactersInConfig().stream())
-                    .map(scc -> characterMapper.asDetailDTO(scc.getCharacter()))
+                    .flatMap(cfg -> cfg.getCharacters().stream())
+                    .map(c -> characterMapper.asDetailDTO(c))
                     .collect(Collectors.toSet());
 
             return new StoryForCreationDto(
@@ -59,5 +64,21 @@ public class StoryService {
 
     public Story getStoryOrThrow(UUID id) throws StoryNotFoundException {
         return storyRepository.findById(id).orElseThrow(() -> new StoryNotFoundException("Could not find Story."));
+    }
+
+    public void createStory(CreateStoryDto input) {
+
+        List<Character> characters = characterRepository
+                .saveAll(input.characters().stream().map(characterMapper::asCharacter).toList());
+
+        storyRepository.save(Story.builder()
+                .title(input.title())
+                .thumbnailDescription(input.thumbnailDescription())
+                .shopDescription(input.shopDescription())
+                .dinnerStoryBrief(input.dinnerStoryBrief())
+                .bannerUrl(input.bannerUrl())
+                .characters(characters.stream().collect(Collectors.toSet()))
+                .build());
+
     }
 }
