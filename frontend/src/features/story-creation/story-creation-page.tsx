@@ -1,11 +1,13 @@
-import PageHeader from "@/components/shared/page-header";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TabsContent } from "@radix-ui/react-tabs";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 import StoryDetailsTab from "./tabs/story-details-tab";
-import { useState } from "react";
-import { StoryCreationDto } from "@/types";
+import { CreateCharacterDto, Story } from "@/types";
+import PageHeader from "@/components/shared/page-header";
 
-const StoryCreationPage = () => {
+type TabId = "story" | "characters" | "setup" | "stages" | "crime";
+
+export default function EditorPage() {
   const navItems = [
     { id: "story", label: "Story Details" },
     { id: "characters", label: "Characters" },
@@ -14,7 +16,7 @@ const StoryCreationPage = () => {
     { id: "crime", label: "The Crime" },
   ];
 
-  const [story, setStory] = useState<StoryCreationDto>({
+  const [story, setStory] = useState<Story>({
     title: "",
     shopDescription: "",
     bannerImage: null,
@@ -24,12 +26,20 @@ const StoryCreationPage = () => {
   });
 
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeader title="Mystery Editor" />
-      <Tabs defaultValue="story" className="w-full">
-        <TabsList className="w-full bg-muted flex flex-wrap gap-2 h-auto">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <PageHeader title="Editor" />
+          <Button>Save Story</Button>
+        </div>
+
+        <Tabs defaultValue="story" className="w-full space-y-4">
+          <TabsList
+            className="w-full overflow-x-auto flex-nowrap flex gap-2 scrollbar-thin scrollbar-track-transparent"
+            style={{ justifyContent: "flex-start" }}
+          >
           {navItems.map((item) => (
-            <TabsTrigger key={item.id} value={item.id}>
+              <TabsTrigger key={item.id} value={item.id as TabId}>
               {item.label}
             </TabsTrigger>
           ))}
@@ -38,6 +48,7 @@ const StoryCreationPage = () => {
           <StoryDetailsTab story={story} setStory={setStory} />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };

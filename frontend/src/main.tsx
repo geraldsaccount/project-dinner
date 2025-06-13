@@ -12,7 +12,7 @@ import EventCreationPage from "./features/event-creation/event-creation-page.tsx
 import InvitationPage from "./features/invitation/invitation-page.tsx";
 import InviteCodePage from "./features/invitation/invite-code-page.tsx";
 import DinnerPage from "./features/dinner-view/dinner-page.tsx";
-import StoryCreationPage from "./features/story-creation/story-creation-page.tsx";
+import EditorPage from "./features/story-creation/story-creation-page.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -38,7 +38,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path=":inviteCode" element={<InvitationPage />} />
             </Route>
             <Route path="editor">
-              <Route index element={<StoryCreationPage />} />
+              <Route index element={<EditorPage />} />
             </Route>
           </Route>
         </Routes>

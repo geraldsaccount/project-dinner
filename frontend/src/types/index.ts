@@ -200,6 +200,14 @@ export interface CreateCharacterDto {
   shopDescription: string;
   privateDescription: string;
   avatarUrl: string;
+
+export interface Story {
+  title: string;
+  shopDescription: string;
+  bannerImage: string | null;
+  rules: string;
+  setting: string;
+  briefing: string;
 }
 
 /**
