@@ -5,16 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Story } from "@/types";
+import { Story } from "@/types/creation";
 import { useRef, useState } from "react";
+import { useEditorContext } from "../../context/editor-context";
 
-type Props = {
-  story: Story;
-  setStory: React.Dispatch<React.SetStateAction<Story>>;
-};
-
-const StoryDetailsTab = ({ story, setStory }: Props) => {
+const StoryTab = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { story, setStory } = useEditorContext();
 
   const [bannerPreview, setBannerPreview] = useState(
     story.bannerImage ||
@@ -133,4 +130,4 @@ const StoryDetailsTab = ({ story, setStory }: Props) => {
   );
 };
 
-export default StoryDetailsTab;
+export default StoryTab;
