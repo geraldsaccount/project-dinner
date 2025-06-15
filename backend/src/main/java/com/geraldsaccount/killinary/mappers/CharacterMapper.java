@@ -2,10 +2,10 @@ package com.geraldsaccount.killinary.mappers;
 
 import org.springframework.stereotype.Component;
 
-import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.dto.input.CreateCharacterDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
+import com.geraldsaccount.killinary.model.mystery.Character;
 
 @Component
 public class CharacterMapper {
@@ -18,13 +18,18 @@ public class CharacterMapper {
                 input.getRole());
     }
 
-    public Character asCharacter(CreateCharacterDto create) {
+    public Character asEntity(CreateCharacterDto create) {
         return Character.builder()
+                .id(create.id())
                 .name(create.name())
+                .role(create.role())
+                .age(create.age())
+                .isPrimary(create.isPrimary())
                 .gender(create.gender())
                 .shopDescription(create.shopDescription())
-                .privateBriefing(create.privateDescription())
+                .privateDescription(create.privateDescription())
                 .avatarUrl(create.avatarUrl())
+                .relationships(create.relationships())
                 .build();
     }
 }
