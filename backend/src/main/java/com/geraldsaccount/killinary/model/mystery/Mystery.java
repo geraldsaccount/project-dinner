@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.With;
 
 @Entity
 @Table(name = "mysteries")
@@ -29,6 +30,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
+@With
 public class Mystery {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

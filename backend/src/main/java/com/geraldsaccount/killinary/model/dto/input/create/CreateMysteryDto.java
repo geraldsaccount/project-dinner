@@ -2,8 +2,10 @@ package com.geraldsaccount.killinary.model.dto.input.create;
 
 import java.util.List;
 
+import lombok.With;
+
+@With
 public record CreateMysteryDto(
-        boolean isPublished,
         CreateStoryDto story,
         List<CreateCharacterDto> characters,
         List<CreateStageDto> stages,

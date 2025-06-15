@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.With;
 
 @Entity
 @Table(name = "character_assignments")
@@ -27,6 +28,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
+@With
 public class CharacterAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -68,7 +68,10 @@ public class Character {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("order ASC")
-    @JoinTable(name = "character_stage_infos", joinColumns = @JoinColumn(name = "character_id"), inverseJoinColumns = @JoinColumn(name = "stage_info_id", unique = true))
+    @JoinTable(name = "character_stage_infos", joinColumns = @JoinColumn(name = "character_id", referencedColumnName = "id"), inverseJoinColumns = {
+            @JoinColumn(name = "stage_id", referencedColumnName = "stage_id"),
+            @JoinColumn(name = "stage_character_id", referencedColumnName = "character_id")
+    })
     private List<CharacterStageInfo> stageInfo;
 
     @Override

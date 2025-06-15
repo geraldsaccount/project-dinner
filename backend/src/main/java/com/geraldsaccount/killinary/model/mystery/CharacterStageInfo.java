@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.geraldsaccount.killinary.model.mystery.id.CharacterStageInfoId;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -29,6 +31,10 @@ import lombok.Setter;
 @Setter
 public class CharacterStageInfo {
     @EmbeddedId
+    @AttributeOverrides({
+            @AttributeOverride(name = "stageId", column = @Column(name = "stage_id")),
+            @AttributeOverride(name = "characterId", column = @Column(name = "character_id"))
+    })
     private CharacterStageInfoId id;
 
     @Column(nullable = false)
@@ -39,7 +45,10 @@ public class CharacterStageInfo {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("order ASC")
-    @JoinTable(name = "stage_info_events", joinColumns = @JoinColumn(name = "stage_info_id"), inverseJoinColumns = @JoinColumn(name = "event_id", unique = true))
+    @JoinTable(name = "stage_info_events", joinColumns = {
+            @JoinColumn(name = "stage_id"),
+            @JoinColumn(name = "character_id"),
+    }, inverseJoinColumns = @JoinColumn(name = "event_id", unique = true))
     private List<StageEvent> events;
 
     @Override
