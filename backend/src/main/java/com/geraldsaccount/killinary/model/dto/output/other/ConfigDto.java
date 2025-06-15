@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.geraldsaccount.killinary.model.Gender;
+import com.geraldsaccount.killinary.model.mystery.Gender;
 
 public record ConfigDto(
         UUID id,

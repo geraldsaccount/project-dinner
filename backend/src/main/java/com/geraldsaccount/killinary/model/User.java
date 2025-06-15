@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.geraldsaccount.killinary.model.dinner.Dinner;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,14 +44,15 @@ public class User {
     @Column(unique = true, nullable = false)
     private String oauthId;
 
-    @Column(unique = false, nullable = true)
     private String name;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(unique = false, nullable = true)
+    @Column(name = "avatar_url")
     private String avatarUrl;
+
+    private Role role;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -59,12 +62,12 @@ public class User {
 
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<Session> hostedSessions = new HashSet<>();
+    private Set<Dinner> hostedDinners = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "session_participants", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "session_id"))
     @Builder.Default
-    private Set<Session> sessions = new HashSet<>();
+    private Set<Dinner> dinners = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

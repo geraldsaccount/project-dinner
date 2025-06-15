@@ -1,9 +1,13 @@
-package com.geraldsaccount.killinary.model;
+package com.geraldsaccount.killinary.model.dinner;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import com.geraldsaccount.killinary.model.User;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,27 +19,25 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.With;
 
 @Entity
-@Table(name = "sessions")
-@Getter
-@Setter
+@Table(name = "dinners")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@With
-public class Session {
+@Getter
+@Setter
+public class Dinner {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -45,39 +47,29 @@ public class Session {
     private User host;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "story_id", nullable = false)
-    private Story story;
+    @JoinColumn(name = "mystery_id", nullable = false)
+    private Mystery mystery;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "story_configuration_id")
-    private StoryConfiguration storyConfiguration;
+    @JoinColumn(name = "config_id", nullable = false)
+    private PlayerConfig config;
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private SessionStatus status;
+    private DinnerStatus status = DinnerStatus.CREATED;
 
-    @Column(name = "current_round")
-    private Integer currentRound;
+    @Column(name = "current_stage")
+    private Integer currentStage;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime date;
 
-    @Column(name = "started_at")
-    private LocalDateTime startedAt;
-
-    @Column(name = "ended_at")
-    private LocalDateTime endedAt;
-
-    @ManyToMany(mappedBy = "sessions", fetch = FetchType.EAGER)
     @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "session_participants", joinColumns = @JoinColumn(name = "dinner_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
+    @OneToMany(mappedBy = "dinner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<CharacterAssignment> characterAssignments = new HashSet<>();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

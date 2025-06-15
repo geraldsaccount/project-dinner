@@ -1,4 +1,4 @@
-package com.geraldsaccount.killinary.model;
+package com.geraldsaccount.killinary.model.mystery;
 
 public enum Gender {
     MALE("Male"),
