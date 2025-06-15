@@ -10,18 +10,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationCreationException;
-import com.geraldsaccount.killinary.model.dto.input.CreateStoryDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateMysteryDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
-import com.geraldsaccount.killinary.service.StoryService;
+import com.geraldsaccount.killinary.service.MysteryService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/stories")
 @RequiredArgsConstructor
-public class StoryController {
+public class MysteryController {
 
-    private final StoryService service;
+    private final MysteryService service;
 
     @GetMapping()
     public Set<StoryForCreationDto> getStorySummaries() {
@@ -29,8 +29,8 @@ public class StoryController {
     }
 
     @PostMapping()
-    public void createStory(Authentication auth, @RequestBody CreateStoryDto input)
+    public void createMystery(Authentication auth, @RequestBody CreateMysteryDto input)
             throws StoryConfigurationCreationException {
-        service.createStory(input);
+        service.createMystery(input);
     }
 }
