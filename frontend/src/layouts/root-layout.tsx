@@ -9,9 +9,7 @@ const RootLayout: React.FC<PropsWithChildren> = () => {
     <div className="flex flex-col min-h-screen items-center">
       <Toaster position="top-right" />
       <Navbar />
-      <main
-        className={"container flex-1 relative py-4 mt-12 h-full md:px-8 px-4"}
-      >
+      <main className={"container flex-1 relative py-4  h-full md:px-8 px-4"}>
         <Outlet />
       </main>
       <Footer />
