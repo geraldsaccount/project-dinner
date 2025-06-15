@@ -27,14 +27,15 @@ import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundExcept
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
-import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.CharacterAssignment;
-import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
+import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
+import com.geraldsaccount.killinary.model.dinner.Dinner;
 import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
+import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 
 @ActiveProfiles("test")
@@ -62,21 +63,21 @@ class CharacterAssignmentServiceTest {
         String oauthId = "user1";
         String inviteCode = "invite123";
         User user = new User();
-        Story story = new Story();
-        story.setId(UUID.randomUUID());
-        Session session = new Session();
-        session.setStory(story);
+        Mystery mystery = new Mystery();
+        mystery.setId(UUID.randomUUID());
+        Dinner dinner = new Dinner();
+        dinner.setMystery(mystery);
         CharacterAssignment assignment = mock(CharacterAssignment.class);
 
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
-        when(assignment.getSession()).thenReturn(session);
+        when(assignment.getDinner()).thenReturn(dinner);
         when(assignment.withCode(null)).thenReturn(assignment);
         when(assignment.withUser(user)).thenReturn(assignment);
 
         service.acceptInvitation(oauthId, inviteCode);
 
-        verify(userService).validateHasNotPlayedStory(user, story.getId());
+        verify(userService).validateHasNotPlayedStory(user, mystery.getId());
         verify(repository).save(assignment);
     }
 
@@ -91,7 +92,8 @@ class CharacterAssignmentServiceTest {
     }
 
     @Test
-    void acceptInvitation_throwsAssignmentNotFound_whenAssignmentNotFound() throws UserNotFoundException {
+    void acceptInvitation_throwsAssignmentNotFound_whenAssignmentNotFound()
+            throws UserNotFoundException {
         String oauthId = "user1";
         String inviteCode = "invite123";
         User user = new User();
@@ -113,15 +115,17 @@ class CharacterAssignmentServiceTest {
         User user = new User();
         User host = new User();
         Story story = new Story();
-        story.setId(UUID.randomUUID());
         story.setShopDescription("desc");
-        Session session = new Session();
-        session.setHost(host);
-        session.setStory(story);
+        Mystery mystery = new Mystery();
+        mystery.setId(UUID.randomUUID());
+        mystery.setStory(story);
+        Dinner dinner = new Dinner();
+        dinner.setHost(host);
+        dinner.setMystery(mystery);
 
         Character character = new Character();
         CharacterAssignment assignment = mock(CharacterAssignment.class);
-        when(assignment.getSession()).thenReturn(session);
+        when(assignment.getDinner()).thenReturn(dinner);
         when(assignment.getCharacter()).thenReturn(character);
 
         CharacterAssignment otherAssignment = mock(CharacterAssignment.class);
@@ -129,7 +133,7 @@ class CharacterAssignmentServiceTest {
         when(otherAssignment.getUser()).thenReturn(user);
 
         Set<CharacterAssignment> assignments = new HashSet<>(Arrays.asList(assignment, otherAssignment));
-        session.setCharacterAssignments(assignments);
+        dinner.setCharacterAssignments(assignments);
 
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
@@ -141,7 +145,7 @@ class CharacterAssignmentServiceTest {
         assertThat(dto).isNotNull();
         assertThat(dto.inviteCode()).isEqualTo(inviteCode);
         assertThat(dto.canAccept()).isTrue();
-        verify(userService).validateHasNotPlayedStory(user, story.getId());
+        verify(userService).validateHasNotPlayedStory(user, mystery.getId());
     }
 
     @Test
@@ -154,21 +158,23 @@ class CharacterAssignmentServiceTest {
         String inviteCode = "invite123";
         User user = new User();
         Story story = new Story();
-        story.setId(UUID.randomUUID());
-        Session session = new Session();
-        session.setHost(new User());
-        session.setStory(story);
+        Mystery mystery = new Mystery();
+        mystery.setId(UUID.randomUUID());
+        mystery.setStory(story);
+        Dinner dinner = new Dinner();
+        dinner.setHost(new User());
+        dinner.setMystery(mystery);
 
         Character character = new Character();
         CharacterAssignment assignment = mock(CharacterAssignment.class);
-        when(assignment.getSession()).thenReturn(session);
+        when(assignment.getDinner()).thenReturn(dinner);
         when(assignment.getCharacter()).thenReturn(character);
 
-        session.setCharacterAssignments(Set.of(assignment));
+        dinner.setCharacterAssignments(Set.of(assignment));
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
         doThrow(new AccessDeniedException("not allowed")).when(userService).validateHasNotPlayedStory(user,
-                story.getId());
+                mystery.getId());
 
         when(characterMapper.asSummaryDTO(any())).thenReturn(mock(CharacterSummaryDto.class));
         when(userMapper.asDTO(any())).thenReturn(mock(UserDto.class));
@@ -213,16 +219,18 @@ class CharacterAssignmentServiceTest {
 
         String inviteCode = "invite123";
         User host = new User();
+        Mystery mystery = new Mystery();
+        mystery.setId(UUID.randomUUID());
+        mystery.setStory(new Story());
         Story story = new Story();
-        story.setId(UUID.randomUUID());
         story.setShopDescription("desc");
-        Session session = new Session();
-        session.setHost(host);
-        session.setStory(story);
+        Dinner dinner = new Dinner();
+        dinner.setHost(host);
+        dinner.setMystery(mystery);
 
         Character character = new Character();
         CharacterAssignment assignment = mock(CharacterAssignment.class);
-        when(assignment.getSession()).thenReturn(session);
+        when(assignment.getDinner()).thenReturn(dinner);
         when(assignment.getCharacter()).thenReturn(character);
 
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
@@ -244,15 +252,17 @@ class CharacterAssignmentServiceTest {
         String inviteCode = "invite123";
         User host = new User();
         Story story = new Story();
-        story.setId(UUID.randomUUID());
         story.setShopDescription("desc");
-        Session session = new Session();
-        session.setHost(host);
-        session.setStory(story);
+        Mystery mystery = new Mystery();
+        mystery.setId(UUID.randomUUID());
+        mystery.setStory(story);
+        Dinner dinner = new Dinner();
+        dinner.setHost(host);
+        dinner.setMystery(mystery);
 
         Character character = new Character();
         CharacterAssignment assignment = mock(CharacterAssignment.class);
-        when(assignment.getSession()).thenReturn(session);
+        when(assignment.getDinner()).thenReturn(dinner);
         when(assignment.getCharacter()).thenReturn(character);
 
         when(repository.findByCode(inviteCode)).thenReturn(Optional.of(assignment));
