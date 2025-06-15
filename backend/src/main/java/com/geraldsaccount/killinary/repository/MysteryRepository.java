@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
 
-public interface CharacterRepository extends JpaRepository<Character, UUID> {
+public interface MysteryRepository extends JpaRepository<Mystery, UUID> {
 
 }

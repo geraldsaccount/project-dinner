@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.geraldsaccount.killinary.model.StoryConfiguration;
+import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 
-public interface StoryConfigurationRepository extends JpaRepository<StoryConfiguration, UUID> {
+public interface StoryConfigurationRepository extends JpaRepository<PlayerConfig, UUID> {
 
 }
