@@ -9,36 +9,31 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.geraldsaccount.killinary.exceptions.MysteryCreationException;
+import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationCreationException;
-import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
-import com.geraldsaccount.killinary.mappers.StoryConfigMapper;
+import com.geraldsaccount.killinary.mappers.PlayerConfigMapper;
 import com.geraldsaccount.killinary.mappers.StoryMapper;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterDto;
-import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterStageInfoDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateConfigDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateCrimeDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateMysteryDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateStageDto;
-import com.geraldsaccount.killinary.model.dto.input.create.CreateStageEvent;
-import com.geraldsaccount.killinary.model.dto.input.create.CreateStoryDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.StorySummaryDto;
-import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
-import com.geraldsaccount.killinary.model.mystery.Stage;
-import com.geraldsaccount.killinary.model.mystery.Story;
-import com.geraldsaccount.killinary.model.mystery.id.CharacterStageInfoId;
 import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.CharacterStageInfo;
 import com.geraldsaccount.killinary.model.mystery.Crime;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
+import com.geraldsaccount.killinary.model.mystery.Stage;
 import com.geraldsaccount.killinary.model.mystery.StageEvent;
-import com.geraldsaccount.killinary.repository.CharacterRepository;
+import com.geraldsaccount.killinary.model.mystery.Story;
+import com.geraldsaccount.killinary.model.mystery.id.CharacterStageInfoId;
 import com.geraldsaccount.killinary.repository.MysteryRepository;
-import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
-import com.geraldsaccount.killinary.repository.StoryRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,36 +42,34 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MysteryService {
     private final MysteryRepository mysteryRepository;
-    private final StoryRepository storyRepository;
-    private final CharacterRepository characterRepository;
-    private final StoryConfigurationRepository configRepository;
-    private final StoryConfigMapper configMapper;
+    private final PlayerConfigMapper configMapper;
     private final StoryMapper storyMapper;
     private final CharacterMapper characterMapper;
 
-    public Set<StoryForCreationDto> getStorySummaries() {
-        return storyRepository.findAll().stream().map(s -> {
+    public Set<StoryForCreationDto> getMysterySummaries() {
+        return mysteryRepository.findAll().stream().map(m -> {
             int minPlayers = Integer.MAX_VALUE;
             int maxPlayers = Integer.MIN_VALUE;
             Set<ConfigDto> configs = new HashSet<>();
 
-            for (PlayerConfig config : s.getConfigurations()) {
+            for (PlayerConfig config : m.getSetups()) {
                 int playerCount = config.getCharacters().size();
                 minPlayers = Math.min(minPlayers, playerCount);
                 maxPlayers = Math.max(maxPlayers, playerCount);
                 configs.add(configMapper.asSummaryDTO(config));
             }
 
-            Set<CharacterDetailDto> characters = s.getConfigurations().stream()
+            Set<CharacterDetailDto> characters = m.getSetups().stream()
                     .flatMap(cfg -> cfg.getCharacters().stream())
                     .map(c -> characterMapper.asDetailDTO(c))
                     .collect(Collectors.toSet());
 
             return new StoryForCreationDto(
-                    new StorySummaryDto(s.getId(),
-                            s.getTitle(),
-                            s.getBannerUrl(),
-                            s.getThumbnailDescription()),
+                    m.getId(),
+                    new StorySummaryDto(
+                            m.getStory().getTitle(),
+                            m.getStory().getBannerUrl(),
+                            m.getStory().getShopDescription()),
                     minPlayers,
                     maxPlayers,
                     characters,
@@ -84,12 +77,16 @@ public class MysteryService {
         }).collect(Collectors.toSet());
     }
 
-    public Story getStoryOrThrow(UUID id) throws StoryNotFoundException {
-        return storyRepository.findById(id).orElseThrow(() -> new StoryNotFoundException("Could not find Story."));
+    public Mystery getMysteryOrThrow(UUID id) throws MysteryNotFoundException {
+        return mysteryRepository.findById(id).orElseThrow(() -> new MysteryNotFoundException("Could not find Story."));
     }
 
     @Transactional
-    public void createMystery(CreateMysteryDto input) throws StoryConfigurationCreationException {
+    public void createMystery(CreateMysteryDto input)
+            throws StoryConfigurationCreationException, MysteryCreationException {
+        if (input == null)
+            throw new IllegalArgumentException("Input cannot be null");
+
         Story story = storyMapper.asEntity(input.story());
 
         Map<UUID, Character> characters = buildCharacters(input.characters());
@@ -108,41 +105,67 @@ public class MysteryService {
                 configs, crime);
     }
 
-    private Map<UUID, Character> buildCharacters(List<CreateCharacterDto> input) {
+    private Map<UUID, Character> buildCharacters(List<CreateCharacterDto> input) throws MysteryCreationException {
         return input.stream()
                 .map(characterMapper::asEntity)
+                .peek(c -> {
+                    if (c == null || c.getId() == null)
+                        throw new MysteryCreationException("Character or Character ID is null");
+                })
                 .collect(Collectors.toMap(Character::getId, c -> c));
     }
 
-    private Map<UUID, Stage> buildStages(List<CreateStageDto> input) {
-        return input.stream().map((s) -> Stage.builder()
-                .id(s.id())
-                .order(s.order())
-                .title(s.title())
-                .hostPrompt(s.hostPrompt())
-                .build())
+    private Map<UUID, Stage> buildStages(List<CreateStageDto> input) throws MysteryCreationException {
+        return input.stream().map((s) -> {
+            if (s == null)
+                throw new MysteryCreationException("Stage DTO is null");
+            if (s.id() == null)
+                throw new MysteryCreationException("Stage ID is null");
+            return Stage.builder()
+                    .id(s.id())
+                    .order(s.order())
+                    .title(s.title())
+                    .hostPrompt(s.hostPrompt())
+                    .build();
+        })
                 .collect(Collectors.toMap(Stage::getId, c -> c));
     }
 
     private void enrichCharactersWithStageInfo(Map<UUID, Character> characters, Map<UUID, Stage> stages,
-            List<CreateCharacterDto> input) {
+            List<CreateCharacterDto> input) throws MysteryCreationException {
         for (CreateCharacterDto createCharacter : input) {
+            if (createCharacter == null)
+                throw new MysteryCreationException("CreateCharacterDto is null");
             Character current = characters.get(createCharacter.id());
+            if (current == null) {
+                throw new MysteryCreationException(
+                        "Character with id " + createCharacter.id() + " not found in characters map.");
+            }
+            if (createCharacter.stageInfo() == null)
+                throw new MysteryCreationException("Stage info for character " + createCharacter.id() + " is null");
 
             Character withStageInfo = current.withStageInfo(createCharacter.stageInfo().stream()
                     .map(csi -> {
+
+                        if (csi.stageId() == null)
+                            throw new MysteryCreationException("StageInfo stageId is null");
+                        if (!stages.containsKey(csi.stageId()))
+                            throw new MysteryCreationException("Stage with id " + csi.stageId() + " not found");
                         CharacterStageInfo stageInfo = CharacterStageInfo.builder()
                                 .id(new CharacterStageInfoId(csi.stageId(), current.getId()))
                                 .order(stages.get(csi.stageId()).getOrder())
                                 .objectivePrompt(csi.objectivePrompt())
-                                .events(csi.stageEvents().stream().map(ev -> StageEvent.builder()
-                                        .id(ev.id())
-                                        .order(ev.order())
-                                        .time(ev.time())
-                                        .title(ev.title())
-                                        .description(ev.description())
-                                        .build())
-                                        .toList())
+                                .events(csi.stageEvents() == null ? List.of() : csi.stageEvents().stream().map(ev -> {
+                                    if (ev.id() == null)
+                                        throw new MysteryCreationException("StageEvent id is null");
+                                    return StageEvent.builder()
+                                            .id(ev.id())
+                                            .order(ev.order())
+                                            .time(ev.time())
+                                            .title(ev.title())
+                                            .description(ev.description())
+                                            .build();
+                                }).toList())
                                 .build();
                         return stageInfo;
                     })
@@ -152,28 +175,55 @@ public class MysteryService {
         }
     }
 
-    private List<PlayerConfig> buildPlayerConfigs(Map<UUID, Character> characters, List<CreateConfigDto> input) {
+    private List<PlayerConfig> buildPlayerConfigs(Map<UUID, Character> characters, List<CreateConfigDto> input)
+            throws MysteryCreationException {
+        if (input == null)
+            throw new MysteryCreationException("Config input list cannot be null");
         return input.stream()
-                .map(cdto -> PlayerConfig.builder()
-                        .id(cdto.id())
-                        .playerCount(cdto.playerCount())
-                        .characters(characters.values().stream()
-                                .filter(c -> cdto.characterIds().contains(c.getId()))
-                                .collect(Collectors.toSet()))
-                        .build())
+                .map(cdto -> {
+                    if (cdto == null)
+                        throw new MysteryCreationException("CreateConfigDto is null");
+                    if (cdto.id() == null)
+                        throw new MysteryCreationException("Config id is null");
+                    if (cdto.characterIds() == null || cdto.characterIds().isEmpty())
+                        throw new MysteryCreationException("Config characterIds is null or empty");
+                    var configCharacters = characters.values().stream()
+                            .filter(c -> cdto.characterIds().contains(c.getId()))
+                            .collect(Collectors.toSet());
+                    if (configCharacters.isEmpty())
+                        throw new MysteryCreationException("No valid characters found for config " + cdto.id());
+                    return PlayerConfig.builder()
+                            .id(cdto.id())
+                            .playerCount(cdto.playerCount())
+                            .characters(configCharacters)
+                            .build();
+                })
                 .toList();
     }
 
-    private Crime buildCrime(Map<UUID, Character> characters, CreateCrimeDto input) {
+    private Crime buildCrime(Map<UUID, Character> characters, CreateCrimeDto input) throws MysteryCreationException {
+        if (input == null)
+            throw new MysteryCreationException("Crime input cannot be null");
+        var criminals = characters.values().stream()
+                .filter(c -> input.criminalIds().contains(c.getId())).collect(Collectors.toSet());
         return Crime.builder()
-                .criminals(characters.values().stream()
-                        .filter(c -> input.criminalIds().contains(c.getId())).collect(Collectors.toSet()))
+                .criminals(criminals)
                 .description(input.description())
                 .build();
     }
 
     private Mystery saveMystery(Story story, List<Character> characters, List<Stage> stages, List<PlayerConfig> setups,
-            Crime crime) {
+            Crime crime) throws MysteryCreationException {
+        if (story == null)
+            throw new MysteryCreationException("Story is null");
+        if (characters == null)
+            throw new MysteryCreationException("Characters list is null");
+        if (stages == null)
+            throw new MysteryCreationException("Stages list is null");
+        if (setups == null)
+            throw new MysteryCreationException("Setups list is null");
+        if (crime == null)
+            throw new MysteryCreationException("Crime is null");
         return mysteryRepository.save(Mystery.builder()
                 .story(story)
                 .characters(characters)

@@ -25,7 +25,7 @@ public class MysteryController {
 
     @GetMapping()
     public Set<StoryForCreationDto> getStorySummaries() {
-        return service.getStorySummaries();
+        return service.getMysterySummaries();
     }
 
     @PostMapping()

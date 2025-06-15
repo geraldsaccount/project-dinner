@@ -2,12 +2,16 @@ package com.geraldsaccount.killinary.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
@@ -17,7 +21,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.MysteryCreationException;
+import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
+import com.geraldsaccount.killinary.mappers.PlayerConfigMapper;
 import com.geraldsaccount.killinary.mappers.StoryMapper;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateConfigDto;
@@ -25,6 +31,8 @@ import com.geraldsaccount.killinary.model.dto.input.create.CreateCrimeDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateMysteryDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateStageDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateStoryDto;
+import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
+import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.Crime;
 import com.geraldsaccount.killinary.model.mystery.Gender;
@@ -32,9 +40,7 @@ import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 import com.geraldsaccount.killinary.model.mystery.Stage;
 import com.geraldsaccount.killinary.model.mystery.Story;
-import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.MysteryRepository;
-import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 @ActiveProfiles("test")
@@ -45,22 +51,7 @@ class MysteryServiceTest {
     private StoryRepository storyRepository;
 
     @Mock
-    private CharacterRepository characterRepository;
-
-    @Mock
-    private StoryConfigurationRepository configRepository;
-
-    // @Mock
-    // private StoryConfigMapper configMapper;
-
-    @Mock
-    private CharacterMapper characterMapper;
-
-    @Mock
     private MysteryRepository mysteryRepository;
-
-    @Mock
-    private StoryMapper storyMapper;
 
     @InjectMocks
     private MysteryService mysteryService;
@@ -107,9 +98,7 @@ class MysteryServiceTest {
     private MysteryService createServiceWithRealMappers() {
         return new MysteryService(
                 mysteryRepository,
-                storyRepository,
-                characterRepository,
-                configRepository,
+                new PlayerConfigMapper(),
                 new StoryMapper(),
                 new CharacterMapper());
     }
@@ -123,84 +112,89 @@ class MysteryServiceTest {
                 baseCrimeDto);
     }
 
-    // @Test
-    // void getStorySummaries_returnsEmptySet_whenNoStories() {
-    // when(storyRepository.findAll()).thenReturn(List.of());
+    @Test
+    void getStorySummaries_returnsEmptySet_whenNoStories() {
+        when(storyRepository.findAll()).thenReturn(List.of());
 
-    // Set<StoryForCreationDto> result = storyService.getStorySummaries();
+        Set<StoryForCreationDto> result = mysteryService.getMysterySummaries();
 
-    // assertThat(result).isEmpty();
-    // }
+        assertThat(result).isEmpty();
+    }
 
-    // @Test
-    // void getStorySummaries_returnsSummaryWithCorrectMinMaxPlayersAndConfigs() {
-    // PlayerConfig config1 = mock(PlayerConfig.class);
-    // PlayerConfig config2 = mock(PlayerConfig.class);
+    @Test
+    void getStorySummaries_returnsSummaryWithCorrectMinMaxPlayersAndConfigs() {
+        PlayerConfig config1 = mock(PlayerConfig.class);
+        PlayerConfig config2 = mock(PlayerConfig.class);
 
-    // // Use named mocks for characters to clarify intent and improve readability
-    // Character charA = mock(Character.class, "charA");
-    // Character charB = mock(Character.class, "charB");
-    // Character charC = mock(Character.class, "charC");
-    // Character charD = mock(Character.class, "charD");
-    // Character charE = mock(Character.class, "charE");
+        // Use named mocks for characters to clarify intent and improve readability
+        Character charA = mock(Character.class, "charA");
+        Character charB = mock(Character.class, "charB");
+        Character charC = mock(Character.class, "charC");
+        Character charD = mock(Character.class, "charD");
+        Character charE = mock(Character.class, "charE");
 
-    // when(config1.getCharacters()).thenReturn(Set.of(charA, charB, charC)); // 3
-    // players
-    // when(config2.getCharacters()).thenReturn(Set.of(charA, charB, charC, charD,
-    // charE)); // 5 players
+        when(config1.getCharacters()).thenReturn(Set.of(charA, charB, charC));
+        when(config2.getCharacters()).thenReturn(Set.of(charA, charB, charC, charD, charE));
 
-    // UUID storyId = UUID.randomUUID();
-    // Story story = mock(Story.class);
-    // when(story.getId()).thenReturn(storyId);
-    // when(story.getTitle()).thenReturn("Test Story");
-    // when(story.getConfigurations()).thenReturn(Set.of(config1, config2));
+        UUID mysteryId = UUID.randomUUID();
+        Story story = mock(Story.class);
+        when(story.getTitle()).thenReturn("Test Story");
+        Mystery mystery = new Mystery();
+        mystery.setId(mysteryId);
+        mystery.setStory(story);
+        mystery.setSetups(List.of(config1, config2));
 
-    // ConfigDto summaryDTO1 = mock(ConfigDto.class);
-    // ConfigDto summaryDTO2 = mock(ConfigDto.class);
+        ConfigDto summaryDTO1 = mock(ConfigDto.class);
+        ConfigDto summaryDTO2 = mock(ConfigDto.class);
 
-    // when(configMapper.asSummaryDTO(eq(config1))).thenReturn(summaryDTO1);
-    // when(configMapper.asSummaryDTO(eq(config2))).thenReturn(summaryDTO2);
+        PlayerConfigMapper configMapper = mock(PlayerConfigMapper.class);
 
-    // when(storyRepository.findAll()).thenReturn(List.of(story));
+        when(configMapper.asSummaryDTO(eq(config1))).thenReturn(summaryDTO1);
+        when(configMapper.asSummaryDTO(eq(config2))).thenReturn(summaryDTO2);
+        when(mysteryRepository.findAll()).thenReturn(List.of(mystery));
 
-    // Set<StoryForCreationDto> result = storyService.getStorySummaries();
+        mysteryService = new MysteryService(
+                mysteryRepository,
+                configMapper,
+                new StoryMapper(),
+                new CharacterMapper());
+        Set<StoryForCreationDto> result = mysteryService.getMysterySummaries();
 
-    // assertThat(result).hasSize(1);
-    // StoryForCreationDto dto = result.iterator().next();
-    // assertThat(dto.story().uuid()).isEqualTo(storyId);
-    // assertThat(dto.story().title()).isEqualTo("Test Story");
-    // assertThat(dto.minPlayerCount()).isEqualTo(3);
-    // assertThat(dto.maxPlayerCount()).isEqualTo(5);
-    // assertThat(dto.configs()).containsExactlyInAnyOrder(summaryDTO1,
-    // summaryDTO2);
-    // }
+        assertThat(result).hasSize(1);
+        StoryForCreationDto dto = result.iterator().next();
+        assertThat(dto.uuid()).isEqualTo(mysteryId);
+        assertThat(dto.story().title()).isEqualTo("Test Story");
+        assertThat(dto.minPlayerCount()).isEqualTo(3);
+        assertThat(dto.maxPlayerCount()).isEqualTo(5);
+        assertThat(dto.configs()).containsExactlyInAnyOrder(summaryDTO1,
+                summaryDTO2);
+    }
 
-    // @Test
-    // void getStoryByIdOrThrow_returnsStory_whenStoryExists() throws Exception {
-    // UUID storyId = UUID.randomUUID();
-    // Story story = mock(Story.class);
-    // when(storyRepository.findById(storyId)).thenReturn(Optional.of(story));
+    @Test
+    void getStoryByIdOrThrow_returnsStory_whenStoryExists() throws Exception {
+        UUID mysteryId = UUID.randomUUID();
+        Mystery mystery = mock(Mystery.class);
+        when(mysteryRepository.findById(mysteryId)).thenReturn(Optional.of(mystery));
 
-    // Story result = storyService.getStoryOrThrow(storyId);
+        Mystery result = mysteryService.getMysteryOrThrow(mysteryId);
 
-    // assertThat(result).isSameAs(story);
-    // verify(storyRepository).findById(storyId);
-    // }
+        assertThat(result).isSameAs(mystery);
+        verify(mysteryRepository).findById(mysteryId);
+    }
 
-    // @Test
-    // void getStoryByIdOrThrow_throwsException_whenStoryDoesNotExist() {
-    // UUID storyId = UUID.randomUUID();
-    // when(storyRepository.findById(storyId)).thenReturn(Optional.empty());
+    @Test
+    void getStoryByIdOrThrow_throwsException_whenStoryDoesNotExist() {
+        UUID mysteryId = UUID.randomUUID();
+        when(storyRepository.findById(mysteryId)).thenReturn(Optional.empty());
 
-    // org.assertj.core.api.ThrowableAssert.ThrowingCallable call = () ->
-    // storyService.getStoryOrThrow(storyId);
+        org.assertj.core.api.ThrowableAssert.ThrowingCallable call = () -> mysteryService.getMysteryOrThrow(mysteryId);
 
-    // assertThatThrownBy(() -> {
-    // storyService.getStoryOrThrow(storyId);
-    // }).isInstanceOf(StoryNotFoundException.class)
-    // .hasMessageContaining("Could not find Story.");
-    // verify(storyRepository).findById(storyId);
-    // }
+        assertThatThrownBy(() -> {
+            mysteryService.getMysteryOrThrow(mysteryId);
+        }).isInstanceOf(MysteryNotFoundException.class)
+                .hasMessageContaining("Could not find Story.");
+        verify(mysteryRepository).findById(mysteryId);
+    }
 
     @Test
     void createMystery_savesMystery_whenCalled() throws Exception {
