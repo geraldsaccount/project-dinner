@@ -1,6 +1,7 @@
 package com.geraldsaccount.killinary.service;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -11,18 +12,16 @@ import org.springframework.stereotype.Service;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
+import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.SessionNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
-import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
-import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.CharacterAssignment;
-import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionStatus;
-import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
+import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
+import com.geraldsaccount.killinary.model.dinner.Dinner;
+import com.geraldsaccount.killinary.model.dinner.DinnerStatus;
 import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.PrivateCharacterInfo;
@@ -34,7 +33,9 @@ import com.geraldsaccount.killinary.model.dto.output.dinner.GuestDinnerViewDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.HostDinnerViewDto;
 import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
-import com.geraldsaccount.killinary.repository.SessionRepository;
+import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.repository.DinnerRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,28 +43,28 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class SessionService {
-    private final SessionRepository sessionRepository;
+    private final DinnerRepository dinnerRepository;
     private final UserService userService;
-    private final StoryService storyService;
+    private final MysteryService mysteryService;
     private final CharacterAssignmentCodeService assignmentCodeService;
     private final UserMapper userMapper;
     private final CharacterMapper characterMapper;
 
     @Transactional
     public Set<DinnerSummaryDto> getSessionSummariesFrom(String oauthId) {
-        return sessionRepository.findAllByUserId(oauthId).stream()
-                .map(session -> {
-                    String characterName = session.getCharacterAssignments().stream()
+        return dinnerRepository.findAllByUserId(oauthId).stream()
+                .map(dinner -> {
+                    String characterName = dinner.getCharacterAssignments().stream()
                             .filter(a -> a.getUser().getOauthId().equals(oauthId))
                             .findFirst()
                             .map(a -> a.getCharacter().getName())
                             .orElse(null);
-                    Story story = session.getStory();
-                    return new DinnerSummaryDto(session.getId(),
-                            session.getStartedAt(),
-                            userMapper.asDTO(session.getHost()),
-                            story.getTitle(),
-                            story.getBannerUrl(),
+                    Mystery mystery = dinner.getMystery();
+                    return new DinnerSummaryDto(dinner.getId(),
+                            dinner.getDate(),
+                            userMapper.asDTO(dinner.getHost()),
+                            mystery.getStory().getTitle(),
+                            mystery.getStory().getBannerUrl(),
                             characterName);
                 })
                 .collect(Collectors.toSet());
@@ -71,25 +72,26 @@ public class SessionService {
 
     @Transactional
     public CreatedSessionDto createSession(String oauthId, CreateSessionDto creationDTO)
-            throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
+            throws UserNotFoundException, MysteryNotFoundException,
+            StoryConfigurationNotFoundException,
             AccessDeniedException {
         User host = userService.getUserOrThrow(oauthId);
         userService.validateHasNotPlayedStory(host, creationDTO.storyId());
 
-        Story story = storyService.getStoryOrThrow(creationDTO.storyId());
-        Session session = buildSession(host, story, creationDTO);
-        session = addEmptyCharacterAssignment(session);
-        return new CreatedSessionDto(session.getId());
+        Mystery mystery = mysteryService.getMysteryOrThrow(creationDTO.storyId());
+        Dinner dinner = buildDinner(host, mystery, creationDTO);
+        dinner = addEmptyCharacterAssignment(dinner);
+        return new CreatedSessionDto(dinner.getId());
     }
 
-    private Session buildSession(User host, Story story, CreateSessionDto creationDTO)
+    private Dinner buildDinner(User host, Mystery mystery, CreateSessionDto creationDTO)
             throws StoryConfigurationNotFoundException {
-        return sessionRepository.save(Session.builder()
+        return dinnerRepository.save(Dinner.builder()
                 .host(host)
-                .startedAt(creationDTO.eventStart())
-                .story(story)
-                .status(SessionStatus.CREATED)
-                .storyConfiguration(story.getConfigurations().stream()
+                .date(creationDTO.eventStart())
+                .mystery(mystery)
+                .status(DinnerStatus.CREATED)
+                .config(mystery.getSetups().stream()
                         .filter(conf -> conf.getId().equals(creationDTO.storyConfigurationId()))
                         .findFirst()
                         .orElseThrow(
@@ -98,11 +100,13 @@ public class SessionService {
     }
 
     @Transactional
-    private Session addEmptyCharacterAssignment(Session session) {
+    private Dinner addEmptyCharacterAssignment(Dinner dinner) {
         int maxAttempts = 5;
+        Map<UUID, Character> characters = dinner.getMystery().getCharacters().stream()
+                .collect(Collectors.toMap(Character::getId, c -> c));
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             Set<String> codes = new HashSet<>();
-            Set<CharacterAssignment> assignments = session.getStoryConfiguration().getCharacters().stream()
+            Set<CharacterAssignment> assignments = dinner.getConfig().getCharacters().stream()
                     .map(character -> {
                         String code = "";
                         do {
@@ -110,39 +114,41 @@ public class SessionService {
                         } while (codes.contains(code));
                         codes.add(code);
                         return CharacterAssignment.builder()
-                                .session(session)
+                                .dinner(dinner)
                                 .character(character)
                                 .code(code)
                                 .build();
                     })
                     .collect(Collectors.toSet());
             try {
-                return sessionRepository.save(session.withCharacterAssignments(assignments));
+                return dinnerRepository.save(dinner.withCharacterAssignments(assignments));
             } catch (DataIntegrityViolationException e) {
             }
         }
-        throw new RuntimeException("Could not generate a unique code after " + maxAttempts + " attempts");
+        throw new RuntimeException("Could not generate a unique code after " +
+                maxAttempts + " attempts");
     }
 
     @Transactional
     public DinnerView getDinnerView(String oauthId, UUID dinnerId)
-            throws UserNotFoundException, SessionNotFoundException, AccessDeniedException,
+            throws UserNotFoundException, SessionNotFoundException,
+            AccessDeniedException,
             CharacterAssignmentNotFoundException {
         User user = userService.getUserOrThrow(oauthId);
 
-        Session session = sessionRepository.findById(dinnerId)
+        Dinner dinner = dinnerRepository.findById(dinnerId)
                 .orElseThrow(() -> new SessionNotFoundException("Could not find session"));
 
-        boolean isInSession = session.getCharacterAssignments().stream()
+        boolean isInSession = dinner.getCharacterAssignments().stream()
                 .anyMatch(a -> a.getUser() != null && a.getUser().equals(user));
 
         if (!isInSession) {
             throw new AccessDeniedException("Cannot access session data.");
         }
 
-        boolean isHost = session.getHost().equals(user);
-        Story story = session.getStory();
-        Set<CharacterAssignment> assignments = session.getCharacterAssignments();
+        boolean isHost = dinner.getHost().equals(user);
+        Mystery mystery = dinner.getMystery();
+        Set<CharacterAssignment> assignments = dinner.getCharacterAssignments();
         Set<DinnerParticipantDto> participants = assignments.stream()
                 .map(a -> {
                     User participant = a.getUser();
@@ -157,11 +163,13 @@ public class SessionService {
                 .collect(Collectors.toSet());
 
         CharacterAssignment assignedCharacter = assignments.stream()
-                .filter(a -> a.getUser() != null && a.getUser().getId().equals(user.getId())).findFirst()
+                .filter(a -> a.getUser() != null &&
+                        a.getUser().getId().equals(user.getId()))
+                .findFirst()
                 .orElseThrow(() -> new CharacterAssignmentNotFoundException(
                         "User should have been assigned to a character."));
         PrivateCharacterInfo privateInfo = new PrivateCharacterInfo(assignedCharacter.getCharacter().getId(),
-                assignedCharacter.getCharacter().getPrivateBriefing());
+                assignedCharacter.getCharacter().getPrivateDescription());
 
         if (isHost) {
             Set<CharacterAssignmentDto> assignmentDtos = assignments.stream()
@@ -175,23 +183,23 @@ public class SessionService {
                     .collect(Collectors.toSet());
 
             return new HostDinnerViewDto(dinnerId,
-                    session.getStartedAt(),
+                    dinner.getDate(),
                     userMapper.asDTO(user),
-                    story.getTitle(),
-                    story.getBannerUrl(),
-                    story.getDinnerStoryBrief(),
+                    mystery.getStory().getTitle(),
+                    mystery.getStory().getBannerUrl(),
+                    mystery.getStory().getBriefing(),
                     participants,
                     privateInfo,
                     assignmentDtos,
                     null);
         }
-        UserDto hostDto = userMapper.asDTO(session.getHost());
+        UserDto hostDto = userMapper.asDTO(dinner.getHost());
         return new GuestDinnerViewDto(dinnerId,
-                session.getStartedAt(),
+                dinner.getDate(),
                 hostDto,
-                story.getTitle(),
-                story.getBannerUrl(),
-                story.getDinnerStoryBrief(),
+                mystery.getStory().getTitle(),
+                mystery.getStory().getBannerUrl(),
+                mystery.getStory().getBriefing(),
                 participants,
                 privateInfo);
     }

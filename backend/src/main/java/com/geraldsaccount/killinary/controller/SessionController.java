@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
+import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.SessionNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
-import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
@@ -47,7 +47,7 @@ public class SessionController {
 
     @PostMapping()
     public CreatedSessionDto createNewSession(Authentication authentication, @RequestBody CreateSessionDto creationDTO)
-            throws UserNotFoundException, StoryNotFoundException, StoryConfigurationNotFoundException,
+            throws UserNotFoundException, MysteryNotFoundException, StoryConfigurationNotFoundException,
             AccessDeniedException {
         return sessionService.createSession(authentication.getName(), creationDTO);
     }

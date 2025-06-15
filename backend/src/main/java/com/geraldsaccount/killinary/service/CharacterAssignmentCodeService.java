@@ -2,7 +2,7 @@ package com.geraldsaccount.killinary.service;
 
 import org.springframework.stereotype.Service;
 
-import com.geraldsaccount.killinary.model.CharacterAssignment;
+import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 
 @Service

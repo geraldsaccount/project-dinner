@@ -24,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
-import com.geraldsaccount.killinary.exceptions.StoryNotFoundException;
+import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
@@ -182,14 +182,14 @@ class SessionServiceTest {
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getDinners()).thenReturn(Set.of());
-        when(mysteryService.getMysteryOrThrow(any())).thenThrow(new StoryNotFoundException("Could not find Story."));
+        when(mysteryService.getMysteryOrThrow(any())).thenThrow(new MysteryNotFoundException("Could not find Story."));
         CreateSessionDto creationDTO = CreateSessionDto.builder()
                 .storyId(UUID.randomUUID())
                 .build();
 
         assertThatThrownBy(() -> {
             sessionService.createSession(validOauthId, creationDTO);
-        }).isInstanceOf(StoryNotFoundException.class)
+        }).isInstanceOf(MysteryNotFoundException.class)
                 .hasMessage("Could not find Story.");
     }
 
