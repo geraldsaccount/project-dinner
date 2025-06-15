@@ -5,9 +5,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
-import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.Gender;
 import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
+import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Gender;
 
 class CharacterMapperTest {
 
@@ -15,11 +15,12 @@ class CharacterMapperTest {
 
     @Test
     void asSummaryDTO_shouldMapAllFields() {
-        Character character = new Character();
-        character.setId(UUID.randomUUID());
-        character.setName("John Doe");
-        character.setShopDescription("A brave hero");
-        character.setGender(Gender.MALE);
+        Character character = Character.builder()
+                .id(UUID.randomUUID())
+                .name("John Doe")
+                .shopDescription("A brave hero")
+                .gender(Gender.MALE)
+                .build();
 
         CharacterSummaryDto dto = characterMapper.asSummaryDTO(character);
 
@@ -30,11 +31,12 @@ class CharacterMapperTest {
 
     @Test
     void asSummaryDTO_shouldHandleNullFields() {
-        Character character = new Character();
-        character.setId(null);
-        character.setName(null);
-        character.setShopDescription(null);
-        character.setGender(null);
+        Character character = Character.builder()
+                .id(null)
+                .name(null)
+                .shopDescription(null)
+                .gender(null)
+                .build();
 
         CharacterSummaryDto dto = characterMapper.asSummaryDTO(character);
 
