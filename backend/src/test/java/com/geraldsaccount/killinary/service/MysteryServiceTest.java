@@ -239,7 +239,7 @@ class MysteryServiceTest {
                 baseCharacterDto.stageInfo());
         CreateMysteryDto dto = buildValidMysteryDto().withCharacters(List.of(invalidCharacter));
         mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> service.createMystery(dto))
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
