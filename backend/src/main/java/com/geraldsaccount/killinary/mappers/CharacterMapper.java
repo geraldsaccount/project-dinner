@@ -20,7 +20,6 @@ public class CharacterMapper {
 
     public Character asEntity(CreateCharacterDto create) {
         return Character.builder()
-                .id(create.id())
                 .name(create.name())
                 .role(create.role())
                 .age(create.age())
@@ -29,7 +28,6 @@ public class CharacterMapper {
                 .shopDescription(create.shopDescription())
                 .privateDescription(create.privateDescription())
                 .avatarUrl(create.avatarUrl())
-                .relationships(create.relationships())
                 .build();
     }
 }

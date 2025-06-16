@@ -13,42 +13,42 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
+import com.geraldsaccount.killinary.exceptions.DinnerNotFoundException;
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
-import com.geraldsaccount.killinary.exceptions.SessionNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
-import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerView;
-import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
-import com.geraldsaccount.killinary.service.SessionService;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedDinnerDto;
+import com.geraldsaccount.killinary.service.DinnerService;
 
 @RestController
-@RequestMapping("/api/sessions")
-public class SessionController {
+@RequestMapping("/api/dinners")
+public class DinnerController {
 
-    private final SessionService sessionService;
+    private final DinnerService dinnerService;
 
-    public SessionController(SessionService sessionService) {
-        this.sessionService = sessionService;
+    public DinnerController(DinnerService dinnerService) {
+        this.dinnerService = dinnerService;
     }
 
     @GetMapping()
-    public Set<DinnerSummaryDto> getSessionsForUser(Authentication authentication) {
-        return sessionService.getSessionSummariesFrom(authentication.getName());
+    public Set<DinnerSummaryDto> getDinnersForUser(Authentication authentication) {
+        return dinnerService.getDinnerSummariesFrom(authentication.getName());
     }
 
     @GetMapping("{id}")
-    public DinnerView getSessionView(Authentication authentication, @PathVariable UUID id)
-            throws UserNotFoundException, SessionNotFoundException, AccessDeniedException,
+    public DinnerView getDinnerView(Authentication authentication, @PathVariable UUID id)
+            throws UserNotFoundException, DinnerNotFoundException, AccessDeniedException,
             CharacterAssignmentNotFoundException {
-        return sessionService.getDinnerView(authentication.getName(), id);
+        return dinnerService.getDinnerView(authentication.getName(), id);
     }
 
     @PostMapping()
-    public CreatedSessionDto createNewSession(Authentication authentication, @RequestBody CreateSessionDto creationDTO)
+    public CreatedDinnerDto createNewDinner(Authentication authentication, @RequestBody CreateDinnerDto creationDTO)
             throws UserNotFoundException, MysteryNotFoundException, StoryConfigurationNotFoundException,
             AccessDeniedException {
-        return sessionService.createSession(authentication.getName(), creationDTO);
+        return dinnerService.createDinner(authentication.getName(), creationDTO);
     }
 }

@@ -7,12 +7,14 @@ import java.util.UUID;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class CharacterStageInfoId implements Serializable {
     private UUID stageId;
     private UUID characterId;

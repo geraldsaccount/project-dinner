@@ -6,7 +6,7 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record CreateSessionDto(
+public record CreateDinnerDto(
         UUID storyId,
         LocalDateTime eventStart,
         UUID storyConfigurationId) {

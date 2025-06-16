@@ -26,7 +26,7 @@ public class StageEvent {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(name = "event_order", nullable = false)
     private Integer order;
 
     private String time;

@@ -33,21 +33,21 @@ public class CharacterStageInfo {
     @EmbeddedId
     @AttributeOverrides({
             @AttributeOverride(name = "stageId", column = @Column(name = "stage_id")),
-            @AttributeOverride(name = "characterId", column = @Column(name = "character_id"))
+            @AttributeOverride(name = "characterId", column = @Column(name = "stage_character_id"))
     })
     private CharacterStageInfoId id;
 
-    @Column(nullable = false)
+    @Column(name = "character_stage_order", nullable = false)
     private Integer order;
 
     @Column(name = "objective_prompt")
     private String objectivePrompt;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("order ASC")
+    @OrderBy("event_order ASC")
     @JoinTable(name = "stage_info_events", joinColumns = {
-            @JoinColumn(name = "stage_id"),
-            @JoinColumn(name = "character_id"),
+            @JoinColumn(name = "stage_id", referencedColumnName = "stage_id"),
+            @JoinColumn(name = "stage_character_id", referencedColumnName = "stage_character_id")
     }, inverseJoinColumns = @JoinColumn(name = "event_id", unique = true))
     private List<StageEvent> events;
 

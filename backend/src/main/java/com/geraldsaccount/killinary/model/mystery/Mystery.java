@@ -44,12 +44,12 @@ public class Mystery {
     @JoinColumn(name = "story_id")
     private Story story;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true)
     @JoinTable(name = "mystery_characters", joinColumns = @JoinColumn(name = "mystery_id"), inverseJoinColumns = @JoinColumn(name = "character_id", unique = true))
     private List<Character> characters;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("order ASC")
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true)
+    @OrderBy("stage_order ASC")
     @JoinTable(name = "mystery_stages", joinColumns = @JoinColumn(name = "mystery_id"), inverseJoinColumns = @JoinColumn(name = "stage_id"))
     private List<Stage> stages;
 

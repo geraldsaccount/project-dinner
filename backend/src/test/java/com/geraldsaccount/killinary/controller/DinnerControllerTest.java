@@ -14,46 +14,49 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
 import com.geraldsaccount.killinary.TestDatabaseResetUtil;
-import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.CharacterAssignment;
-import com.geraldsaccount.killinary.model.Gender;
-import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.SessionStatus;
-import com.geraldsaccount.killinary.model.Story;
-import com.geraldsaccount.killinary.model.StoryConfiguration;
 import com.geraldsaccount.killinary.model.User;
-import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
-import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
+import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
+import com.geraldsaccount.killinary.model.dinner.Dinner;
+import com.geraldsaccount.killinary.model.dinner.DinnerStatus;
+import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedDinnerDto;
+import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Gender;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
+import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
-import com.geraldsaccount.killinary.repository.SessionRepository;
-import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
+import com.geraldsaccount.killinary.repository.DinnerRepository;
+import com.geraldsaccount.killinary.repository.MysteryRepository;
+import com.geraldsaccount.killinary.repository.PlayerConfigRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 import com.geraldsaccount.killinary.repository.UserRepository;
-
-import jakarta.transaction.Transactional;
 
 @SpringBootTest(classes = KillinaryApplication.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SuppressWarnings("unused")
-class SessionControllerTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+class DinnerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private SessionRepository sessionRepository;
+    private DinnerRepository dinnerRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -65,7 +68,10 @@ class SessionControllerTest {
     private CharacterRepository characterRepository;
 
     @Autowired
-    private StoryConfigurationRepository configRepository;
+    private PlayerConfigRepository configRepository;
+
+    @Autowired
+    private MysteryRepository mysteryRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -74,16 +80,66 @@ class SessionControllerTest {
 
     private User host;
     private User participant;
-    private Session session;
-    private Story story;
-    private Story newStory;
-    private StoryConfiguration config;
+    private Dinner dinner;
+    private PlayerConfig config;
+    private Mystery newMystery;
 
     @BeforeEach
     @Transactional
     void setUp() {
-        databaseResetUtil.resetDatabase();
+        buildUsers();
 
+        Character character = characterRepository.save(Character.builder()
+                .name("Watson")
+                .gender(Gender.MALE)
+                .build());
+
+        Character hostCharacter = characterRepository.save(Character.builder()
+                .name("Holmes")
+                .gender(Gender.MALE)
+                .build());
+
+        config = PlayerConfig.builder()
+                .characters(Set.of(hostCharacter, character))
+                .playerCount(2)
+                .build();
+
+        Mystery mystery = mysteryRepository.save(Mystery.builder()
+                .story(Story.builder().title("Murder Mystery")
+                        .build())
+                .build());
+
+        newMystery = mysteryRepository.save(Mystery.builder()
+                .story(Story.builder().title("Murder Mystery")
+                        .build())
+                .setups(List.of(config))
+                .build());
+
+        dinner = dinnerRepository.save(Dinner.builder()
+                .host(host)
+                .mystery(mystery)
+                .config(config)
+                .status(DinnerStatus.CONCLUDED)
+                .date(LocalDateTime.of(2025, 6, 2, 18, 0))
+                .build());
+
+        CharacterAssignment assignment = CharacterAssignment.builder()
+                .dinner(dinner)
+                .user(participant)
+                .character(character)
+                .build();
+        CharacterAssignment hostAssignment = CharacterAssignment.builder()
+                .dinner(dinner)
+                .user(host)
+                .character(hostCharacter)
+                .build();
+        dinner.setParticipants(Set.of(host, participant));
+        dinner.setCharacterAssignments(Set.of(assignment, hostAssignment));
+        dinnerRepository.save(dinner);
+        userRepository.saveAll(List.of(host.withDinners(Set.of(dinner)), participant.withDinners(Set.of(dinner))));
+    }
+
+    private void buildUsers() {
         host = userRepository.save(User.builder()
                 .oauthId("hostuser")
                 .name("Sherlock")
@@ -99,65 +155,13 @@ class SessionControllerTest {
                 .name("Lestrade")
                 .email("lestrade@holmes.com")
                 .build());
-
-        story = storyRepository.save(Story.builder()
-                .title("Murder Mystery")
-                .build());
-
-        newStory = storyRepository.save(Story.builder()
-                .title("Other Mystery")
-                .build());
-        config = configRepository.save(StoryConfiguration.builder()
-                .story(newStory)
-                .build());
-        newStory.setConfigurations(Set.of(config));
-        storyRepository.save(newStory);
-
-        session = Session.builder()
-                .host(host)
-                .story(story)
-                .status(SessionStatus.CONCLUDED)
-                .startedAt(LocalDateTime.of(2025, 6, 2, 18, 0))
-                .build();
-
-        session = sessionRepository.save(session);
-
-        session.setParticipants(Set.of(host, participant));
-
-        Character character = characterRepository.save(Character.builder()
-                .name("Watson")
-                .gender(Gender.MALE)
-                .story(story)
-                .build());
-
-        CharacterAssignment assignment = CharacterAssignment.builder()
-                .session(session)
-                .user(participant)
-                .character(character)
-                .build();
-
-        Character hostCharacter = characterRepository.save(Character.builder()
-                .name("Holmes")
-                .gender(Gender.MALE)
-                .story(story)
-                .build());
-
-        CharacterAssignment hostAssignment = CharacterAssignment.builder()
-                .session(session)
-                .user(host)
-                .character(hostCharacter)
-                .build();
-
-        session.setCharacterAssignments(Set.of(assignment, hostAssignment));
-        sessionRepository.save(session);
-        userRepository.saveAll(List.of(host.withSessions(Set.of(session)), participant.withSessions(Set.of(session))));
     }
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void getSessionsForUser_returnsSessionSummaries_forAuthenticatedUser() throws Exception {
+    void getDinnersForUser_returnsDinnerSummaries_forAuthenticatedUser() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/api/sessions")
+        mockMvc.perform(get("/api/dinners")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -171,33 +175,33 @@ class SessionControllerTest {
     }
 
     @Test
-    void getSessionsForUser_returnsUnauthorized_whenNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/api/sessions")
+    void getDinnersForUser_returnsUnauthorized_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/dinners")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void createSession_returnsUnauthorized_whenNotAuthenticated() throws Exception {
-        mockMvc.perform(post("/api/sessions")
+    void createDinner_returnsUnauthorized_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/dinners")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username = "invaliduser", roles = { "USER" })
-    void createSession_returnsBadRequest_whenNoContent() throws Exception {
-        mockMvc.perform(post("/api/sessions")
+    void createDinner_returnsBadRequest_whenNoContent() throws Exception {
+        mockMvc.perform(post("/api/dinners")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(username = "invaliduser", roles = { "USER" })
-    void createSession_returnsNotFound_whenUserNotFound() throws Exception {
-        CreateSessionDto dto = CreateSessionDto.builder()
+    void createDinner_returnsNotFound_whenUserNotFound() throws Exception {
+        CreateDinnerDto dto = CreateDinnerDto.builder()
                 .build();
-        mockMvc.perform(post("/api/sessions")
+        mockMvc.perform(post("/api/dinners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .accept(MediaType.APPLICATION_JSON))
@@ -206,11 +210,11 @@ class SessionControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createSession_returnsBadRequest_whenUserAlreadyPlayed() throws JsonProcessingException, Exception {
-        CreateSessionDto dto = CreateSessionDto.builder()
-                .storyId(session.getStory().getId())
+    void createDinner_returnsBadRequest_whenUserAlreadyPlayed() throws JsonProcessingException, Exception {
+        CreateDinnerDto dto = CreateDinnerDto.builder()
+                .storyId(dinner.getMystery().getId())
                 .build();
-        mockMvc.perform(post("/api/sessions")
+        mockMvc.perform(post("/api/dinners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .accept(MediaType.APPLICATION_JSON))
@@ -219,11 +223,11 @@ class SessionControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createSession_returnsNotFound_whenStoryNotFound() throws JsonProcessingException, Exception {
-        CreateSessionDto dto = CreateSessionDto.builder()
+    void createDinner_returnsNotFound_whenStoryNotFound() throws JsonProcessingException, Exception {
+        CreateDinnerDto dto = CreateDinnerDto.builder()
                 .storyId(UUID.randomUUID())
                 .build();
-        mockMvc.perform(post("/api/sessions")
+        mockMvc.perform(post("/api/dinners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .accept(MediaType.APPLICATION_JSON))
@@ -232,12 +236,12 @@ class SessionControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createSession_returnsNotFound_whenStoryConfigNotFound() throws JsonProcessingException, Exception {
-        CreateSessionDto dto = CreateSessionDto.builder()
-                .storyId(newStory.getId())
+    void createDinner_returnsNotFound_whenStoryConfigNotFound() throws JsonProcessingException, Exception {
+        CreateDinnerDto dto = CreateDinnerDto.builder()
+                .storyId(newMystery.getId())
                 .storyConfigurationId(UUID.randomUUID())
                 .build();
-        String response = mockMvc.perform(post("/api/sessions")
+        String response = mockMvc.perform(post("/api/dinners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .accept(MediaType.APPLICATION_JSON))
@@ -247,34 +251,35 @@ class SessionControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createSession_returnsSessionCreatedDTO_whenValidData()
+    void createDinner_returnsDinnerCreatedDTO_whenValidData()
             throws JsonProcessingException, UnsupportedEncodingException, Exception {
-        CreateSessionDto dto = CreateSessionDto.builder()
-                .storyId(newStory.getId())
+        CreateDinnerDto dto = CreateDinnerDto.builder()
+                .storyId(newMystery.getId())
                 .storyConfigurationId(config.getId())
                 .build();
-        String response = mockMvc.perform(post("/api/sessions")
+        String response = mockMvc.perform(post("/api/dinners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        CreatedSessionDto newSession = objectMapper.readValue(response, CreatedSessionDto.class);
+        CreatedDinnerDto newDinner = objectMapper.readValue(response,
+                CreatedDinnerDto.class);
 
-        assertThat(newSession.sessionId()).isNotNull();
+        assertThat(newDinner.dinnerId()).isNotNull();
     }
 
     @Test
-    void getSessionView_returnsUnauthorized_whenNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/api/sessions/" + session.getId())
+    void getDinnerView_returnsUnauthorized_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/dinners/" + dinner.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void getSessionView_returnsSessionView_forAuthenticatedParticipant() throws Exception {
-        mockMvc.perform(get("/api/sessions/" + session.getId())
+    void getDinnerView_returnsDinnerView_forAuthenticatedParticipant() throws Exception {
+        mockMvc.perform(get("/api/dinners/" + dinner.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -288,8 +293,8 @@ class SessionControllerTest {
 
     @Test
     @WithMockUser(username = "hostuser", roles = { "USER" })
-    void getSessionView_returnsSessionView_forHost() throws Exception {
-        mockMvc.perform(get("/api/sessions/" + session.getId())
+    void getDinnerView_returnsDinnerView_forHost() throws Exception {
+        mockMvc.perform(get("/api/dinners/" + dinner.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -302,24 +307,24 @@ class SessionControllerTest {
 
     @Test
     @WithMockUser(username = "unknownuser", roles = { "USER" })
-    void getSessionView_returnsForbidden_whenUserDoesNotExist() throws Exception {
-        mockMvc.perform(get("/api/sessions/" + session.getId())
+    void getDinnerView_returnsForbidden_whenUserDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/dinners/" + dinner.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = "notparticipating", roles = { "USER" })
-    void getSessionView_returnsForbidden_whenUserNotParticipantOrHost() throws Exception {
-        mockMvc.perform(get("/api/sessions/" + session.getId())
+    void getDinnerView_returnsForbidden_whenUserNotParticipantOrHost() throws Exception {
+        mockMvc.perform(get("/api/dinners/" + dinner.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void getSessionView_returnsNotFound_whenSessionDoesNotExist() throws Exception {
-        mockMvc.perform(get("/api/sessions/" + UUID.randomUUID())
+    void getDinnerView_returnsNotFound_whenDinnerDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/dinners/" + UUID.randomUUID())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }

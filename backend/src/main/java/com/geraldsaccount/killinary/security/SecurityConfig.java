@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/protected/**").authenticated()
-                        .requestMatchers("/api/sessions/**").authenticated()
+                        .requestMatchers("/api/dinners/**").authenticated()
                         // .requestMatchers(HttpMethod.GET, "/api/stories/**").permitAll()
                         // .requestMatchers("/api/stories/**").hasAnyRole("ADMIN", "AUTHOR")
                         .requestMatchers(HttpMethod.GET, "/api/invite/**").permitAll()

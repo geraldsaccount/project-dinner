@@ -10,12 +10,13 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -24,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.With;
 
 @Entity
@@ -32,10 +34,11 @@ import lombok.With;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 @With
 public class Character {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(nullable = false)
@@ -49,6 +52,7 @@ public class Character {
     @Column(name = "is_primary", nullable = false)
     private Boolean isPrimary = false;
 
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @Column(name = "shop_description")
@@ -67,11 +71,8 @@ public class Character {
     private Map<UUID, String> relationships = new HashMap<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("order ASC")
-    @JoinTable(name = "character_stage_infos", joinColumns = @JoinColumn(name = "character_id", referencedColumnName = "id"), inverseJoinColumns = {
-            @JoinColumn(name = "stage_id", referencedColumnName = "stage_id"),
-            @JoinColumn(name = "stage_character_id", referencedColumnName = "character_id")
-    })
+    @OrderBy("character_stage_order ASC")
+    @JoinColumn(name = "stage_character_id", referencedColumnName = "id")
     private List<CharacterStageInfo> stageInfo;
 
     @Override

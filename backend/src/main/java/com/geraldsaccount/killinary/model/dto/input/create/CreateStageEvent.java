@@ -1,9 +1,7 @@
 package com.geraldsaccount.killinary.model.dto.input.create;
 
-import java.util.UUID;
-
 public record CreateStageEvent(
-        UUID id,
+        String id,
         Integer order,
         String time,
         String title,

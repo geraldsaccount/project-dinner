@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
-import com.geraldsaccount.killinary.repository.SessionRepository;
-import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
-import com.geraldsaccount.killinary.repository.StoryRepository;
+import com.geraldsaccount.killinary.repository.DinnerRepository;
+import com.geraldsaccount.killinary.repository.MysteryRepository;
+import com.geraldsaccount.killinary.repository.PlayerConfigRepository;
 import com.geraldsaccount.killinary.repository.UserRepository;
 
 @Component
@@ -16,11 +16,11 @@ public class TestDatabaseResetUtil {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private SessionRepository sessionRepository;
+    private DinnerRepository dinnerRepository;
     @Autowired
-    private StoryRepository storyRepository;
+    private MysteryRepository mysteryRepository;
     @Autowired
-    private StoryConfigurationRepository storyConfigurationRepository;
+    private PlayerConfigRepository storyConfigurationRepository;
     @Autowired
     private CharacterRepository characterRepository;
     @Autowired(required = false)
@@ -28,21 +28,21 @@ public class TestDatabaseResetUtil {
 
     public void resetDatabase() {
         userRepository.findAll().forEach(user -> {
-            user.getSessions().clear();
+            user.getDinners().clear();
             userRepository.save(user);
         });
-        sessionRepository.findAll().forEach(session -> {
-            session.getParticipants().clear();
-            sessionRepository.save(session);
+        dinnerRepository.findAll().forEach(dinner -> {
+            dinner.getParticipants().clear();
+            dinnerRepository.save(dinner);
         });
 
-        // Delete in correct order
         if (characterAssignmentRepository != null)
             characterAssignmentRepository.deleteAll();
-        sessionRepository.deleteAll();
+        dinnerRepository.deleteAll();
         storyConfigurationRepository.deleteAll();
         characterRepository.deleteAll();
-        storyRepository.deleteAll();
+        mysteryRepository.deleteAll();
+
         userRepository.deleteAll();
     }
 }

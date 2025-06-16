@@ -26,6 +26,7 @@ public class Stage {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "stage_order")
     private Integer order;
 
     private String title;

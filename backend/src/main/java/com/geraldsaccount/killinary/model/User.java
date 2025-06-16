@@ -10,6 +10,8 @@ import com.geraldsaccount.killinary.model.dinner.Dinner;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -52,6 +54,7 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -65,7 +68,7 @@ public class User {
     private Set<Dinner> hostedDinners = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "session_participants", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "session_id"))
+    @JoinTable(name = "dinner_participants", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "dinner_id"))
     @Builder.Default
     private Set<Dinner> dinners = new HashSet<>();
 

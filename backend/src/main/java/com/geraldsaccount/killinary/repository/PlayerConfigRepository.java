@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 
-public interface StoryConfigurationRepository extends JpaRepository<PlayerConfig, UUID> {
+public interface PlayerConfigRepository extends JpaRepository<PlayerConfig, UUID> {
 
 }

@@ -23,15 +23,15 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
-import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
+import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.model.dinner.Dinner;
-import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.CharacterAssignmentDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerParticipantDto;
@@ -48,7 +48,7 @@ import com.geraldsaccount.killinary.repository.DinnerRepository;
 
 @ActiveProfiles("test")
 @SuppressWarnings("unused")
-class SessionServiceTest {
+class DinnerServiceTest {
 
     @Mock
     private DinnerRepository dinnerRepository;
@@ -69,7 +69,7 @@ class SessionServiceTest {
     private CharacterMapper characterMapper;
 
     @InjectMocks
-    private SessionService sessionService;
+    private DinnerService dinnerService;
 
     private User user;
     private User host;
@@ -83,24 +83,24 @@ class SessionServiceTest {
     }
 
     @Test
-    void getSessionSummariesFrom_returnsEmptySet_whenNoSessions() {
+    void getDinnerSummariesFrom_returnsEmptySet_whenNoDinners() {
         when(dinnerRepository.findAllByUserId("U1")).thenReturn(Collections.emptyList());
 
-        Set<DinnerSummaryDto> result = sessionService.getSessionSummariesFrom("U1");
+        Set<DinnerSummaryDto> result = dinnerService.getDinnerSummariesFrom("U1");
 
         assertThat(result).isEmpty();
     }
 
     @Test
-    void getSessionSummariesFrom_returnsSessionSummary_whenSessionExistsAndUserAssigned() {
-        createDummySession();
+    void getDinnerSummariesFrom_returnsDinnerSummary_whenDinnerExistsAndUserAssigned() {
+        createDummyDinner();
         when(dinnerRepository.findAllByUserId(user.getOauthId())).thenReturn(List.of(dinner));
 
         UserDto hostDto = new UserDto(user.getId(), user.getName(),
                 user.getAvatarUrl());
         when(userMapper.asDTO(host)).thenReturn(hostDto);
 
-        Set<DinnerSummaryDto> result = sessionService.getSessionSummariesFrom(user.getOauthId());
+        Set<DinnerSummaryDto> result = dinnerService.getDinnerSummariesFrom(user.getOauthId());
 
         assertThat(result).hasSize(1);
         DinnerSummaryDto dto = result.iterator().next();
@@ -118,8 +118,8 @@ class SessionServiceTest {
     }
 
     @Test
-    void getSessionSummariesFrom_assignedCharacterNameIsNull_whenUserNotAssigned() {
-        createDummySession();
+    void getDinnerSummariesFrom_assignedCharacterNameIsNull_whenUserNotAssigned() {
+        createDummyDinner();
         dinner.setCharacterAssignments(Collections.emptySet());
         when(dinnerRepository.findAllByUserId(user.getOauthId())).thenReturn(List.of(dinner));
 
@@ -127,7 +127,7 @@ class SessionServiceTest {
                 user.getAvatarUrl());
         when(userMapper.asDTO(host)).thenReturn(hostDto);
 
-        Set<DinnerSummaryDto> result = sessionService.getSessionSummariesFrom(user.getOauthId());
+        Set<DinnerSummaryDto> result = dinnerService.getDinnerSummariesFrom(user.getOauthId());
 
         assertThat(result).hasSize(1);
         DinnerSummaryDto dto = result.iterator().next();
@@ -145,23 +145,23 @@ class SessionServiceTest {
     }
 
     @Test
-    void createSession_throwsUserNotFound_withInvalidOathId() throws Exception {
+    void createDinner_throwsUserNotFound_withInvalidOathId() throws Exception {
         String invalidId = "invalid-id";
         when(userService.getUserOrThrow(invalidId)).thenThrow(new UserNotFoundException("Could not find host."));
-        CreateSessionDto creationDTO = mock(CreateSessionDto.class);
+        CreateDinnerDto creationDTO = mock(CreateDinnerDto.class);
 
         assertThatThrownBy(() -> {
-            sessionService.createSession(invalidId, creationDTO);
+            dinnerService.createDinner(invalidId, creationDTO);
         }).isInstanceOf(UserNotFoundException.class)
                 .hasMessage("Could not find host.");
     }
 
     @Test
-    void createSession_throwsNotAllowed_whenHostAlreadyKnowsStory() throws Exception {
+    void createDinner_throwsNotAllowed_whenHostAlreadyKnowsStory() throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID participatedId = UUID.randomUUID();
         User testHost = mock(User.class);
-        CreateSessionDto creationDTO = CreateSessionDto.builder()
+        CreateDinnerDto creationDTO = CreateDinnerDto.builder()
                 .storyId(participatedId)
                 .build();
 
@@ -169,32 +169,32 @@ class SessionServiceTest {
         doThrow(new AccessDeniedException("User cannot play a Story multiple times"))
                 .when(userService).validateHasNotPlayedStory(testHost, participatedId);
 
-        assertThatThrownBy(() -> sessionService.createSession(validOauthId,
+        assertThatThrownBy(() -> dinnerService.createDinner(validOauthId,
                 creationDTO))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("User cannot play a Story multiple times");
     }
 
     @Test
-    void createSession_throwsStoryNotFound_withInvalidStoryId() throws Exception {
+    void createDinner_throwsStoryNotFound_withInvalidStoryId() throws Exception {
         String validOauthId = "valid-oauth-id";
         host = mock(User.class);
 
         when(userService.getUserOrThrow(validOauthId)).thenReturn(host);
         when(host.getDinners()).thenReturn(Set.of());
         when(mysteryService.getMysteryOrThrow(any())).thenThrow(new MysteryNotFoundException("Could not find Story."));
-        CreateSessionDto creationDTO = CreateSessionDto.builder()
+        CreateDinnerDto creationDTO = CreateDinnerDto.builder()
                 .storyId(UUID.randomUUID())
                 .build();
 
         assertThatThrownBy(() -> {
-            sessionService.createSession(validOauthId, creationDTO);
+            dinnerService.createDinner(validOauthId, creationDTO);
         }).isInstanceOf(MysteryNotFoundException.class)
                 .hasMessage("Could not find Story.");
     }
 
     @Test
-    void createSession_throwsStoryConfigurationNotFound_withInvalidConfigurationId()
+    void createDinner_throwsStoryConfigurationNotFound_withInvalidConfigurationId()
             throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
@@ -208,18 +208,18 @@ class SessionServiceTest {
         when(mystery.getSetups()).thenReturn(List.of(config));
         when(config.getId()).thenReturn(UUID.randomUUID());
 
-        CreateSessionDto creationDTO = CreateSessionDto.builder()
+        CreateDinnerDto creationDTO = CreateDinnerDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(UUID.randomUUID())
                 .build();
         assertThatThrownBy(() -> {
-            sessionService.createSession(validOauthId, creationDTO);
+            dinnerService.createDinner(validOauthId, creationDTO);
         }).isInstanceOf(StoryConfigurationNotFoundException.class)
                 .hasMessage("Could not find Story Configuration");
     }
 
     @Test
-    void createSession_throwsStoryConfigurationNotFound_withStoryContainingNoConfigs()
+    void createDinner_throwsStoryConfigurationNotFound_withStoryContainingNoConfigs()
             throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
@@ -231,18 +231,18 @@ class SessionServiceTest {
         when(mysteryService.getMysteryOrThrow(storyId)).thenReturn(mystery);
         when(mystery.getSetups()).thenReturn(List.of());
 
-        CreateSessionDto creationDTO = CreateSessionDto.builder()
+        CreateDinnerDto creationDTO = CreateDinnerDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(UUID.randomUUID())
                 .build();
         assertThatThrownBy(() -> {
-            sessionService.createSession(validOauthId, creationDTO);
+            dinnerService.createDinner(validOauthId, creationDTO);
         }).isInstanceOf(StoryConfigurationNotFoundException.class)
                 .hasMessage("Could not find Story Configuration");
     }
 
     @Test
-    void createSession_throwsRuntime_whenTooManyCodeGenerationAttempts() throws Exception {
+    void createDinner_throwsRuntime_whenTooManyCodeGenerationAttempts() throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
         UUID configId = UUID.randomUUID();
@@ -258,23 +258,23 @@ class SessionServiceTest {
 
         when(dinnerRepository.save(any())).thenThrow(new RuntimeException("Duplicate code"));
 
-        CreateSessionDto creationDTO = CreateSessionDto.builder()
+        CreateDinnerDto creationDTO = CreateDinnerDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(configId)
                 .build();
 
-        assertThatThrownBy(() -> sessionService.createSession(validOauthId,
+        assertThatThrownBy(() -> dinnerService.createDinner(validOauthId,
                 creationDTO))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Duplicate code");
     }
 
     @Test
-    void createSession_returnsSessionDTO_withValidInputs() throws Exception {
+    void createDinner_returnsDinnerDTO_withValidInputs() throws Exception {
         String validOauthId = "valid-oauth-id";
         UUID storyId = UUID.randomUUID();
         UUID configId = UUID.randomUUID();
-        UUID sessionId = UUID.randomUUID();
+        UUID dinnerId = UUID.randomUUID();
         host = mock(User.class);
         mystery = mock(Mystery.class);
         dinner = mock(Dinner.class);
@@ -286,23 +286,23 @@ class SessionServiceTest {
         when(mystery.getSetups()).thenReturn(List.of(config));
         when(config.getId()).thenReturn(configId);
         when(dinnerRepository.save(any())).thenReturn(dinner);
-        when(dinner.getId()).thenReturn(sessionId);
+        when(dinner.getId()).thenReturn(dinnerId);
         when(dinner.getConfig()).thenReturn(config);
         when(dinner.getMystery()).thenReturn(mystery);
 
-        CreateSessionDto creationDTO = CreateSessionDto.builder()
+        CreateDinnerDto creationDTO = CreateDinnerDto.builder()
                 .storyId(storyId)
                 .storyConfigurationId(configId)
                 .build();
 
-        assertThat(sessionService.createSession(validOauthId,
-                creationDTO).sessionId())
-                .isEqualTo(sessionId);
+        assertThat(dinnerService.createDinner(validOauthId,
+                creationDTO).dinnerId())
+                .isEqualTo(dinnerId);
 
         verify(dinnerRepository, times(2)).save(any());
     }
 
-    private void createDummySession() {
+    private void createDummyDinner() {
         host = User.builder()
                 .oauthId("UH")
                 .name("Host")
@@ -338,26 +338,26 @@ class SessionServiceTest {
         UUID dinnerId = UUID.randomUUID();
         when(userService.getUserOrThrow("bad-oauth")).thenThrow(new UserNotFoundException("User not found"));
 
-        assertThatThrownBy(() -> sessionService.getDinnerView("bad-oauth", dinnerId))
+        assertThatThrownBy(() -> dinnerService.getDinnerView("bad-oauth", dinnerId))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("User not found");
     }
 
     @Test
-    void getDinnerView_throwsSessionNotFound_whenSessionDoesNotExist() throws Exception {
+    void getDinnerView_throwsDinnerNotFound_whenDinnerDoesNotExist() throws Exception {
         String oauthId = "user-oauth";
         UUID dinnerId = UUID.randomUUID();
         user = User.builder().oauthId(oauthId).build();
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sessionService.getDinnerView(oauthId, dinnerId))
-                .isInstanceOf(com.geraldsaccount.killinary.exceptions.SessionNotFoundException.class)
-                .hasMessage("Could not find session");
+        assertThatThrownBy(() -> dinnerService.getDinnerView(oauthId, dinnerId))
+                .isInstanceOf(com.geraldsaccount.killinary.exceptions.DinnerNotFoundException.class)
+                .hasMessage("Could not find dinner");
     }
 
     @Test
-    void getDinnerView_throwsAccessDenied_whenUserNotInSession() throws Exception {
+    void getDinnerView_throwsAccessDenied_whenUserNotInDinner() throws Exception {
         String oauthId = "user-oauth";
         UUID dinnerId = UUID.randomUUID();
         user = User.builder().oauthId(oauthId).build();
@@ -365,9 +365,9 @@ class SessionServiceTest {
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
 
-        assertThatThrownBy(() -> sessionService.getDinnerView(oauthId, dinnerId))
+        assertThatThrownBy(() -> dinnerService.getDinnerView(oauthId, dinnerId))
                 .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Cannot access session data.");
+                .hasMessage("Cannot access dinner data.");
     }
 
     @Test
@@ -405,7 +405,7 @@ class SessionServiceTest {
         when(userMapper.asDTO(hostUser)).thenReturn(new UserDto(userId, "Host",
                 "avatar.png"));
 
-        DinnerView result = sessionService.getDinnerView(oauthId, dinnerId);
+        DinnerView result = dinnerService.getDinnerView(oauthId, dinnerId);
 
         assertThat(result).isInstanceOf(HostDinnerViewDto.class);
         HostDinnerViewDto dto = (HostDinnerViewDto) result;
@@ -474,7 +474,7 @@ class SessionServiceTest {
                 .thenReturn(new UserDto(hostUser.getId(), hostUser.getName(),
                         hostUser.getAvatarUrl()));
 
-        DinnerView result = sessionService.getDinnerView(oauthId, dinnerId);
+        DinnerView result = dinnerService.getDinnerView(oauthId, dinnerId);
 
         assertThat(result).isInstanceOf(GuestDinnerViewDto.class);
         GuestDinnerViewDto dto = (GuestDinnerViewDto) result;

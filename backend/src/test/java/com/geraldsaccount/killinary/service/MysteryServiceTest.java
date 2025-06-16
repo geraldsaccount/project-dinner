@@ -34,13 +34,14 @@ import com.geraldsaccount.killinary.model.dto.input.create.CreateStoryDto;
 import com.geraldsaccount.killinary.model.dto.output.other.ConfigDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.model.mystery.Character;
-import com.geraldsaccount.killinary.model.mystery.Crime;
 import com.geraldsaccount.killinary.model.mystery.Gender;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 import com.geraldsaccount.killinary.model.mystery.Stage;
 import com.geraldsaccount.killinary.model.mystery.Story;
+import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.MysteryRepository;
+import com.geraldsaccount.killinary.repository.StageRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 @ActiveProfiles("test")
@@ -49,6 +50,10 @@ class MysteryServiceTest {
 
     @Mock
     private StoryRepository storyRepository;
+    @Mock
+    private CharacterRepository characterRepository;
+    @Mock
+    private StageRepository stageRepository;
 
     @Mock
     private MysteryRepository mysteryRepository;
@@ -56,9 +61,9 @@ class MysteryServiceTest {
     @InjectMocks
     private MysteryService mysteryService;
 
-    private UUID charId;
-    private UUID stageId;
-    private UUID configId;
+    private String charId;
+    private String stageId;
+    private String configId;
     private CreateStoryDto baseStoryDto;
     private CreateStageDto baseStageDto;
     private CreateCharacterDto baseCharacterDto;
@@ -68,9 +73,9 @@ class MysteryServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        charId = UUID.randomUUID();
-        stageId = UUID.randomUUID();
-        configId = UUID.randomUUID();
+        charId = "C1";
+        stageId = "S1";
+        configId = "Conf1";
         baseStoryDto = new CreateStoryDto(
                 "title",
                 "shopDescription",
@@ -98,6 +103,8 @@ class MysteryServiceTest {
     private MysteryService createServiceWithRealMappers() {
         return new MysteryService(
                 mysteryRepository,
+                characterRepository,
+                stageRepository,
                 new PlayerConfigMapper(),
                 new StoryMapper(),
                 new CharacterMapper());
@@ -155,6 +162,8 @@ class MysteryServiceTest {
 
         mysteryService = new MysteryService(
                 mysteryRepository,
+                characterRepository,
+                stageRepository,
                 configMapper,
                 new StoryMapper(),
                 new CharacterMapper());
@@ -199,13 +208,16 @@ class MysteryServiceTest {
     @Test
     void createMystery_savesMystery_whenCalled() throws Exception {
         mysteryService = createServiceWithRealMappers();
-        Story story = mock(Story.class);
-        Character character = mock(Character.class);
-        Stage stage = mock(Stage.class);
-        PlayerConfig playerConfig = mock(PlayerConfig.class);
-        Crime crime = mock(Crime.class);
-        Mystery mystery = mock(Mystery.class);
-        when(mysteryRepository.save(any(Mystery.class))).thenReturn(mystery);
+        Character character = Character.builder()
+                .id(UUID.randomUUID())
+                .name("CharName")
+                .build();
+        Stage stage = Stage.builder()
+                .id(UUID.randomUUID())
+                .title("Stage 1")
+                .build();
+        when(characterRepository.saveAll(any())).thenReturn(List.of(character));
+        when(stageRepository.saveAll(any())).thenReturn(List.of(stage));
 
         mysteryService.createMystery(buildValidMysteryDto());
         verify(mysteryRepository).save(any(Mystery.class));
@@ -235,8 +247,8 @@ class MysteryServiceTest {
     @Test
     void createMystery_throwsMysteryCreation_whenConfigHasNoValidCharacters() {
         mysteryService = createServiceWithRealMappers();
-        UUID fakeCharId = UUID.randomUUID();
-        CreateConfigDto invalidConfig = new CreateConfigDto(UUID.randomUUID(), 1, List.of(fakeCharId));
+        String fakeCharId = "FakeChar";
+        CreateConfigDto invalidConfig = new CreateConfigDto("Conf2", 1, List.of(fakeCharId));
         CreateCrimeDto invalidCrime = new CreateCrimeDto(List.of(fakeCharId), "desc");
         CreateMysteryDto dto = buildValidMysteryDto()
                 .withSetups(List.of(invalidConfig))
@@ -298,8 +310,8 @@ class MysteryServiceTest {
     @Test
     void createMystery_throwsMysteryCreation_whenConfigCharacterIdsIsNullOrEmpty() {
         mysteryService = createServiceWithRealMappers();
-        CreateConfigDto configNull = new CreateConfigDto(UUID.randomUUID(), 1, null);
-        CreateConfigDto configEmpty = new CreateConfigDto(UUID.randomUUID(), 1, List.of());
+        CreateConfigDto configNull = new CreateConfigDto("ConfA", 1, null);
+        CreateConfigDto configEmpty = new CreateConfigDto("ConfB", 1, List.of());
         CreateMysteryDto dtoNull = buildValidMysteryDto().withSetups(List.of(configNull));
         CreateMysteryDto dtoEmpty = buildValidMysteryDto().withSetups(List.of(configEmpty));
 

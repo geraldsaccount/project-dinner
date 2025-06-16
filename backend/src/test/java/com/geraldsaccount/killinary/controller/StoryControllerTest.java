@@ -1,14 +1,15 @@
 package com.geraldsaccount.killinary.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,15 +21,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
 import com.geraldsaccount.killinary.TestDatabaseResetUtil;
-import com.geraldsaccount.killinary.model.Character;
-import com.geraldsaccount.killinary.model.Gender;
-import com.geraldsaccount.killinary.model.Story;
-import com.geraldsaccount.killinary.model.StoryConfiguration;
-import com.geraldsaccount.killinary.model.dto.input.CreateCharacterDto;
-import com.geraldsaccount.killinary.model.dto.input.CreateConfigDto;
-import com.geraldsaccount.killinary.model.dto.input.CreateStoryDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterStageInfoDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateConfigDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateCrimeDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateMysteryDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateStageDto;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateStageEvent;
+import com.geraldsaccount.killinary.model.dto.input.create.CreateStoryDto;
+import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Gender;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
+import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
-import com.geraldsaccount.killinary.repository.StoryConfigurationRepository;
+import com.geraldsaccount.killinary.repository.MysteryRepository;
+import com.geraldsaccount.killinary.repository.PlayerConfigRepository;
 import com.geraldsaccount.killinary.repository.StoryRepository;
 
 import jakarta.transaction.Transactional;
@@ -37,13 +45,16 @@ import jakarta.transaction.Transactional;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SuppressWarnings("unused")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class StoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private StoryRepository storyRepository;
     @Autowired
-    private StoryConfigurationRepository storyConfigurationRepository;
+    private MysteryRepository mysteryRepository;
+    @Autowired
+    private PlayerConfigRepository playerConfigRepository;
     @Autowired
     private CharacterRepository characterRepository;
     @Autowired
@@ -52,38 +63,36 @@ class StoryControllerTest {
     @Autowired
     private TestDatabaseResetUtil databaseResetUtil;
 
-    @BeforeEach
     @Transactional
     void setUp() {
-        databaseResetUtil.resetDatabase();
-
-        Story story = storyRepository.save(Story.builder()
+        Story story = Story.builder()
                 .title("Test Story")
-                .thumbnailDescription("A thrilling adventure")
-                .build());
+                .shopDescription("A thrilling adventure")
+                .build();
 
         Character character1 = characterRepository.save(Character.builder()
                 .name("Alice")
                 .gender(Gender.FEMALE)
-                .story(story)
                 .build());
         Character character2 = characterRepository.save(Character.builder()
                 .name("Bob")
                 .gender(Gender.MALE)
-                .story(story)
                 .build());
 
-        StoryConfiguration config = storyConfigurationRepository.save(StoryConfiguration.builder()
+        PlayerConfig config = PlayerConfig.builder()
                 .characters(Set.of(character1, character2))
-                .story(story)
-                .build());
+                .build();
 
-        storyRepository.save(story.withCharacters(Set.of(character1, character2))
-                .withConfigurations(Set.of(config)));
+        Mystery mystery = mysteryRepository.save(Mystery.builder()
+                .story(story)
+                .characters(List.of(character1, character2))
+                .setups(List.of(config))
+                .build());
     }
 
     @Test
     void getStorySummaries_returnsSummaries() throws Exception {
+        setUp();
         mockMvc.perform(get("/api/stories").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -97,7 +106,6 @@ class StoryControllerTest {
 
     @Test
     void getStorySummaries_returnsEmpty_whenNoStories() throws Exception {
-        databaseResetUtil.resetDatabase();
         mockMvc.perform(get("/api/stories").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -106,43 +114,71 @@ class StoryControllerTest {
 
     @Test
     void createStory_createsStoryWithCharactersAndConfigs() throws Exception {
-        var charDto1 = new CreateCharacterDto(0, "Alice", Gender.FEMALE, "desc", "private", "url1");
-        var charDto2 = new CreateCharacterDto(1, "Bob", Gender.MALE, "desc2", "private2", "url2");
-        var configDto = new CreateConfigDto(java.util.List.of(0, 1));
-        var dto = new CreateStoryDto(
-                "New Story",
-                "A new adventure",
-                "Shop desc",
-                "Dinner brief",
-                "banner.png",
-                Set.of(charDto1, charDto2),
-                Set.of(configDto));
-        String requestBody = objectMapper.writeValueAsString(dto);
+        CreateCharacterDto charDto1 = CreateCharacterDto.builder()
+                .id("C1")
+                .name("Alice")
+                .role("Crazy Victorian Lady")
+                .age(16)
+                .isPrimary(true)
+                .gender(Gender.FEMALE)
+                .shopDescription("Description")
+                .privateDescription("Secret")
+                .avatarUrl("avatar.com")
+                .build();
 
+        CreateCharacterDto charDto2 = CreateCharacterDto.builder()
+                .id("C2")
+                .name("Bob")
+                .role("Builder")
+                .age(25)
+                .isPrimary(false)
+                .gender(Gender.MALE)
+                .shopDescription("Description")
+                .privateDescription("Secret")
+                .avatarUrl("avatar.com")
+                .build();
+
+        CreateStageDto stageDto = new CreateStageDto("S1", 0, "The Beginning of the end",
+                "Tell the guest whats going on");
+
+        Map<String, String> relationships1 = Map.of(
+                "C2", "Friend");
+        Map<String, String> relationships2 = Map.of(
+                "C1", "Friend");
+
+        List<CreateStageEvent> stageEvents1 = List.of(
+                new CreateStageEvent("S1", 0, "12:00", "Meet", "Meet at the park"));
+
+        List<CreateStageEvent> stageEvents2 = List.of(
+                new CreateStageEvent("S1", 0, "12:00", "Meet", "Meet at the park"));
+
+        List<CreateCharacterStageInfoDto> stageInfo1 = List.of(
+                new CreateCharacterStageInfoDto(stageDto.id(), "Find the clue", stageEvents1));
+
+        List<CreateCharacterStageInfoDto> stageInfo2 = List.of(
+                new CreateCharacterStageInfoDto(stageDto.id(), "Help Alice", stageEvents2));
+
+        charDto1 = charDto1.withRelationships(relationships1).withStageInfo(stageInfo1);
+        charDto2 = charDto2.withRelationships(relationships2).withStageInfo(stageInfo2);
+
+        CreateConfigDto configDto = new CreateConfigDto("S1", 2, List.of(charDto1.id(), charDto2.id()));
+        CreateStoryDto storyDto = new CreateStoryDto(
+                "New Story",
+                "Shop desc",
+                "banner.png",
+                "rules",
+                "Story setting",
+                "Dinner brief");
+        CreateCrimeDto crimeDto = new CreateCrimeDto(List.of(charDto1.id()), "She did it frfr");
+        CreateMysteryDto mysteryDto = new CreateMysteryDto(storyDto, List.of(charDto1, charDto2), List.of(stageDto),
+                List.of(configDto),
+                crimeDto);
+
+        String requestBody = objectMapper.writeValueAsString(mysteryDto);
         mockMvc.perform(post("/api/stories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void createStory_returnsBadRequest_whenConfigReferencesUnknownCharacterIndex() throws Exception {
-        var charDto = new CreateCharacterDto(0, "Alice", Gender.FEMALE, "desc", "private", "url1");
-        var configDto = new CreateConfigDto(List.of(1));
-        var dto = new CreateStoryDto(
-                "Invalid Story",
-                "desc",
-                "shop",
-                "brief",
-                "banner",
-                Set.of(charDto),
-                Set.of(configDto));
-        String requestBody = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post("/api/stories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
-                .andExpect(status().isBadRequest());
     }
 
 }

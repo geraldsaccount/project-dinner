@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
+import com.geraldsaccount.killinary.exceptions.DinnerNotFoundException;
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
-import com.geraldsaccount.killinary.exceptions.SessionNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
@@ -22,7 +22,7 @@ import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.model.dinner.Dinner;
 import com.geraldsaccount.killinary.model.dinner.DinnerStatus;
-import com.geraldsaccount.killinary.model.dto.input.CreateSessionDto;
+import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.PrivateCharacterInfo;
 import com.geraldsaccount.killinary.model.dto.output.dinner.CharacterAssignmentDto;
@@ -31,7 +31,7 @@ import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerView;
 import com.geraldsaccount.killinary.model.dto.output.dinner.GuestDinnerViewDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.HostDinnerViewDto;
-import com.geraldsaccount.killinary.model.dto.output.other.CreatedSessionDto;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
 import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
@@ -42,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class SessionService {
+public class DinnerService {
     private final DinnerRepository dinnerRepository;
     private final UserService userService;
     private final MysteryService mysteryService;
@@ -51,7 +51,7 @@ public class SessionService {
     private final CharacterMapper characterMapper;
 
     @Transactional
-    public Set<DinnerSummaryDto> getSessionSummariesFrom(String oauthId) {
+    public Set<DinnerSummaryDto> getDinnerSummariesFrom(String oauthId) {
         return dinnerRepository.findAllByUserId(oauthId).stream()
                 .map(dinner -> {
                     String characterName = dinner.getCharacterAssignments().stream()
@@ -71,7 +71,7 @@ public class SessionService {
     }
 
     @Transactional
-    public CreatedSessionDto createSession(String oauthId, CreateSessionDto creationDTO)
+    public CreatedDinnerDto createDinner(String oauthId, CreateDinnerDto creationDTO)
             throws UserNotFoundException, MysteryNotFoundException,
             StoryConfigurationNotFoundException,
             AccessDeniedException {
@@ -81,10 +81,10 @@ public class SessionService {
         Mystery mystery = mysteryService.getMysteryOrThrow(creationDTO.storyId());
         Dinner dinner = buildDinner(host, mystery, creationDTO);
         dinner = addEmptyCharacterAssignment(dinner);
-        return new CreatedSessionDto(dinner.getId());
+        return new CreatedDinnerDto(dinner.getId());
     }
 
-    private Dinner buildDinner(User host, Mystery mystery, CreateSessionDto creationDTO)
+    private Dinner buildDinner(User host, Mystery mystery, CreateDinnerDto creationDTO)
             throws StoryConfigurationNotFoundException {
         return dinnerRepository.save(Dinner.builder()
                 .host(host)
@@ -131,19 +131,19 @@ public class SessionService {
 
     @Transactional
     public DinnerView getDinnerView(String oauthId, UUID dinnerId)
-            throws UserNotFoundException, SessionNotFoundException,
+            throws UserNotFoundException, DinnerNotFoundException,
             AccessDeniedException,
             CharacterAssignmentNotFoundException {
         User user = userService.getUserOrThrow(oauthId);
 
         Dinner dinner = dinnerRepository.findById(dinnerId)
-                .orElseThrow(() -> new SessionNotFoundException("Could not find session"));
+                .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
 
-        boolean isInSession = dinner.getCharacterAssignments().stream()
+        boolean isInDinner = dinner.getCharacterAssignments().stream()
                 .anyMatch(a -> a.getUser() != null && a.getUser().equals(user));
 
-        if (!isInSession) {
-            throw new AccessDeniedException("Cannot access session data.");
+        if (!isInDinner) {
+            throw new AccessDeniedException("Cannot access dinner data.");
         }
 
         boolean isHost = dinner.getHost().equals(user);

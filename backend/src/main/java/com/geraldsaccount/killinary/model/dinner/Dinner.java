@@ -67,8 +67,8 @@ public class Dinner {
     private LocalDateTime date;
 
     @Builder.Default
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "session_participants", joinColumns = @JoinColumn(name = "dinner_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "dinner_participants", joinColumns = @JoinColumn(name = "dinner_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
 
     @Builder.Default
