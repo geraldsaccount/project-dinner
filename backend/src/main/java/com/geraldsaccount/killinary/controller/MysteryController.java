@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.geraldsaccount.killinary.exceptions.StoryConfigurationCreationException;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateMysteryDto;
 import com.geraldsaccount.killinary.model.dto.output.other.StoryForCreationDto;
 import com.geraldsaccount.killinary.service.MysteryService;
@@ -29,8 +28,7 @@ public class MysteryController {
     }
 
     @PostMapping()
-    public void createMystery(Authentication auth, @RequestBody CreateMysteryDto input)
-            throws StoryConfigurationCreationException {
+    public void createMystery(Authentication auth, @RequestBody CreateMysteryDto input) {
         service.createMystery(input);
     }
 }

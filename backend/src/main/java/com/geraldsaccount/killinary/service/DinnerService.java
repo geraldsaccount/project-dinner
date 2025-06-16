@@ -102,8 +102,6 @@ public class DinnerService {
     @Transactional
     private Dinner addEmptyCharacterAssignment(Dinner dinner) {
         int maxAttempts = 5;
-        dinner.getMystery().getCharacters().stream()
-                .collect(Collectors.toMap(Character::getId, c -> c));
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             Set<String> codes = new HashSet<>();
             Set<CharacterAssignment> assignments = dinner.getConfig().getCharacters().stream()

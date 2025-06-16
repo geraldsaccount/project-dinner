@@ -46,7 +46,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class MysteryService {
-    private final String characterNotFoundMessage = "Could not find Character after persisting it";
+    private static final String CHARACTER_NOT_FOUND_MESSAGE = "Could not find Character after persisting it";
     private final MysteryRepository mysteryRepository;
     private final CharacterRepository characterRepository;
     private final StageRepository stageRepository;
@@ -69,7 +69,7 @@ public class MysteryService {
 
             Set<CharacterDetailDto> characters = m.getSetups().stream()
                     .flatMap(cfg -> cfg.getCharacters().stream())
-                    .map(c -> characterMapper.asDetailDTO(c))
+                    .map(characterMapper::asDetailDTO)
                     .collect(Collectors.toSet());
 
             return new StoryForCreationDto(
@@ -123,7 +123,7 @@ public class MysteryService {
                 CreateCharacterDto::id,
                 CreateCharacterDto::name,
                 Character::getName,
-                () -> new MysteryCreationException(characterNotFoundMessage));
+                () -> new MysteryCreationException(CHARACTER_NOT_FOUND_MESSAGE));
     }
 
     private Map<String, Stage> saveStages(List<CreateStageDto> input) throws MysteryCreationException {
@@ -169,7 +169,7 @@ public class MysteryService {
                 CreateCharacterDto::id,
                 CreateCharacterDto::name,
                 Character::getName,
-                () -> new MysteryCreationException(characterNotFoundMessage));
+                () -> new MysteryCreationException(CHARACTER_NOT_FOUND_MESSAGE));
     }
 
     private CharacterStageInfo buildStageInfoOrThrow(Map<String, Stage> stages, Character character,
@@ -179,8 +179,7 @@ public class MysteryService {
         if (!stages.containsKey(csi.stageId()))
             throw new MysteryCreationException("Stage with id " + csi.stageId() + " not found");
         Stage stage = stages.get(csi.stageId());
-        CharacterStageInfo stageInfo = buildStageInfo(csi, character.getId(), stage);
-        return stageInfo;
+        return buildStageInfo(csi, character.getId(), stage);
     }
 
     private CharacterStageInfo buildStageInfo(CreateCharacterStageInfoDto input, UUID characterId,
@@ -234,7 +233,7 @@ public class MysteryService {
                 CreateCharacterDto::id,
                 CreateCharacterDto::name,
                 Character::getName,
-                () -> new MysteryCreationException(characterNotFoundMessage));
+                () -> new MysteryCreationException(CHARACTER_NOT_FOUND_MESSAGE));
     }
 
     private List<PlayerConfig> buildPlayerConfigs(Map<String, Character> characters, List<CreateConfigDto> input)
@@ -266,8 +265,10 @@ public class MysteryService {
     private Crime buildCrime(Map<String, Character> characters, CreateCrimeDto input) throws MysteryCreationException {
         if (input == null)
             throw new MysteryCreationException("Crime input cannot be null");
-        var criminals = characters.values().stream()
-                .filter(c -> input.criminalIds().contains(c.getId())).collect(Collectors.toSet());
+        Set<Character> criminals = input.criminalIds().stream()
+                .map(characters::get)
+                .collect(Collectors.toSet());
+
         return Crime.builder()
                 .criminals(criminals)
                 .description(input.description())
@@ -295,12 +296,12 @@ public class MysteryService {
                 .build());
     }
 
-    public static <DTO, ENTITY, ID> Map<ID, ENTITY> mapByIdAndMatch(
-            List<DTO> dtos,
-            List<ENTITY> entities,
-            Function<DTO, ID> idExtractor,
-            Function<DTO, String> dtoNameExtractor,
-            Function<ENTITY, String> entityNameExtractor,
+    public static <D, E, I> Map<I, E> mapByIdAndMatch(
+            List<D> dtos,
+            List<E> entities,
+            Function<D, I> idExtractor,
+            Function<D, String> dtoNameExtractor,
+            Function<E, String> entityNameExtractor,
             Supplier<RuntimeException> notFoundSupplier) {
         return dtos.stream()
                 .collect(Collectors.toMap(
