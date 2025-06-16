@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
@@ -156,8 +155,8 @@ class MysteryServiceTest {
 
         PlayerConfigMapper configMapper = mock(PlayerConfigMapper.class);
 
-        when(configMapper.asSummaryDTO(eq(config1))).thenReturn(summaryDTO1);
-        when(configMapper.asSummaryDTO(eq(config2))).thenReturn(summaryDTO2);
+        when(configMapper.asSummaryDTO(config1)).thenReturn(summaryDTO1);
+        when(configMapper.asSummaryDTO(config2)).thenReturn(summaryDTO2);
         when(mysteryRepository.findAll()).thenReturn(List.of(mystery));
 
         mysteryService = new MysteryService(
@@ -239,8 +238,8 @@ class MysteryServiceTest {
                 baseCharacterDto.relationships(),
                 baseCharacterDto.stageInfo());
         CreateMysteryDto dto = buildValidMysteryDto().withCharacters(List.of(invalidCharacter));
-
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> service.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
@@ -254,14 +253,15 @@ class MysteryServiceTest {
                 .withSetups(List.of(invalidConfig))
                 .withCrime(invalidCrime);
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
     @Test
     void createMystery_throwsIllegalArgument_whenInputIsNull() {
         mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(null))
+        assertThatThrownBy(() -> mysteryService.createMystery(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -271,7 +271,8 @@ class MysteryServiceTest {
         CreateStageDto invalidStage = new CreateStageDto(null, 1, "Stage 1", "Prompt");
         CreateMysteryDto dto = buildValidMysteryDto().withStages(List.of(invalidStage));
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
@@ -293,7 +294,8 @@ class MysteryServiceTest {
         );
         CreateMysteryDto dto = buildValidMysteryDto().withCharacters(List.of(invalidCharacter));
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
@@ -303,7 +305,8 @@ class MysteryServiceTest {
         CreateConfigDto invalidConfig = new CreateConfigDto(null, 1, List.of(baseCharacterDto.id()));
         CreateMysteryDto dto = buildValidMysteryDto().withSetups(List.of(invalidConfig));
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
@@ -315,9 +318,10 @@ class MysteryServiceTest {
         CreateMysteryDto dtoNull = buildValidMysteryDto().withSetups(List.of(configNull));
         CreateMysteryDto dtoEmpty = buildValidMysteryDto().withSetups(List.of(configEmpty));
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dtoNull))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dtoNull))
                 .isInstanceOf(MysteryCreationException.class);
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dtoEmpty))
+        assertThatThrownBy(() -> mysteryService.createMystery(dtoEmpty))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
@@ -326,7 +330,8 @@ class MysteryServiceTest {
         mysteryService = createServiceWithRealMappers();
         CreateMysteryDto dto = buildValidMysteryDto().withCrime(null);
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(MysteryCreationException.class);
     }
 
@@ -335,7 +340,8 @@ class MysteryServiceTest {
         mysteryService = createServiceWithRealMappers();
         CreateMysteryDto dto = buildValidMysteryDto().withStory(null);
 
-        assertThatThrownBy(() -> createServiceWithRealMappers().createMystery(dto))
+        mysteryService = createServiceWithRealMappers();
+        assertThatThrownBy(() -> mysteryService.createMystery(dto))
                 .isInstanceOf(NullPointerException.class);
     }
 }

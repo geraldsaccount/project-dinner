@@ -63,36 +63,9 @@ class StoryControllerTest {
     @Autowired
     private TestDatabaseResetUtil databaseResetUtil;
 
-    @Transactional
-    void setUp() {
-        Story story = Story.builder()
-                .title("Test Story")
-                .shopDescription("A thrilling adventure")
-                .build();
-
-        Character character1 = characterRepository.save(Character.builder()
-                .name("Alice")
-                .gender(Gender.FEMALE)
-                .build());
-        Character character2 = characterRepository.save(Character.builder()
-                .name("Bob")
-                .gender(Gender.MALE)
-                .build());
-
-        PlayerConfig config = PlayerConfig.builder()
-                .characters(Set.of(character1, character2))
-                .build();
-
-        Mystery mystery = mysteryRepository.save(Mystery.builder()
-                .story(story)
-                .characters(List.of(character1, character2))
-                .setups(List.of(config))
-                .build());
-    }
-
     @Test
     void getStorySummaries_returnsSummaries() throws Exception {
-        setUp();
+        saveMystery();
         mockMvc.perform(get("/api/stories").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -181,4 +154,30 @@ class StoryControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Transactional
+    void saveMystery() {
+        Story story = Story.builder()
+                .title("Test Story")
+                .shopDescription("A thrilling adventure")
+                .build();
+
+        Character character1 = characterRepository.save(Character.builder()
+                .name("Alice")
+                .gender(Gender.FEMALE)
+                .build());
+        Character character2 = characterRepository.save(Character.builder()
+                .name("Bob")
+                .gender(Gender.MALE)
+                .build());
+
+        PlayerConfig config = PlayerConfig.builder()
+                .characters(Set.of(character1, character2))
+                .build();
+
+        Mystery mystery = mysteryRepository.save(Mystery.builder()
+                .story(story)
+                .characters(List.of(character1, character2))
+                .setups(List.of(config))
+                .build());
+    }
 }

@@ -1,6 +1,5 @@
 package com.geraldsaccount.killinary.controller;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geraldsaccount.killinary.KillinaryApplication;
 import com.geraldsaccount.killinary.TestDatabaseResetUtil;
@@ -210,7 +208,7 @@ class DinnerControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createDinner_returnsBadRequest_whenUserAlreadyPlayed() throws JsonProcessingException, Exception {
+    void createDinner_returnsBadRequest_whenUserAlreadyPlayed() throws Exception {
         CreateDinnerDto dto = CreateDinnerDto.builder()
                 .storyId(dinner.getMystery().getId())
                 .build();
@@ -223,7 +221,7 @@ class DinnerControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createDinner_returnsNotFound_whenStoryNotFound() throws JsonProcessingException, Exception {
+    void createDinner_returnsNotFound_whenStoryNotFound() throws Exception {
         CreateDinnerDto dto = CreateDinnerDto.builder()
                 .storyId(UUID.randomUUID())
                 .build();
@@ -236,7 +234,7 @@ class DinnerControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createDinner_returnsNotFound_whenStoryConfigNotFound() throws JsonProcessingException, Exception {
+    void createDinner_returnsNotFound_whenStoryConfigNotFound() throws Exception {
         CreateDinnerDto dto = CreateDinnerDto.builder()
                 .storyId(newMystery.getId())
                 .storyConfigurationId(UUID.randomUUID())
@@ -251,8 +249,7 @@ class DinnerControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" })
-    void createDinner_returnsDinnerCreatedDTO_whenValidData()
-            throws JsonProcessingException, UnsupportedEncodingException, Exception {
+    void createDinner_returnsDinnerCreatedDTO_whenValidData() throws Exception {
         CreateDinnerDto dto = CreateDinnerDto.builder()
                 .storyId(newMystery.getId())
                 .storyConfigurationId(config.getId())

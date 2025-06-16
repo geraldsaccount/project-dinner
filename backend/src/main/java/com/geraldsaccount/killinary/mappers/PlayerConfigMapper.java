@@ -1,6 +1,6 @@
 package com.geraldsaccount.killinary.mappers;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public class PlayerConfigMapper {
         Map<Gender, Long> genderCounts = characters.stream()
                 .collect(Collectors.groupingBy(Character::getGender,
                         Collectors.counting()));
-        Map<Gender, Integer> genderCountsInt = new HashMap<>();
+        Map<Gender, Integer> genderCountsInt = new EnumMap<>(Gender.class);
         genderCounts.forEach((k, v) -> genderCountsInt.put(k, v.intValue()));
 
         return new ConfigDto(input.getId(),

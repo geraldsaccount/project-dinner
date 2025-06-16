@@ -1,7 +1,6 @@
 package com.geraldsaccount.killinary.service;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
+import com.geraldsaccount.killinary.exceptions.CodeGenerationException;
 import com.geraldsaccount.killinary.exceptions.DinnerNotFoundException;
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
@@ -102,7 +102,7 @@ public class DinnerService {
     @Transactional
     private Dinner addEmptyCharacterAssignment(Dinner dinner) {
         int maxAttempts = 5;
-        Map<UUID, Character> characters = dinner.getMystery().getCharacters().stream()
+        dinner.getMystery().getCharacters().stream()
                 .collect(Collectors.toMap(Character::getId, c -> c));
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             Set<String> codes = new HashSet<>();
@@ -123,9 +123,10 @@ public class DinnerService {
             try {
                 return dinnerRepository.save(dinner.withCharacterAssignments(assignments));
             } catch (DataIntegrityViolationException e) {
+                // continue when thrown
             }
         }
-        throw new RuntimeException("Could not generate a unique code after " +
+        throw new CodeGenerationException("Could not generate a unique code after " +
                 maxAttempts + " attempts");
     }
 
