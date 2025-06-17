@@ -5,19 +5,21 @@ spring:
         jwt:
           jwk-set-uri: "https://related-colt-33.clerk.accounts.dev/.well-known/jwks.json"
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS testdb
     driver-class-name: org.h2.Driver
     username: sa
     password: ''
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
+        format-sql: true
+        use-sql-comments: true
         dialect: org.hibernate.dialect.H2Dialect
-        hbm2ddl:
-          auto: create-drop
+        # hbm2ddl:
+        #   auto: create-drop
 clerk:
   webhook:
     secret: aGVsbG8td29ybGQtd2ViYm9vay1zZWNyZXQ # "hello-world-webhook-secret" in base64

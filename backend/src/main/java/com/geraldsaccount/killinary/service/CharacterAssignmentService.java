@@ -11,12 +11,13 @@ import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundExcept
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
-import com.geraldsaccount.killinary.model.CharacterAssignment;
-import com.geraldsaccount.killinary.model.Session;
-import com.geraldsaccount.killinary.model.Story;
 import com.geraldsaccount.killinary.model.User;
+import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
+import com.geraldsaccount.killinary.model.dinner.Dinner;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerParticipantDto;
 import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
+import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
 
 import jakarta.transaction.Transactional;
@@ -32,13 +33,15 @@ public class CharacterAssignmentService {
 
     @Transactional
     public void acceptInvitation(String oauthId, String inviteCode)
-            throws UserNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException {
+            throws UserNotFoundException, CharacterAssignmentNotFoundException,
+            AccessDeniedException {
         User user = userService.getUserOrThrow(oauthId);
 
         CharacterAssignment assignment = repository.findByCode(inviteCode)
                 .orElseThrow(() -> new CharacterAssignmentNotFoundException("Invalid invitation code"));
 
-        userService.validateHasNotPlayedStory(user, assignment.getSession().getStory().getId());
+        userService.validateHasNotPlayedStory(user,
+                assignment.getDinner().getMystery().getId());
         repository.save(assignment
                 .withCode(null)
                 .withUser(user));
@@ -53,25 +56,28 @@ public class CharacterAssignmentService {
             User user = userService.getUserOrThrow(auth.getName());
 
             try {
-                userService.validateHasNotPlayedStory(user, assignment.getSession().getStory().getId());
+                userService.validateHasNotPlayedStory(user,
+                        assignment.getDinner().getMystery().getId());
             } catch (AccessDeniedException e) {
                 canAccept = false;
             }
         }
 
-        Session session = assignment.getSession();
-        Story story = session.getStory();
+        Dinner dinner = assignment.getDinner();
+        Mystery mystery = dinner.getMystery();
+        Story story = mystery.getStory();
 
-        Set<DinnerParticipantDto> otherParticipants = session.getCharacterAssignments().stream()
-                .map(charAs -> new DinnerParticipantDto(userMapper.asDTO(charAs.getUser()), null))
+        Set<DinnerParticipantDto> otherParticipants = dinner.getCharacterAssignments().stream()
+                .map(charAs -> new DinnerParticipantDto(userMapper.asDTO(charAs.getUser()),
+                        null))
                 .collect(Collectors.toSet());
 
         return new InvitationViewDto(inviteCode,
-                session.getStartedAt(),
-                userMapper.asDTO(session.getHost()),
+                dinner.getDate(),
+                userMapper.asDTO(dinner.getHost()),
                 story.getTitle(),
                 story.getBannerUrl(),
-                story.getDinnerStoryBrief(),
+                story.getBriefing(),
                 characterMapper.asDetailDTO(assignment.getCharacter()),
                 otherParticipants,
                 canAccept);
