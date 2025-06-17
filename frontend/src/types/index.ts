@@ -179,3 +179,12 @@ export interface ConfigDto {
   genderCounts: Record<Gender, number>;
   characterIds: string[];
 }
+
+export interface StoryForCreationDto {
+    id: string;
+    story: StorySummaryDto;
+    minPlayerCount: number;
+    maxPlayerCount: number;
+    characters: CharacterDetailDto[];
+    configs: ConfigDto[];
+}
