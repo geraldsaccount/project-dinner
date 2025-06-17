@@ -35,10 +35,9 @@ const CharacterEventCard = ({ character, stageInfo, event }: Props) => {
   const handleDeleteEvent = (stageId: string, eventId: string) => {
     const newStageInfo = character.stageInfo.map((si: CharacterStageInfo) => {
       if (si.stageId === stageId) {
-        const newEvents = si.events.filter(
-          (ev: StageEvent) => ev.id !== eventId
-        );
-        return { ...si, events: newEvents };
+        const filteredEvents = si.events.filter((ev: StageEvent) => ev.id !== eventId);
+        const reorderedEvents = filteredEvents.map((ev, idx) => ({ ...ev, order: idx }));
+        return { ...si, events: reorderedEvents };
       }
       return si;
     });

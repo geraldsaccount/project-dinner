@@ -46,7 +46,7 @@ const EventCreationPage = () => {
   const navigate = useNavigate();
   // const stories = [sampleStorySummary];
   useEffect(() => {
-    fetchStories("/api/stories");
+    fetchStories("/api/mysteries");
   }, [fetchStories]);
 
   const form = useForm<EventFormValues>({
@@ -77,9 +77,9 @@ const EventCreationPage = () => {
         eventStart: data.date,
       };
       console.log(body);
-      const result = await postSession("/api/sessions", "POST", body);
+      const result = await postSession("/api/dinners", "POST", body);
       if (result && result.sessionId) {
-        navigate(`/sessions/${result.sessionId}`);
+        navigate(`/dinners/${result.sessionId}`);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {

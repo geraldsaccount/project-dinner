@@ -17,7 +17,7 @@ const EventsPage = () => {
   } = useAuthenticatedApi<DinnerSummaryDto[]>();
 
   useEffect(() => {
-    fetchEvents("/api/sessions");
+    fetchEvents("/api/dinners");
   }, [fetchEvents]);
 
   // const navigate = useNavigate();
