@@ -32,12 +32,14 @@ export interface Character {
 
 export interface CharacterStageInfo {
   stageId: string;
+  order: number;
   objectivePrompt: string;
   events: StageEvent[];
 }
 
 export interface StageEvent {
   id: string;
+  order: number;
   time: string;
   title: string;
   description: string;
@@ -45,6 +47,7 @@ export interface StageEvent {
 
 export interface Stage {
   id: string;
+  order: number;
   title: string;
   hostPrompt: string;
 }

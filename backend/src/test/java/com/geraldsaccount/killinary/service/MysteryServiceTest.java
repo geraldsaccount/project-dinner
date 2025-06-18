@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
@@ -19,11 +18,9 @@ import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.geraldsaccount.killinary.exceptions.MysteryCreationException;
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
 import com.geraldsaccount.killinary.mappers.PlayerConfigMapper;
-import com.geraldsaccount.killinary.mappers.StoryMapper;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateConfigDto;
 import com.geraldsaccount.killinary.model.dto.input.create.CreateCrimeDto;
@@ -36,7 +33,6 @@ import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.Gender;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
-import com.geraldsaccount.killinary.model.mystery.Stage;
 import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterRepository;
 import com.geraldsaccount.killinary.repository.MysteryRepository;
@@ -102,10 +98,7 @@ class MysteryServiceTest {
     private MysteryService createServiceWithRealMappers() {
         return new MysteryService(
                 mysteryRepository,
-                characterRepository,
-                stageRepository,
                 new PlayerConfigMapper(),
-                new StoryMapper(),
                 new CharacterMapper());
     }
 
@@ -161,10 +154,7 @@ class MysteryServiceTest {
 
         mysteryService = new MysteryService(
                 mysteryRepository,
-                characterRepository,
-                stageRepository,
                 configMapper,
-                new StoryMapper(),
                 new CharacterMapper());
         Set<StoryForCreationDto> result = mysteryService.getMysterySummaries();
 
@@ -202,146 +192,5 @@ class MysteryServiceTest {
         }).isInstanceOf(MysteryNotFoundException.class)
                 .hasMessageContaining("Could not find Story.");
         verify(mysteryRepository).findById(mysteryId);
-    }
-
-    @Test
-    void createMystery_savesMystery_whenCalled() throws Exception {
-        mysteryService = createServiceWithRealMappers();
-        Character character = Character.builder()
-                .id(UUID.randomUUID())
-                .name("CharName")
-                .build();
-        Stage stage = Stage.builder()
-                .id(UUID.randomUUID())
-                .title("Stage 1")
-                .build();
-        when(characterRepository.saveAll(any())).thenReturn(List.of(character));
-        when(stageRepository.saveAll(any())).thenReturn(List.of(stage));
-
-        mysteryService.createMystery(buildValidMysteryDto());
-        verify(mysteryRepository).save(any(Mystery.class));
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenCharacterIdIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        CreateCharacterDto invalidCharacter = new CreateCharacterDto(
-                null,
-                baseCharacterDto.name(),
-                baseCharacterDto.role(),
-                baseCharacterDto.age(),
-                baseCharacterDto.isPrimary(),
-                baseCharacterDto.gender(),
-                baseCharacterDto.shopDescription(),
-                baseCharacterDto.privateDescription(),
-                baseCharacterDto.avatarUrl(),
-                baseCharacterDto.relationships(),
-                baseCharacterDto.stageInfo());
-        CreateMysteryDto dto = buildValidMysteryDto().withCharacters(List.of(invalidCharacter));
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenConfigHasNoValidCharacters() {
-        mysteryService = createServiceWithRealMappers();
-        String fakeCharId = "FakeChar";
-        CreateConfigDto invalidConfig = new CreateConfigDto("Conf2", 1, List.of(fakeCharId));
-        CreateCrimeDto invalidCrime = new CreateCrimeDto(List.of(fakeCharId), "desc");
-        CreateMysteryDto dto = buildValidMysteryDto()
-                .withSetups(List.of(invalidConfig))
-                .withCrime(invalidCrime);
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsIllegalArgument_whenInputIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(null))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenStageIdIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        CreateStageDto invalidStage = new CreateStageDto(null, 1, "Stage 1", "Prompt");
-        CreateMysteryDto dto = buildValidMysteryDto().withStages(List.of(invalidStage));
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenStageInfoIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        CreateCharacterDto invalidCharacter = new CreateCharacterDto(
-                baseCharacterDto.id(),
-                baseCharacterDto.name(),
-                baseCharacterDto.role(),
-                baseCharacterDto.age(),
-                baseCharacterDto.isPrimary(),
-                baseCharacterDto.gender(),
-                baseCharacterDto.shopDescription(),
-                baseCharacterDto.privateDescription(),
-                baseCharacterDto.avatarUrl(),
-                baseCharacterDto.relationships(),
-                null // stageInfo
-        );
-        CreateMysteryDto dto = buildValidMysteryDto().withCharacters(List.of(invalidCharacter));
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenConfigIdIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        CreateConfigDto invalidConfig = new CreateConfigDto(null, 1, List.of(baseCharacterDto.id()));
-        CreateMysteryDto dto = buildValidMysteryDto().withSetups(List.of(invalidConfig));
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenConfigCharacterIdsIsNullOrEmpty() {
-        mysteryService = createServiceWithRealMappers();
-        CreateConfigDto configNull = new CreateConfigDto("ConfA", 1, null);
-        CreateConfigDto configEmpty = new CreateConfigDto("ConfB", 1, List.of());
-        CreateMysteryDto dtoNull = buildValidMysteryDto().withSetups(List.of(configNull));
-        CreateMysteryDto dtoEmpty = buildValidMysteryDto().withSetups(List.of(configEmpty));
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dtoNull))
-                .isInstanceOf(MysteryCreationException.class);
-        assertThatThrownBy(() -> mysteryService.createMystery(dtoEmpty))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsMysteryCreation_whenCrimeIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        CreateMysteryDto dto = buildValidMysteryDto().withCrime(null);
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(MysteryCreationException.class);
-    }
-
-    @Test
-    void createMystery_throwsNullPointer_whenStoryIsNull() {
-        mysteryService = createServiceWithRealMappers();
-        CreateMysteryDto dto = buildValidMysteryDto().withStory(null);
-
-        mysteryService = createServiceWithRealMappers();
-        assertThatThrownBy(() -> mysteryService.createMystery(dto))
-                .isInstanceOf(NullPointerException.class);
     }
 }

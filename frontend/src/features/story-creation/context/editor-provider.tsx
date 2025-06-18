@@ -34,6 +34,7 @@ const EditorProvider = ({ children }: { children: React.ReactNode }) => {
           return (
             existingInfo || {
               stageId: gStage.id,
+              order: gStage.order,
               objectivePrompt: "",
               events: [],
             }

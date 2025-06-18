@@ -35,11 +35,14 @@ export const CharacterStageCard = ({ character, stage: gStage }: Props) => {
   };
 
   const addEvent = (stageId: string) => {
+    const stageInfoObj = character.stageInfo.find((si) => si.stageId === stageId);
+    const nextOrder = stageInfoObj ? stageInfoObj.events.length : 0;
     const newEvent: StageEvent = {
       id: `ev_${Date.now()}`,
       time: "",
       title: "",
       description: "",
+      order: nextOrder,
     };
     const newStageInfo = character.stageInfo.map((si: CharacterStageInfo) =>
       si.stageId === stageId ? { ...si, events: [...si.events, newEvent] } : si
