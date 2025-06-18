@@ -39,6 +39,7 @@ public class ClerkWebhookController {
             @RequestHeader("svix-signature") String svixSignature,
             HttpServletRequest request) throws JsonMappingException, JsonProcessingException, ClerkWebhookException,
             WebhookVerificationException, UserMapperException, UserNotFoundException {
+        // inconsequential change
         HashMap<String, List<String>> headerMap = new HashMap<>();
         headerMap.put("svix-id", Arrays.asList(svixId));
         headerMap.put("svix-timestamp", Arrays.asList(svixTimestamp));
