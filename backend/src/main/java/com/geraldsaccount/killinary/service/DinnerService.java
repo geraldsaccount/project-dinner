@@ -138,37 +138,34 @@ public class DinnerService {
         Dinner dinner = dinnerRepository.findById(dinnerId)
                 .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
 
+        boolean isHost = dinner.getHost().equals(user);
         boolean isInDinner = dinner.getCharacterAssignments().stream()
                 .anyMatch(a -> a.getUser() != null && a.getUser().equals(user));
 
-        if (!isInDinner) {
+        if (!isInDinner && !isHost) {
             throw new AccessDeniedException("Cannot access dinner data.");
         }
 
-        boolean isHost = dinner.getHost().equals(user);
         Mystery mystery = dinner.getMystery();
         Set<CharacterAssignment> assignments = dinner.getCharacterAssignments();
         Set<DinnerParticipantDto> participants = assignments.stream()
                 .map(a -> {
                     User participant = a.getUser();
-                    UserDto userDto = participant == null ? null
-                            : userMapper.asDTO(participant);
-
+                    UserDto userDto = participant == null ? null : userMapper.asDTO(participant);
                     Character character = a.getCharacter();
                     CharacterDetailDto characterDto = characterMapper.asDetailDTO(character);
-
                     return new DinnerParticipantDto(userDto, characterDto);
                 })
                 .collect(Collectors.toSet());
 
-        CharacterAssignment assignedCharacter = assignments.stream()
-                .filter(a -> a.getUser() != null &&
-                        a.getUser().getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new CharacterAssignmentNotFoundException(
-                        "User should have been assigned to a character."));
-        PrivateCharacterInfo privateInfo = new PrivateCharacterInfo(assignedCharacter.getCharacter().getId(),
-                assignedCharacter.getCharacter().getPrivateDescription());
+        Optional<CharacterAssignment> assignedCharacter = assignments.stream()
+                .filter(a -> a.getUser() != null && a.getUser().getId().equals(user.getId()))
+                .findFirst();
+        PrivateCharacterInfo privateInfo = null;
+        if (assignedCharacter.isPresent()) {
+            Character character = assignedCharacter.get().getCharacter();
+            privateInfo = new PrivateCharacterInfo(character.getId(), character.getPrivateDescription());
+        }
 
         if (isHost) {
             Set<CharacterAssignmentDto> assignmentDtos = assignments.stream()

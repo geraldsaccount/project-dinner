@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const SessionSummaryCardSkeleton = () => (
+const DinnerSummaryCardSkeleton = () => (
   <Card className="py-0 overflow-clip">
     <div className="flex">
       <div className="w-1/3 flex-shrink-0 flex items-center justify-center">
@@ -21,4 +21,4 @@ const SessionSummaryCardSkeleton = () => (
   </Card>
 );
 
-export default SessionSummaryCardSkeleton;
+export default DinnerSummaryCardSkeleton;

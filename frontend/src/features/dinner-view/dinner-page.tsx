@@ -19,7 +19,7 @@ const DinnerPage = () => {
   } = useAuthenticatedApi<HostDinnerViewDto | GuestDinnerViewDto>();
   useEffect(() => {
     if (dinnerId) {
-      fetchDinner(`/api/sessions/${dinnerId}`);
+      fetchDinner(`/api/dinners/${dinnerId}`);
     }
     // eslint-disable-next-line
   }, [dinnerId]);

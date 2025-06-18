@@ -1,8 +1,8 @@
 import GridLayout from "@/components/layout/grid-layout";
 import PageHeader from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import SessionSummaryCard from "@/features/event-gallery/components/summary-card";
-import SessionSummaryCardSkeleton from "@/features/event-gallery/components/summary-card-skeleton";
+import DinnerSummaryCard from "@/features/event-gallery/components/summary-card";
+import DinnerSummaryCardSkeleton from "@/features/event-gallery/components/summary-card-skeleton";
 import { useAuthenticatedApi } from "@/hooks";
 import { DinnerSummaryDto } from "@/types";
 import { useEffect } from "react";
@@ -30,9 +30,9 @@ const EventsPage = () => {
           className="pt-4 w-full"
           gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}
         >
-          <SessionSummaryCardSkeleton />
-          <SessionSummaryCardSkeleton />
-          <SessionSummaryCardSkeleton />
+          <DinnerSummaryCardSkeleton />
+          <DinnerSummaryCardSkeleton />
+          <DinnerSummaryCardSkeleton />
         </GridLayout>
       );
     }
@@ -61,7 +61,7 @@ const EventsPage = () => {
           <Link to={"create"}>Host new dinner</Link>
         </Button>
         {summaries.map((e) => (
-          <SessionSummaryCard key={e.uuid} summary={e} />
+          <DinnerSummaryCard key={e.uuid} summary={e} />
         ))}
       </GridLayout>
     );

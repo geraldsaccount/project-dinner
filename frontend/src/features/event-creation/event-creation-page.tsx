@@ -12,7 +12,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthenticatedApi } from "@/hooks";
-import { NewSessionDTO, StoryForCreationDto } from "@/types";
+import { NewDinnerDTO, StoryForCreationDto } from "@/types";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -40,14 +40,15 @@ const EventCreationPage = () => {
     callApi: fetchStories,
   } = useAuthenticatedApi<StoryForCreationDto[]>();
 
-  const { loading: creationLoading, callApi: postSession } =
-    useAuthenticatedApi<NewSessionDTO>();
+  const { loading: creationLoading, callApi: postDinner } =
+    useAuthenticatedApi<NewDinnerDTO>();
 
   const navigate = useNavigate();
   // const stories = [sampleStorySummary];
   useEffect(() => {
     fetchStories("/api/mysteries");
   }, [fetchStories]);
+  console.log(stories);
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
@@ -59,7 +60,7 @@ const EventCreationPage = () => {
   });
 
   const selectedStory = stories?.find(
-    (s) => s.story.uuid === form.watch("storyId")
+    (s) => s.uuid === form.watch("storyId")
   );
   const sortedConfigs = selectedStory
     ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
@@ -69,21 +70,20 @@ const EventCreationPage = () => {
   );
 
   const handleSubmit = async (data: EventFormValues) => {
-    toast("Creating Session");
+    toast("Creating Dinner");
     try {
       const body = {
         storyId: data.storyId,
         storyConfigurationId: data.storyConfigurationId,
         eventStart: data.date,
       };
-      console.log(body);
-      const result = await postSession("/api/dinners", "POST", body);
-      if (result && result.sessionId) {
-        navigate(`/dinners/${result.sessionId}`);
+      const result = await postDinner("/api/dinners", "POST", body);
+      if (result && result.dinnerId) {
+        navigate(`/dinners/${result.dinnerId}`);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {
-      toast.error("Failed to create session");
+      toast.error("Failed to create dinner");
     }
   };
 

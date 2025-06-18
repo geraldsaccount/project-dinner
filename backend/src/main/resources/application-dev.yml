@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop # For development: 'update' to sync schema
+      ddl-auto: update # For development: 'update' to sync schema
     show-sql: true
     properties:
       hibernate:
