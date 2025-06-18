@@ -10,10 +10,10 @@ export interface MobileNavProps {
   setActiveItem: (to: string) => void;
 }
 /**
- * The response given when a session was successfully created.
+ * The response given when a dinner was successfully created.
  */
-export interface NewSessionDTO {
-  sessionId: string;
+export interface NewDinnerDTO {
+  dinnerId: string;
 }
 
 /**
@@ -38,7 +38,7 @@ export interface CharacterSummaryDto {
  * A minimal representation of a story, used for shop thumbnails or lists.
  */
 export interface StorySummaryDto {
-  uuid: string;
+//   uuid: string;
   title: string;
   bannerUrl: string;
   thumbnailDescription: string;
@@ -181,7 +181,7 @@ export interface ConfigDto {
 }
 
 export interface StoryForCreationDto {
-    id: string;
+    uuid: string;
     story: StorySummaryDto;
     minPlayerCount: number;
     maxPlayerCount: number;

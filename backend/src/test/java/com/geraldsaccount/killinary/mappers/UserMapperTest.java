@@ -16,134 +16,177 @@ import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
 @ActiveProfiles("test")
 class UserMapperTest {
 
-    private final UserMapper userMapper = new UserMapper();
+	private final UserMapper userMapper = new UserMapper();
 
-    @Test
-    void withUpdatedClerkUserData_shouldUpdateFields() {
-        User source = User.builder()
-                .oauthId("U1")
-                .name("johndoe")
-                .email("john@example.com")
-                .build();
+	@Test
+	void withUpdatedClerkUserData_shouldUpdateFields() {
+		User source = User.builder()
+				.oauthId("U1")
+				.name("johndoe")
+				.email("john@example.com")
+				.build();
 
-        User updated = User.builder()
-                .name("janesmith")
-                .email("jane@example.com")
-                .build();
+		User updated = User.builder()
+				.name("janesmith")
+				.email("jane@example.com")
+				.build();
 
-        User result = userMapper.withUpdatedClerkUserData(source, updated);
+		User result = userMapper.withUpdatedClerkUserData(source, updated);
 
-        assertThat(result.getName()).isEqualTo("janesmith");
-        assertThat(result.getEmail()).isEqualTo("jane@example.com");
-        assertThat(result.getOauthId()).isEqualTo("U1");
-    }
+		assertThat(result.getName()).isEqualTo("janesmith");
+		assertThat(result.getEmail()).isEqualTo("jane@example.com");
+		assertThat(result.getOauthId()).isEqualTo("U1");
+	}
 
-    @Test
-    void fromClerkUser_shouldMapFields_withValidClerkUser() throws UserMapperException {
-        ClerkEmailAddress email = ClerkEmailAddress.builder()
-                .id("E1")
-                .emailAddress("alice@wonderland.com")
-                .build();
+	@Test
+	void fromClerkUser_shouldMapFields_withValidClerkUserWithoutFullName() throws UserMapperException {
+		ClerkEmailAddress email = ClerkEmailAddress.builder()
+				.id("E1")
+				.emailAddress("alice@wonderland.com")
+				.build();
 
-        OAuthUserData clerkUser = OAuthUserData.builder()
-                .id("U1")
-                .name("alicew")
-                .primaryEmailAddressID(email.getId())
-                .emailAddresses(new ClerkEmailAddress[] { email })
-                .build();
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.username("alicew")
+				.primaryEmailAddressID(email.getId())
+				.emailAddresses(new ClerkEmailAddress[] { email })
+				.build();
 
-        User user = userMapper.fromClerkUser(clerkUser);
+		User user = userMapper.fromClerkUser(clerkUser);
 
-        assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
-        assertThat(user.getName()).isEqualTo(clerkUser.getName());
-        assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
-    }
+		assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
+		assertThat(user.getName()).isEqualTo(clerkUser.getUsername());
+		assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
+	}
 
-    @Test
-    void fromClerkUser_shouldThrowException_whenIdIsNull() {
-        OAuthUserData clerkUser = OAuthUserData.builder()
-                .id(null)
-                .primaryEmailAddressID("E1")
-                .emailAddresses(new ClerkEmailAddress[] {})
-                .build();
+	@Test
+	void fromClerkUser_shouldMapFieldsWithFullName_withValidClerkUser() throws UserMapperException {
+		ClerkEmailAddress email = ClerkEmailAddress.builder()
+				.id("E1")
+				.emailAddress("alice@wonderland.com")
+				.build();
 
-        assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
-                .isInstanceOf(UserMapperException.class)
-                .hasMessageContaining("Missing required user fields");
-    }
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.firstName("Alice")
+				.lastName("Wonderland")
+				.primaryEmailAddressID(email.getId())
+				.emailAddresses(new ClerkEmailAddress[] { email })
+				.build();
 
-    @Test
-    void fromClerkUser_shouldThrowException_whenPrimaryEmailIsNull() {
-        OAuthUserData clerkUser = OAuthUserData.builder()
-                .id("U1")
-                .primaryEmailAddressID(null)
-                .emailAddresses(new ClerkEmailAddress[] {})
-                .build();
+		User user = userMapper.fromClerkUser(clerkUser);
 
-        assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
-                .isInstanceOf(UserMapperException.class)
-                .hasMessageContaining("Missing required user fields");
-    }
+		assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
+		assertThat(user.getName()).isEqualTo("Alice W.");
+		assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
+	}
 
-    @Test
-    void getPrimaryEmail_shouldReturnNull_ifNoIdMatches() throws Exception {
-        ClerkEmailAddress email1 = ClerkEmailAddress.builder()
-                .id("E1")
-                .emailAddress("alice@wonderland.com")
-                .build();
-        ClerkEmailAddress email2 = ClerkEmailAddress.builder()
-                .id("E2")
-                .emailAddress("madhatter@wonderland.com")
-                .build();
+	@Test
+	void fromClerkUser_shouldMapFieldsWithFirstName_withValidClerkUser() throws UserMapperException {
+		ClerkEmailAddress email = ClerkEmailAddress.builder()
+				.id("E1")
+				.emailAddress("alice@wonderland.com")
+				.build();
 
-        OAuthUserData clerkUser = OAuthUserData.builder()
-                .id("U1")
-                .primaryEmailAddressID("E3")
-                .emailAddresses(new ClerkEmailAddress[] { email1, email2 }).build();
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.firstName("Alice")
+				.primaryEmailAddressID(email.getId())
+				.emailAddresses(new ClerkEmailAddress[] { email })
+				.build();
 
-        assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
-                .isInstanceOf(UserMapperException.class);
-    }
+		User user = userMapper.fromClerkUser(clerkUser);
 
-    @Test
-    void getPrimaryEmail_shouldReturnNullIfPrimaryEmailIdIsNull() throws Exception {
-        OAuthUserData clerkUser = OAuthUserData.builder()
-                .id("userId")
-                .primaryEmailAddressID(null)
-                .emailAddresses(null)
-                .build();
+		assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
+		assertThat(user.getName()).isEqualTo("Alice");
+		assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
+	}
 
-        assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
-                .isInstanceOf(UserMapperException.class);
-    }
+	@Test
+	void fromClerkUser_shouldThrowException_whenIdIsNull() {
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id(null)
+				.primaryEmailAddressID("E1")
+				.emailAddresses(new ClerkEmailAddress[] {})
+				.build();
 
-    @Test
-    void asDTO_shouldMapFieldsCorrectly() {
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .name("bob")
-                .avatarUrl("http://avatar.com/bob.png")
-                .build();
+		assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
+				.isInstanceOf(UserMapperException.class)
+				.hasMessageContaining("Missing required user fields");
+	}
 
-        UserDto dto = userMapper.asDTO(user);
+	@Test
+	void fromClerkUser_shouldThrowException_whenPrimaryEmailIsNull() {
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.primaryEmailAddressID(null)
+				.emailAddresses(new ClerkEmailAddress[] {})
+				.build();
 
-        assertThat(dto.uuid()).isEqualTo(user.getId());
-        assertThat(dto.name()).isEqualTo("bob");
-        assertThat(dto.avatarUrl()).isEqualTo("http://avatar.com/bob.png");
-    }
+		assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
+				.isInstanceOf(UserMapperException.class)
+				.hasMessageContaining("Missing required user fields");
+	}
 
-    @Test
-    void asDTO_shouldHandleNullAvatarUrl() {
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .name("eve")
-                .avatarUrl(null)
-                .build();
+	@Test
+	void getPrimaryEmail_shouldReturnNull_ifNoIdMatches() throws Exception {
+		ClerkEmailAddress email1 = ClerkEmailAddress.builder()
+				.id("E1")
+				.emailAddress("alice@wonderland.com")
+				.build();
+		ClerkEmailAddress email2 = ClerkEmailAddress.builder()
+				.id("E2")
+				.emailAddress("madhatter@wonderland.com")
+				.build();
 
-        UserDto dto = userMapper.asDTO(user);
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.primaryEmailAddressID("E3")
+				.emailAddresses(new ClerkEmailAddress[] { email1, email2 }).build();
 
-        assertThat(dto.uuid()).isEqualTo(user.getId());
-        assertThat(dto.name()).isEqualTo("eve");
-        assertThat(dto.avatarUrl()).isNull();
-    }
+		assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
+				.isInstanceOf(UserMapperException.class);
+	}
+
+	@Test
+	void getPrimaryEmail_shouldReturnNullIfPrimaryEmailIdIsNull() throws Exception {
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("userId")
+				.primaryEmailAddressID(null)
+				.emailAddresses(null)
+				.build();
+
+		assertThatThrownBy(() -> userMapper.fromClerkUser(clerkUser))
+				.isInstanceOf(UserMapperException.class);
+	}
+
+	@Test
+	void asDTO_shouldMapFieldsCorrectly() {
+		User user = User.builder()
+				.id(UUID.randomUUID())
+				.name("bob")
+				.avatarUrl("http://avatar.com/bob.png")
+				.build();
+
+		UserDto dto = userMapper.asDTO(user);
+
+		assertThat(dto.uuid()).isEqualTo(user.getId());
+		assertThat(dto.name()).isEqualTo("bob");
+		assertThat(dto.avatarUrl()).isEqualTo("http://avatar.com/bob.png");
+	}
+
+	@Test
+	void asDTO_shouldHandleNullAvatarUrl() {
+		User user = User.builder()
+				.id(UUID.randomUUID())
+				.name("eve")
+				.avatarUrl(null)
+				.build();
+
+		UserDto dto = userMapper.asDTO(user);
+
+		assertThat(dto.uuid()).isEqualTo(user.getId());
+		assertThat(dto.name()).isEqualTo("eve");
+		assertThat(dto.avatarUrl()).isNull();
+	}
 }

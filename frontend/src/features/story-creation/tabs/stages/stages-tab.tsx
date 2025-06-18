@@ -14,6 +14,9 @@ import { Stage } from "@/types/creation";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useEditorContext } from "../../context/editor-context";
 
+const assignStageOrders = (stages: Stage[]): Stage[] =>
+  stages.map((stage, idx) => ({ ...stage, order: idx }));
+
 const StagesTab = () => {
   const { story, setStory, stages, setStages } = useEditorContext();
 
@@ -22,13 +25,16 @@ const StagesTab = () => {
       id: `stage_${Date.now()}`,
       title: `Stage ${stages.length + 1}`,
       hostPrompt: "",
+      order: stages.length,
     };
-    setStages((prev) => [...prev, newStage]);
+    setStages((prev) => assignStageOrders([...prev, newStage]));
   };
 
   const updateStage = (id: string, field: keyof Stage, value: string) => {
     setStages((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+      assignStageOrders(
+        prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+      )
     );
   };
 
@@ -38,7 +44,7 @@ const StagesTab = () => {
         "Are you sure? This will remove this stage from all characters as well."
       )
     ) {
-      setStages((prev) => prev.filter((s) => s.id !== id));
+      setStages((prev) => assignStageOrders(prev.filter((s) => s.id !== id)));
     }
   };
 

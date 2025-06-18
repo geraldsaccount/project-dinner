@@ -7,7 +7,7 @@ type Props = {
   summary: DinnerSummaryDto;
 };
 
-const SessionSummaryCard = ({ summary }: Props) => {
+const DinnerSummaryCard = ({ summary }: Props) => {
   const {
     uuid,
     dateTime,
@@ -56,4 +56,4 @@ const SessionSummaryCard = ({ summary }: Props) => {
   );
 };
 
-export default SessionSummaryCard;
+export default DinnerSummaryCard;
