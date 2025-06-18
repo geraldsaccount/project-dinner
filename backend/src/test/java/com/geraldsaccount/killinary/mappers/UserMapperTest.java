@@ -39,7 +39,7 @@ class UserMapperTest {
 	}
 
 	@Test
-	void fromClerkUser_shouldMapFields_withValidClerkUser() throws UserMapperException {
+	void fromClerkUser_shouldMapFields_withValidClerkUserWithoutFullName() throws UserMapperException {
 		ClerkEmailAddress email = ClerkEmailAddress.builder()
 				.id("E1")
 				.emailAddress("alice@wonderland.com")
@@ -56,6 +56,49 @@ class UserMapperTest {
 
 		assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
 		assertThat(user.getName()).isEqualTo(clerkUser.getUsername());
+		assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
+	}
+
+	@Test
+	void fromClerkUser_shouldMapFieldsWithFullName_withValidClerkUser() throws UserMapperException {
+		ClerkEmailAddress email = ClerkEmailAddress.builder()
+				.id("E1")
+				.emailAddress("alice@wonderland.com")
+				.build();
+
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.firstName("Alice")
+				.lastName("Wonderland")
+				.primaryEmailAddressID(email.getId())
+				.emailAddresses(new ClerkEmailAddress[] { email })
+				.build();
+
+		User user = userMapper.fromClerkUser(clerkUser);
+
+		assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
+		assertThat(user.getName()).isEqualTo("Alice W.");
+		assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
+	}
+
+	@Test
+	void fromClerkUser_shouldMapFieldsWithFirstName_withValidClerkUser() throws UserMapperException {
+		ClerkEmailAddress email = ClerkEmailAddress.builder()
+				.id("E1")
+				.emailAddress("alice@wonderland.com")
+				.build();
+
+		OAuthUserData clerkUser = OAuthUserData.builder()
+				.id("U1")
+				.firstName("Alice")
+				.primaryEmailAddressID(email.getId())
+				.emailAddresses(new ClerkEmailAddress[] { email })
+				.build();
+
+		User user = userMapper.fromClerkUser(clerkUser);
+
+		assertThat(user.getOauthId()).isEqualTo(clerkUser.getId());
+		assertThat(user.getName()).isEqualTo("Alice");
 		assertThat(user.getEmail()).isEqualTo(email.getEmailAddress());
 	}
 
