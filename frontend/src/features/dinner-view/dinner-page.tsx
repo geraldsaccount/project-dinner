@@ -8,6 +8,7 @@ import { GuestDinnerViewDto, HostDinnerViewDto } from "@/types";
 import { useEffect } from "react";
 import LoadingHeader from "@/components/shared/loading-header";
 import ErrorPage from "@/pages/error-page";
+import HostCastChoice from "./components/host-cast-choice";
 
 const DinnerPage = () => {
   const { dinnerId } = useParams();
@@ -23,6 +24,11 @@ const DinnerPage = () => {
     }
     // eslint-disable-next-line
   }, [dinnerId]);
+  const isHostDinnerView = (
+    dinner: HostDinnerViewDto | GuestDinnerViewDto
+  ): dinner is HostDinnerViewDto => {
+    return "assignments" in dinner;
+  };
 
   if (loading) {
     return <LoadingHeader title="Loading Dinner..." />;
@@ -38,15 +44,21 @@ const DinnerPage = () => {
     <div className="flex flex-col gap-8">
       <DinnerHeader dinner={dinner} />
       <DinnerStory dinner={dinner} />
-      <DinnerCast dinner={dinner} />
-      <DinnerSecret
-        character={
-          dinner.participants.find(
-            (p) => p.character.uuid === dinner.yourPrivateInfo.characterId
-          )!.character
-        }
-        secret={dinner.yourPrivateInfo}
-      />
+      {isHostDinnerView(dinner) && !dinner.yourPrivateInfo ? (
+        <HostCastChoice dinner={dinner} />
+      ) : (
+        <DinnerCast dinner={dinner} />
+      )}
+      {(!isHostDinnerView(dinner) || dinner.yourPrivateInfo) && (
+        <DinnerSecret
+          character={
+            dinner.participants.find(
+              (p) => p.character.uuid === dinner.yourPrivateInfo.characterId
+            )!.character
+          }
+          secret={dinner.yourPrivateInfo}
+        />
+      )}
     </div>
   );
 };

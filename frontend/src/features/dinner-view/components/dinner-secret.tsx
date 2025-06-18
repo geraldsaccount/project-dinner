@@ -22,7 +22,7 @@ type Props = {
 };
 
 const DinnerSecret = ({ character, secret }: Props) => {
-  const [isHidden, setIsHidden] = useState(false);
+  const [isHidden, setIsHidden] = useState(true);
 
   const toggleHidden = () => {
     setIsHidden(!isHidden);
