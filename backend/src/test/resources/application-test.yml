@@ -23,3 +23,5 @@ spring:
 clerk:
   webhook:
     secret: aGVsbG8td29ybGQtd2ViYm9vay1zZWNyZXQ # "hello-world-webhook-secret" in base64
+cors:
+  allowed-origins: http://localhost:5173

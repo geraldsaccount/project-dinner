@@ -12,6 +12,8 @@ spring:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+cors:
+  allowed-origins: https://killinary.com
 
 logging:
   level:
