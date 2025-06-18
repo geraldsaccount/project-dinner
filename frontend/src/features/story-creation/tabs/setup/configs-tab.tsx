@@ -19,6 +19,7 @@ const ConfigsTab = () => {
           return (
             existingInfo || {
               stageId: gStage.id,
+              order: gStage.order,
               objectivePrompt: "",
               events: [],
             }

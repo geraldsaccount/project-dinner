@@ -30,6 +30,7 @@ const CharactersTab = () => {
       relationships: {},
       stageInfo: globalStages.map((s) => ({
         stageId: s.id,
+        order: s.order,
         objectivePrompt: "",
         events: [],
       })),
