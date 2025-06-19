@@ -8,7 +8,7 @@ const CharacterCard = ({ character }: Props) => {
   return (
     <div className="flex items-center gap-4 p-2">
       <img
-        src="https://placehold.co/64x64"
+        src={`data:image/jpeg;base64,${character.avatarData}`}
         alt={character.name}
         className="rounded-full w-16 h-16 object-cover bg-gray-200"
       />

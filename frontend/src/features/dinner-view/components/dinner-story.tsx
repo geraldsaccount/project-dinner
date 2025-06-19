@@ -11,7 +11,7 @@ const DinnerStory = ({ dinner }: Props) => (
     <SectionHeader title="The Story" className="mb-4" />
     <Card className="pt-0 overflow-hidden">
       <CardHeader className="px-0">
-        <img src={dinner.storyBannerUrl} className="w-full h-64 object-cover" />
+        <img src={`data:image/jpeg;base64,${dinner.storyBannerData}`} className="w-full h-64 object-cover" />
       </CardHeader>
       <CardContent>
         <h4 className="text-xl font-semibold mb-2">{dinner.storyTitle}</h4>
