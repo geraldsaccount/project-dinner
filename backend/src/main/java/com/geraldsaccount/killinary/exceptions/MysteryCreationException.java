@@ -6,4 +6,8 @@ public class MysteryCreationException extends RuntimeException {
         super(message);
     }
 
+    public MysteryCreationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

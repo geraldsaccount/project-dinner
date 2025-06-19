@@ -17,6 +17,7 @@ import com.geraldsaccount.killinary.model.dto.output.shared.StorySummaryDto;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 import com.geraldsaccount.killinary.repository.MysteryRepository;
+import com.geraldsaccount.killinary.utils.ImageConverter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,7 +50,7 @@ public class MysteryService {
                     m.getId(),
                     new StorySummaryDto(
                             m.getStory().getTitle(),
-                            m.getStory().getBannerUrl(),
+                            ImageConverter.imageAsBase64(m.getStory().getBannerImage()),
                             m.getStory().getShopDescription()),
                     minPlayers,
                     maxPlayers,

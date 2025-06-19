@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,7 +67,7 @@ public class EditorControllerTest {
                 .gender(Gender.FEMALE)
                 .shopDescription("Description")
                 .privateDescription("Secret")
-                .avatarUrl("avatar.com")
+                .avatarImage("avatar1.png") // or null
                 .build();
 
         CreateCharacterDto charDto2 = CreateCharacterDto.builder()
@@ -78,7 +79,7 @@ public class EditorControllerTest {
                 .gender(Gender.MALE)
                 .shopDescription("Description")
                 .privateDescription("Secret")
-                .avatarUrl("avatar.com")
+                .avatarImage("avatar2.png") // or null
                 .build();
 
         CreateStageDto stageDto = new CreateStageDto("S1", 0, "The Beginning of the end",
@@ -117,10 +118,38 @@ public class EditorControllerTest {
                 List.of(configDto),
                 crimeDto);
 
-        String requestBody = objectMapper.writeValueAsString(mysteryDto);
-        mockMvc.perform(post("/api/editor")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
+        MockMultipartFile mysteryJsonPart = new MockMultipartFile(
+                "mystery", // This MUST match the @RequestPart name in your controller
+                "",
+                MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(mysteryDto));
+
+        // 2. Create mock file parts
+        MockMultipartFile bannerImageFile = new MockMultipartFile(
+                "bannerImageFile", // This MUST match the key used on the frontend/service
+                "banner.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "banner-image-bytes".getBytes());
+
+        // The key for character avatars MUST match the character's ID
+        MockMultipartFile avatarFile1 = new MockMultipartFile(
+                charDto1.id(), // Key is "C1"
+                "avatar1.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "avatar-1-bytes".getBytes());
+
+        MockMultipartFile avatarFile2 = new MockMultipartFile(
+                charDto2.id(), // Key is "C2"
+                "avatar2.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "avatar-2-bytes".getBytes());
+
+        // 3. Perform the multipart request
+        mockMvc.perform(multipart("/api/editor")
+                .file(mysteryJsonPart)
+                .file(bannerImageFile)
+                .file(avatarFile1)
+                .file(avatarFile2))
                 .andExpect(status().isOk());
     }
 }

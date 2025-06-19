@@ -11,11 +11,9 @@ public class StoryMapper {
         return Story.builder()
                 .title(data.title())
                 .shopDescription(data.shopDescription())
-                .bannerUrl(data.bannerUrl())
                 .rules(data.rules())
                 .setting(data.setting())
                 .briefing(data.briefing())
                 .build();
-
     }
 }
