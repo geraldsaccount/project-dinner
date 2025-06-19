@@ -6,6 +6,7 @@ import { UserPlus, Users } from "lucide-react";
 import CharacterForm from "./character-form";
 import SectionHeader from "@/components/shared/section-header";
 import { useEditorContext } from "../../context/editor-context";
+import { useEffect, useMemo } from "react";
 
 const CharactersTab = () => {
   const {
@@ -15,6 +16,22 @@ const CharactersTab = () => {
     setActiveCharacterId,
     stages: globalStages,
   } = useEditorContext();
+
+  const avatarPreviews = useMemo(() => {
+    const previews = new Map<string, string>();
+    characters.forEach(char => {
+      if (char.avatarImage instanceof File) {
+        previews.set(char.id, URL.createObjectURL(char.avatarImage));
+      }
+    });
+    return previews;
+  }, [characters]);
+
+  useEffect(() => {
+    return () => {
+      avatarPreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [avatarPreviews]);
 
   const addCharacter = () => {
     const newChar: Character = {
@@ -26,7 +43,7 @@ const CharactersTab = () => {
       gender: "Other",
       shopDescription: "",
       privateDescription: "",
-      avatarUrl: null,
+      avatarImage: null,
       relationships: {},
       stageInfo: globalStages.map((s) => ({
         stageId: s.id,
@@ -87,7 +104,8 @@ const CharactersTab = () => {
                   >
                     <img
                       src={
-                        char.avatarUrl ||
+                        avatarPreviews.get(char.id) || // Use memoized preview if available
+                        (typeof char.avatarImage === 'string' ? char.avatarImage : null) || // Use string if it's a URL
                         "https://placehold.co/100x100/e2e8f0/64748b?text=Avatar"
                       }
                       className="w-10 h-10 rounded-full object-cover"
