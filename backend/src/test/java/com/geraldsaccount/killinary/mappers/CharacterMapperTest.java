@@ -1,5 +1,6 @@
 package com.geraldsaccount.killinary.mappers;
 
+import java.util.Base64;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,10 +16,12 @@ class CharacterMapperTest {
 
     @Test
     void asSummaryDTO_shouldMapAllFields() {
+        byte[] mockAvatarBytes = "mock-avatar-data".getBytes();
         Character character = Character.builder()
                 .id(UUID.randomUUID())
                 .name("John Doe")
                 .shopDescription("A brave hero")
+                .avatarImage(mockAvatarBytes)
                 .gender(Gender.MALE)
                 .build();
 
@@ -26,7 +29,7 @@ class CharacterMapperTest {
 
         assertThat(dto.uuid()).isEqualTo(character.getId());
         assertThat(dto.name()).isEqualTo(character.getName());
-        assertThat(dto.avatarUrl()).isEqualTo(character.getAvatarUrl());
+        assertThat(dto.avatarUrl()).isEqualTo(Base64.getEncoder().encodeToString(mockAvatarBytes));
     }
 
     @Test

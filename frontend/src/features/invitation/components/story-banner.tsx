@@ -7,7 +7,7 @@ type Props = {
 const StoryBanner = ({ invitation }: Props) => (
   <div className="relative w-full h-40 sm:h-60 md:h-80 lg:h-96 mb-4 rounded-xl shadow overflow-hidden">
     <img
-      src={invitation.storyBannerUrl}
+      src={`data:image/jpeg;base64,${invitation.storyBannerData}`}
       alt={invitation.storyTitle}
       className="w-full h-full object-cover absolute inset-0"
     />

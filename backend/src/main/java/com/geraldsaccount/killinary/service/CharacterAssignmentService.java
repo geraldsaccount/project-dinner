@@ -19,6 +19,7 @@ import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
+import com.geraldsaccount.killinary.utils.ImageConverter;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class CharacterAssignmentService {
                 .withUser(user));
     }
 
+    @Transactional
     public InvitationViewDto getInvitation(Authentication auth, String inviteCode)
             throws UserNotFoundException, CharacterAssignmentNotFoundException {
         boolean canAccept = true;
@@ -76,7 +78,7 @@ public class CharacterAssignmentService {
                 dinner.getDate(),
                 userMapper.asDTO(dinner.getHost()),
                 story.getTitle(),
-                story.getBannerUrl(),
+                ImageConverter.imageAsBase64(story.getBannerImage()),
                 story.getBriefing(),
                 characterMapper.asDetailDTO(assignment.getCharacter()),
                 otherParticipants,

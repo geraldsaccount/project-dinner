@@ -19,7 +19,7 @@ const StoryCard = ({ summary, minPlayerCount, maxPlayerCount, className }: Props
       <div className="flex h-full">
         <div className="w-1/3 flex-shrink-0 flex items-center justify-center bg-gray-100">
           <img
-            src="https://placehold.co/100x100"
+            src={`data:image/jpeg;base64,${summary.bannerData}`}
             alt={title}
             className="object-cover w-full h-full"
           />

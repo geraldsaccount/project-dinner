@@ -6,15 +6,20 @@ import com.geraldsaccount.killinary.model.dto.input.create.CreateCharacterDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.CharacterSummaryDto;
 import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.utils.ImageConverter;
 
 @Component
 public class CharacterMapper {
     public CharacterSummaryDto asSummaryDTO(Character input) {
-        return new CharacterSummaryDto(input.getId(), input.getName(), input.getAvatarUrl(), input.getRole());
+        String avatarBase64 = ImageConverter.imageAsBase64(input.getAvatarImage());
+
+        return new CharacterSummaryDto(input.getId(), input.getName(), avatarBase64, input.getRole());
     }
 
     public CharacterDetailDto asDetailDTO(Character input) {
-        return new CharacterDetailDto(input.getId(), input.getName(), input.getShopDescription(), input.getAvatarUrl(),
+        String avatarBase64 = ImageConverter.imageAsBase64(input.getAvatarImage());
+
+        return new CharacterDetailDto(input.getId(), input.getName(), input.getShopDescription(), avatarBase64,
                 input.getRole());
     }
 
@@ -27,7 +32,6 @@ public class CharacterMapper {
                 .gender(create.gender())
                 .shopDescription(create.shopDescription())
                 .privateDescription(create.privateDescription())
-                .avatarUrl(create.avatarUrl())
                 .build();
     }
 }

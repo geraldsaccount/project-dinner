@@ -1,5 +1,6 @@
 package com.geraldsaccount.killinary.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.geraldsaccount.killinary.exceptions.MysteryCreationException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
@@ -47,13 +49,23 @@ public class EditorService {
     private final CharacterMapper characterMapper;
 
     @Transactional
-    public void createMystery(CreateMysteryDto input) throws MysteryCreationException {
+    public void createMystery(CreateMysteryDto input, Map<String, MultipartFile> files)
+            throws MysteryCreationException {
         if (input == null)
             throw new IllegalArgumentException("Input cannot be null");
 
         Story story = storyMapper.asEntity(input.story());
 
-        Map<String, Character> characters = saveCharacters(input.characters());
+        MultipartFile bannerFile = files.get("bannerImageFile");
+        if (bannerFile != null && !bannerFile.isEmpty()) {
+            try {
+                story.setBannerImage(bannerFile.getBytes());
+            } catch (IOException e) {
+                throw new MysteryCreationException("Could not read banner file bytes", e);
+            }
+        }
+
+        Map<String, Character> characters = saveCharacters(input.characters(), files);
 
         Map<String, Stage> stages = saveStages(input.stages());
 
@@ -71,10 +83,33 @@ public class EditorService {
                 configs, crime);
     }
 
-    private Map<String, Character> saveCharacters(List<CreateCharacterDto> input) throws MysteryCreationException {
-        // Map from temporary string id (from DTO) to Character entity
-        List<Character> persistedCharacters = characterRepository
-                .saveAll(input.stream().map(characterMapper::asEntity).toList());
+    private Map<String, Character> saveCharacters(List<CreateCharacterDto> input, Map<String, MultipartFile> files)
+            throws MysteryCreationException {
+        List<Character> charactersToSave = input.stream().map(characterMapper::asEntity).toList();
+
+        Map<String, Character> dtoIdToEntityMap = input.stream()
+                .collect(Collectors.toMap(
+                        CreateCharacterDto::id,
+                        dto -> charactersToSave.get(input.indexOf(dto))));
+
+        // --- MODIFICATION FOR AVATARS ---
+        for (CreateCharacterDto dto : input) {
+            MultipartFile avatarFile = files.get(dto.id());
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                Character character = dtoIdToEntityMap.get(dto.id());
+                if (character != null) {
+                    try {
+                        character.setAvatarImage(avatarFile.getBytes());
+                    } catch (IOException e) {
+                        throw new MysteryCreationException(
+                                "Could not read avatar file bytes for character: " + dto.name(), e);
+                    }
+                }
+            }
+        }
+
+        List<Character> persistedCharacters = characterRepository.saveAll(charactersToSave);
+
         return mapByIdAndMatch(input,
                 persistedCharacters,
                 CreateCharacterDto::id,

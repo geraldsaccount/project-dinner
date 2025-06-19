@@ -40,7 +40,7 @@ export interface CharacterSummaryDto {
 export interface StorySummaryDto {
 //   uuid: string;
   title: string;
-  bannerUrl: string;
+  bannerData: string;
   thumbnailDescription: string;
 }
 
@@ -53,7 +53,7 @@ export interface CharacterDetailDto {
   name: string;
   role: string;
   shopDescription: string;
-  avatarUrl: string;
+  avatarData: string;
 }
 
 /**
@@ -63,7 +63,7 @@ export interface StoryDetailDto {
   uuid: string;
   title: string;
   shopDescription: string;
-  bannerUrl: string;
+  bannerData: string;
   minPlayerCount: number;
   maxPlayerCount: number;
   characters: CharacterDetailDto[];
@@ -86,7 +86,7 @@ export interface DinnerSummaryDto {
   dateTime: string; // ISO 8601 string format
   host: UserDto;
   storyTitle: string;
-  storyBannerUrl: string;
+  storyBannerData: string;
   yourAssignedCharacterName: string;
 }
 
@@ -107,7 +107,7 @@ export interface GuestDinnerViewDto {
   dateTime: string; // ISO 8601 string format
   host: UserDto;
   storyTitle: string;
-  storyBannerUrl: string;
+  storyBannerData: string;
   dinnerStoryBrief: string;
   participants: DinnerParticipantDto[];
   yourPrivateInfo: PrivateCharacterInfo; // Only the guest's own private data.
@@ -132,7 +132,7 @@ export interface HostDinnerViewDto {
   dateTime: string;
   host: UserDto;
   storyTitle: string;
-  storyBannerUrl: string;
+  storyBannerData: string;
   dinnerStoryBrief: string;
   participants: DinnerParticipantDto[];
   yourPrivateInfo: PrivateCharacterInfo; // Only the guest's own private data.
@@ -153,7 +153,7 @@ export interface InvitationViewDto {
   dateTime: string;
   host: UserDto;
   storyTitle: string;
-  storyBannerUrl: string;
+  storyBannerData: string;
   dinnerStoryBrief: string;
   yourAssignedCharacter: CharacterDetailDto;
   otherParticipants: DinnerParticipantDto[];

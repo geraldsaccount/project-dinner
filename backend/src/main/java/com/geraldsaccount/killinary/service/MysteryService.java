@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
@@ -17,6 +18,7 @@ import com.geraldsaccount.killinary.model.dto.output.shared.StorySummaryDto;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 import com.geraldsaccount.killinary.repository.MysteryRepository;
+import com.geraldsaccount.killinary.utils.ImageConverter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,7 @@ public class MysteryService {
     private final PlayerConfigMapper configMapper;
     private final CharacterMapper characterMapper;
 
+    @Transactional
     public Set<StoryForCreationDto> getMysterySummaries() {
         return mysteryRepository.findAll().stream().map(m -> {
             int minPlayers = Integer.MAX_VALUE;
@@ -49,7 +52,7 @@ public class MysteryService {
                     m.getId(),
                     new StorySummaryDto(
                             m.getStory().getTitle(),
-                            m.getStory().getBannerUrl(),
+                            ImageConverter.imageAsBase64(m.getStory().getBannerImage()),
                             m.getStory().getShopDescription()),
                     minPlayers,
                     maxPlayers,

@@ -12,7 +12,7 @@ const CharacterAvatar = ({ character, className }: Props) => {
     <Avatar
       className={cn("border-2 border-muted-foreground shrink-0", className)}
     >
-      <AvatarImage src={character.avatarUrl} />
+      <AvatarImage src={`data:image/jpeg;base64,${character.avatarData}`} />
       <AvatarFallback>
         {character.name
           .split(" ")

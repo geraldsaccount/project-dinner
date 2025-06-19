@@ -19,7 +19,7 @@ public record CreateCharacterDto(
         Gender gender,
         String shopDescription,
         String privateDescription,
-        String avatarUrl,
+        String avatarImage,
         Map<String, String> relationships,
         List<CreateCharacterStageInfoDto> stageInfo) {
 
