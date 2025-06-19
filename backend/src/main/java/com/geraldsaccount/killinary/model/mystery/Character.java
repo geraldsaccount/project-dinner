@@ -17,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -61,8 +62,9 @@ public class Character {
     @Column(name = "private_description")
     private String privateDescription;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
+    @Lob
+    @Column(name = "avatar_image", columnDefinition = "bytea") // Specify the correct PostgreSQL type
+    private byte[] avatarImage;
 
     @Builder.Default
     @ElementCollection

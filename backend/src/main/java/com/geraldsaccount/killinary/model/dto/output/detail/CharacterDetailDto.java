@@ -6,7 +6,7 @@ public record CharacterDetailDto(
         UUID uuid,
         String name,
         String shopDescription,
-        String avatarUrl,
+        String avatarData,
         String role) {
 
 }

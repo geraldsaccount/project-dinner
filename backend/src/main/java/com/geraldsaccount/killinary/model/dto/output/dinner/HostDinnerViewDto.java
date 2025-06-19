@@ -12,7 +12,7 @@ public record HostDinnerViewDto(
         LocalDateTime dateTime,
         UserDto host,
         String storyTitle,
-        String storyBannerUrl,
+        String storyBannerData,
         String dinnerStoryBrief,
         Set<DinnerParticipantDto> participants,
         PrivateCharacterInfo yourPrivateInfo,
