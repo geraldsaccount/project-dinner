@@ -12,5 +12,10 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "https://related-colt-33.clerk.accounts.dev/.well-known/jwks.json"
 cors:
   allowed-origins: http://localhost:5173

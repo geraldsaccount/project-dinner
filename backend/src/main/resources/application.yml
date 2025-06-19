@@ -3,11 +3,6 @@ spring:
     name: killinary
   profiles:
     active: dev
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: "https://related-colt-33.clerk.accounts.dev/.well-known/jwks.json"
 
 clerk:
   webhook:
