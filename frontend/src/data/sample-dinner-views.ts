@@ -1,5 +1,8 @@
 import { GuestDinnerViewDto, HostDinnerViewDto } from "@/types";
 
+// A sample 1x1 transparent pixel Base64 encoded string
+const sampleBase64Image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
 export const sampleGuestDinnerView: GuestDinnerViewDto = {
   uuid: "dinner-uuid-1",
   dateTime: "2025-07-01T19:00:00Z",
@@ -9,8 +12,7 @@ export const sampleGuestDinnerView: GuestDinnerViewDto = {
     avatarUrl: "https://randomuser.me/api/portraits/women/8.jpg",
   },
   storyTitle: "Murder at the Manor",
-  storyBannerUrl:
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+  storyBannerData: sampleBase64Image,
   dinnerStoryBrief:
     "Welcome to Blackwood Manor, a sprawling estate steeped in history and shrouded in mystery.\n\nTonight, the manor is alive with the clinking of glasses and the hum of conversation as distinguished guests gather for an exclusive dinner party hosted by the enigmatic Lady Eleanor Blackwood. The grand halls are adorned with priceless art, and the air is thick with secrets—old rivalries, hidden romances, and long-buried scandals.\n\nBut as the evening unfolds, tragedy strikes: the host is found dead, and the guests quickly realize that no one can be trusted. Each of you has a role to play in uncovering the truth, but beware—everyone has something to hide, and the walls of Blackwood Manor have ears.",
   participants: [
@@ -26,7 +28,7 @@ export const sampleGuestDinnerView: GuestDinnerViewDto = {
         role: "Hostess",
         shopDescription:
           "The enigmatic lady of the manor, Eleanor's calm hides a lifetime of secrets and intrigue.",
-        avatarUrl: "https://randomuser.me/api/portraits/women/4.jpg",
+        avatarData: sampleBase64Image,
       },
     },
     {
@@ -41,7 +43,7 @@ export const sampleGuestDinnerView: GuestDinnerViewDto = {
         role: "Retired Colonel",
         shopDescription:
           "A retired military man, Reginald's stern exterior and cryptic stories make him respected and feared.",
-        avatarUrl: "https://randomuser.me/api/portraits/men/5.jpg",
+        avatarData: sampleBase64Image,
       },
     },
     {
@@ -56,7 +58,7 @@ export const sampleGuestDinnerView: GuestDinnerViewDto = {
         role: "Detective",
         shopDescription:
           "A sharp detective, Arthur is known for solving the most perplexing cases and uncovering the manor's secrets.",
-        avatarUrl: "https://randomuser.me/api/portraits/men/6.jpg",
+        avatarData: sampleBase64Image,
       },
     },
     {
@@ -67,7 +69,7 @@ export const sampleGuestDinnerView: GuestDinnerViewDto = {
         role: "Forensic Scientist",
         shopDescription:
           "A meticulous forensic scientist whose expertise in uncovering hidden evidence is matched only by his own mysterious past.",
-        avatarUrl: "https://randomuser.me/api/portraits/men/15.jpg",
+        avatarData: sampleBase64Image,
       },
     },
   ],
@@ -87,8 +89,7 @@ export const sampleHostDinnerView: HostDinnerViewDto = {
     avatarUrl: "https://randomuser.me/api/portraits/women/8.jpg",
   },
   storyTitle: "Murder at the Manor",
-  storyBannerUrl:
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+  storyBannerData: sampleBase64Image,
   dinnerStoryBrief:
     "Welcome to Blackwood Manor, a sprawling estate steeped in history and shrouded in mystery.\n\nTonight, the manor is alive with the clinking of glasses and the hum of conversation as distinguished guests gather for an exclusive dinner party hosted by the enigmatic Lady Eleanor Blackwood. The grand halls are adorned with priceless art, and the air is thick with secrets—old rivalries, hidden romances, and long-buried scandals.\n\nBut as the evening unfolds, tragedy strikes: the host is found dead, and the guests quickly realize that no one can be trusted. Each of you has a role to play in uncovering the truth, but beware—everyone has something to hide, and the walls of Blackwood Manor have ears.",
   participants: [
@@ -104,7 +105,7 @@ export const sampleHostDinnerView: HostDinnerViewDto = {
         role: "Hostess",
         shopDescription:
           "The enigmatic lady of the manor, Eleanor's calm hides a lifetime of secrets and intrigue.",
-        avatarUrl: "https://randomuser.me/api/portraits/women/4.jpg",
+        avatarData: sampleBase64Image,
       },
     },
     {
@@ -119,7 +120,7 @@ export const sampleHostDinnerView: HostDinnerViewDto = {
         role: "Retired Colonel",
         shopDescription:
           "A retired military man, Reginald's stern exterior and cryptic stories make him respected and feared.",
-        avatarUrl: "https://randomuser.me/api/portraits/men/5.jpg",
+        avatarData: sampleBase64Image,
       },
     },
     {
@@ -130,7 +131,7 @@ export const sampleHostDinnerView: HostDinnerViewDto = {
         role: "Detective",
         shopDescription:
           "A sharp detective, Arthur is known for solving the most perplexing cases and uncovering the manor's secrets.",
-        avatarUrl: "https://randomuser.me/api/portraits/men/6.jpg",
+        avatarData: sampleBase64Image,
       },
     },
     {
@@ -141,7 +142,7 @@ export const sampleHostDinnerView: HostDinnerViewDto = {
         role: "Journalist",
         shopDescription:
           "A sharp-witted journalist, Vivian is always on the hunt for a scoop and has a knack for uncovering secrets others wish to keep hidden.",
-        avatarUrl: "https://randomuser.me/api/portraits/women/7.jpg",
+        avatarData: sampleBase64Image,
       },
     },
   ],
