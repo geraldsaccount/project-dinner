@@ -41,21 +41,59 @@ const EditorPageContent = () => {
   }
 
   const handleSave = async () => {
-    const creation: Mystery = {
-      story,
-      characters,
+    const formData = new FormData();
+
+    // 1. Handle the banner image file (same as before)
+    if (story.bannerImage instanceof File) {
+      formData.append("bannerImageFile", story.bannerImage);
+    }
+
+    // 2. Handle all character avatar files
+    characters.forEach((character) => {
+      if (character.avatarImage instanceof File) {
+        // We use the character's ID as the key. This is how the backend
+        // will map the file to the correct character.
+        formData.append(character.id, character.avatarImage);
+      }
+    });
+
+    // 3. Create a "clean" characters array for the JSON payload.
+    // This removes any File objects, replacing them with null.
+    const cleanCharacters = characters.map((character) => ({
+      ...character,
+      avatarImage:
+        character.avatarImage instanceof File ? null : character.avatarImage,
+    }));
+
+    // 4. Create the main JSON payload using the cleaned data.
+    const creationPayload: Mystery = {
+      story: {
+        ...story,
+        bannerImage:
+          story.bannerImage instanceof File ? null : story.bannerImage,
+      },
+      characters: cleanCharacters, // Use the cleaned character array
       stages,
       setups: playerConfigs,
       crime,
     };
+
+    // 5. Append the main JSON payload as a single part
+    formData.append(
+      "mystery",
+      new Blob([JSON.stringify(creationPayload)], { type: "application/json" })
+    );
+
     toast.message("Saving Story");
-    await callApi("/api/editor", "POST", creation);
+
+    // 6. Call the API with the FormData object
+    await callApi("/api/editor", "POST", formData);
+
     if (saveError) {
       toast.error("Could not save Story. Try again later");
     } else {
       toast.success("Saved successfully");
     }
-    // Optionally, show a success message or handle errors
   };
 
   return (

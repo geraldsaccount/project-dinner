@@ -6,24 +6,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Story } from "@/types/creation";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react"; // 1. Import useEffect
 import { useEditorContext } from "../../context/editor-context";
 
 const StoryTab = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { story, setStory } = useEditorContext();
 
-  const [bannerPreview, setBannerPreview] = useState(
-    story.bannerImage ||
-      "https://placehold.co/600x300/e2e8f0/64748b?text=Banner+Preview"
-  );
+  // 2. This state will ONLY hold the URL for the preview image.
+  // We initialize it as undefined and let the useEffect hook set it.
+  const [bannerPreview, setBannerPreview] = useState<string | undefined>();
+
+  // 3. Use useEffect to manage the preview URL whenever story.bannerImage changes.
+  // This correctly handles initial loads (string URL) and new files (File object).
+  useEffect(() => {
+    let previewUrl: string | undefined;
+
+    if (story.bannerImage instanceof File) {
+      // If it's a new file, create a temporary URL for it.
+      previewUrl = URL.createObjectURL(story.bannerImage);
+      setBannerPreview(previewUrl);
+    } else if (typeof story.bannerImage === "string") {
+      // If it's a string (from the server), use it directly.
+      setBannerPreview(story.bannerImage);
+    } else {
+      // Otherwise, use the placeholder.
+      setBannerPreview(
+        "https://placehold.co/600x300/e2e8f0/64748b?text=Banner+Preview"
+      );
+    }
+
+    // 4. Cleanup function: This is important to prevent memory leaks.
+    // It revokes the temporary URL when the component unmounts or the image changes.
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [story.bannerImage]); // This effect runs whenever the bannerImage changes.
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setBannerPreview(previewUrl);
-      setStory((prev) => ({ ...prev, bannerImage: previewUrl }));
+      // 5. CRITICAL CHANGE: Store the actual File object in the main state.
+      // Do not store the preview URL here.
+      setStory((prev) => ({ ...prev, bannerImage: file }));
     }
   };
 
@@ -96,6 +123,7 @@ const StoryTab = () => {
           </Card>
         </div>
       </div>
+      {/* The rest of your component remains the same... */}
       <GridLayout gridCols={{ base: 1, md: 2 }}>
         <Card>
           <CardHeader>

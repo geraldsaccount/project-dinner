@@ -8,7 +8,7 @@ interface UseAuthenticatedApiResult<TResponse, TBody> {
   callApi: (
     endpoint: string,
     method?: "GET" | "POST" | "PUT" | "DELETE",
-    body?: TBody
+    body?: TBody | FormData
   ) => Promise<TResponse | undefined>;
 }
 
@@ -32,7 +32,7 @@ function useAuthenticatedApi<TResponse, TBody = Record<string, unknown>>(
     async (
       endpoint: string,
       method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-      body?: TBody
+      body?: TBody | FormData // Allow body to be FormData
     ): Promise<TResponse | undefined> => {
       setLoading(true);
       setError(null);
@@ -55,7 +55,6 @@ function useAuthenticatedApi<TResponse, TBody = Record<string, unknown>>(
 
         const headers: HeadersInit = {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         };
 
         const config: RequestInit = {
@@ -64,7 +63,16 @@ function useAuthenticatedApi<TResponse, TBody = Record<string, unknown>>(
         };
 
         if (body && (method === "POST" || method === "PUT")) {
-          config.body = JSON.stringify(body);
+          // --- START OF MODIFICATION ---
+          if (body instanceof FormData) {
+            // If the body is FormData, let the browser set the Content-Type header.
+            // Do NOT stringify the body.
+            config.body = body;
+          } else {
+            // Otherwise, handle it as JSON like before.
+            headers["Content-Type"] = "application/json";
+            config.body = JSON.stringify(body);
+          }
         }
 
         const response = await fetch(endpoint, config);

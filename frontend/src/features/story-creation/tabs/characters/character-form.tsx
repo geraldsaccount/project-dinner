@@ -33,25 +33,39 @@ const CharacterForm = ({
   allCharacters,
   globalStages,
 }: Props) => {
-  const [avatarPreview, setAvatarPreview] = useState(
-    character.avatarUrl ||
-      "https://placehold.co/256x256/e2e8f0/64748b?text=Avatar+Preview"
-  );
+  const [avatarPreview, setAvatarPreview] = useState<string | undefined>();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    setAvatarPreview(
-      character.avatarUrl ||
+    let previewUrl: string | undefined;
+
+    if (character.avatarImage instanceof File) {
+      // If it's a new file, create a temporary URL for it.
+      previewUrl = URL.createObjectURL(character.avatarImage);
+      setAvatarPreview(previewUrl);
+    } else if (typeof character.avatarImage === "string") {
+      // If it's a string (from the server), use it directly.
+      setAvatarPreview(character.avatarImage);
+    } else {
+      // Otherwise, use the placeholder.
+      setAvatarPreview(
         "https://placehold.co/256x256/e2e8f0/64748b?text=Avatar+Preview"
-    );
-  }, [character.avatarUrl]);
+      );
+    }
+
+    // 4. Cleanup function: This is important to prevent memory leaks.
+    // It revokes the temporary URL when the component unmounts or the image changes.
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [character.avatarImage]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setAvatarPreview(previewUrl);
-      updateCharacter(character.id, { ...character, avatarUrl: previewUrl });
+      updateCharacter(character.id, { ...character, avatarImage: file });
     }
   };
 

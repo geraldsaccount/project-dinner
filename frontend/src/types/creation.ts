@@ -10,7 +10,7 @@ export interface Story {
   id: string;
   title: string;
   shopDescription: string;
-  bannerImage: string | null;
+  bannerImage: string | File | null;
   rules: string;
   setting: string;
   briefing: string;
@@ -25,7 +25,7 @@ export interface Character {
   gender: "Female" | "Male" | "Other";
   shopDescription: string;
   privateDescription: string;
-  avatarUrl: string | null;
+  avatarImage: string | File | null;
   relationships: Record<string, string>;
   stageInfo: CharacterStageInfo[];
 }
