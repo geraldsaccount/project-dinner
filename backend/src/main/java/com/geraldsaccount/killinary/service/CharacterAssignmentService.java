@@ -48,6 +48,7 @@ public class CharacterAssignmentService {
                 .withUser(user));
     }
 
+    @Transactional
     public InvitationViewDto getInvitation(Authentication auth, String inviteCode)
             throws UserNotFoundException, CharacterAssignmentNotFoundException {
         boolean canAccept = true;

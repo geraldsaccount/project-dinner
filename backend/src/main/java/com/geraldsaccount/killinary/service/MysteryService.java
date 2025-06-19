@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
@@ -28,6 +29,7 @@ public class MysteryService {
     private final PlayerConfigMapper configMapper;
     private final CharacterMapper characterMapper;
 
+    @Transactional
     public Set<StoryForCreationDto> getMysterySummaries() {
         return mysteryRepository.findAll().stream().map(m -> {
             int minPlayers = Integer.MAX_VALUE;
