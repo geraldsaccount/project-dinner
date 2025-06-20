@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
+import com.geraldsaccount.killinary.exceptions.CharacterNotFoundException;
 import com.geraldsaccount.killinary.exceptions.CodeGenerationException;
 import com.geraldsaccount.killinary.exceptions.DinnerNotFoundException;
 import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
@@ -22,7 +23,9 @@ import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.model.dinner.Dinner;
 import com.geraldsaccount.killinary.model.dinner.DinnerStatus;
+import com.geraldsaccount.killinary.model.dinner.Vote;
 import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
+import com.geraldsaccount.killinary.model.dto.input.dinner.VoteDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
 import com.geraldsaccount.killinary.model.dto.output.detail.PrivateCharacterInfo;
 import com.geraldsaccount.killinary.model.dto.output.dinner.CharacterAssignmentDto;
@@ -201,6 +204,7 @@ public class DinnerService {
                 privateInfo);
     }
 
+    @Transactional
     public DinnerView progressDinner(String oauthId, UUID dinnerId) throws UserNotFoundException,
             DinnerNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException {
         User user = userService.getUserOrThrow(oauthId);
@@ -248,6 +252,43 @@ public class DinnerService {
             }
             default -> throw new AssertionError();
         }
+        return getDinnerView(oauthId, dinnerId);
+    }
+
+    @Transactional
+    public DinnerView castVote(String oauthId, UUID dinnerId, VoteDto vote) throws UserNotFoundException,
+            DinnerNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException,
+            CharacterNotFoundException {
+        User user = userService.getUserOrThrow(oauthId);
+
+        Dinner dinner = dinnerRepository.findById(dinnerId)
+                .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
+
+        boolean isInDinner = dinner.getCharacterAssignments().stream()
+                .anyMatch(a -> a.getUser() != null && a.getUser().equals(user));
+
+        if (!isInDinner) {
+            throw new AccessDeniedException("User cannot cast vote for a dinner they are not participating in");
+        }
+
+        Set<Vote> votes = dinner.getSuspectVotes();
+        if (votes.stream().anyMatch(v -> user.getId().equals(v.getUser().getId()))) {
+            votes = votes.stream()
+                    .filter(v -> !v.getUser().getId().equals(user.getId()))
+                    .collect(Collectors.toSet());
+        }
+
+        Character suspect = dinner.getMystery().getCharacters().stream()
+                .filter(c -> vote.suspectId().equals(c.getId())).findFirst()
+                .orElseThrow(() -> new CharacterNotFoundException("Could not find character with given id"));
+        votes.add(Vote.builder()
+                .user(user)
+                .suspect(suspect)
+                .motive(vote.motive())
+                .build());
+
+        dinnerRepository.save(dinner.withSuspectVotes(votes));
+
         return getDinnerView(oauthId, dinnerId);
     }
 
