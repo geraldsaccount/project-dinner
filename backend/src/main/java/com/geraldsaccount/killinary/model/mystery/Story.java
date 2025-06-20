@@ -30,17 +30,20 @@ public class Story {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "shop_description")
+    @Column(name = "shop_description", columnDefinition = "TEXT")
     private String shopDescription;
 
     @Lob
     @Column(name = "banner_image", columnDefinition = "bytea") // Changed from banner_url
     private byte[] bannerImage;
 
+    @Column(name = "rules", columnDefinition = "TEXT")
     private String rules;
 
+    @Column(name = "setting", columnDefinition = "TEXT")
     private String setting;
 
+    @Column(name = "briefing", columnDefinition = "TEXT")
     private String briefing;
 
     @Override

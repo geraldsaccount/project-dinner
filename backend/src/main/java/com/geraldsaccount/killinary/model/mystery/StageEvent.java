@@ -33,6 +33,7 @@ public class StageEvent {
 
     private String title;
 
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Override

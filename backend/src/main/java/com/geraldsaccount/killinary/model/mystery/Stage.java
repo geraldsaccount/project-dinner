@@ -31,7 +31,7 @@ public class Stage {
 
     private String title;
 
-    @Column(name = "host_prompt")
+    @Column(name = "host_prompt", columnDefinition = "TEXT")
     private String hostPrompt;
 
     @Override
