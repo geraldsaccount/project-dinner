@@ -1,12 +1,5 @@
 package com.geraldsaccount.killinary.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Collections;
@@ -19,8 +12,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -29,23 +28,21 @@ import com.geraldsaccount.killinary.exceptions.MysteryNotFoundException;
 import com.geraldsaccount.killinary.exceptions.StoryConfigurationNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
 import com.geraldsaccount.killinary.mappers.CharacterMapper;
+import com.geraldsaccount.killinary.mappers.DinnerMapper;
 import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.model.dinner.Dinner;
 import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
-import com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto;
-import com.geraldsaccount.killinary.model.dto.output.dinner.CharacterAssignmentDto;
-import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerParticipantDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerView;
 import com.geraldsaccount.killinary.model.dto.output.dinner.GuestDinnerViewDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.HostDinnerViewDto;
 import com.geraldsaccount.killinary.model.dto.output.shared.UserDto;
+import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
 import com.geraldsaccount.killinary.model.mystery.Story;
-import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.repository.DinnerRepository;
 
 @ActiveProfiles("test")
@@ -63,6 +60,9 @@ class DinnerServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private DinnerMapper dinnerMapper;
 
     @Mock
     private CharacterAssignmentCodeService assignmentCodeService;
@@ -378,126 +378,44 @@ class DinnerServiceTest {
     }
 
     @Test
-    void getDinnerView_returnsHostDinnerView_whenUserIsHost() throws Exception {
-        String oauthId = "host-oauth";
+    void getDinnerView_returnsGuestView_whenUserIsGuest() throws Exception {
+        String oauthId = "guest-oauth";
         UUID dinnerId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        UUID pendingCharacterId = UUID.randomUUID();
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").build();
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment)).build();
 
-        User hostUser = User.builder().id(userId).oauthId(oauthId).name("Host").avatarUrl("avatar.png").build();
-        byte[] bannerBytes = "banner-data".getBytes();
-        Story story = Story.builder().title("Story Title").bannerImage(bannerBytes).briefing("brief").build();
-        character = Character.builder().id(characterId).privateDescription("private").build();
-        Character pendingCharacter = Character.builder().id(pendingCharacterId).build();
-        mystery = Mystery.builder().story(story).characters(List.of(character,
-                pendingCharacter)).build();
-        CharacterAssignment assigned = CharacterAssignment.builder().user(hostUser).character(character).code("CODE123")
-                .build();
-        CharacterAssignment pending = CharacterAssignment.builder().user(null).character(pendingCharacter)
-                .code("INVITE456").build();
-        dinner = Dinner.builder()
-                .id(dinnerId)
-                .host(hostUser)
-                .mystery(mystery)
-                .date(LocalDateTime.now())
-                .characterAssignments(Set.of(assigned, pending))
-                .participants(Set.of(hostUser))
-                .build();
-
-        CharacterDetailDto characterDetailDto = mock(CharacterDetailDto.class);
-        CharacterDetailDto pendingCharacterDetailDto = mock(CharacterDetailDto.class);
-        when(userService.getUserOrThrow(oauthId)).thenReturn(hostUser);
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
-        when(characterMapper.asDetailDTO(character)).thenReturn(characterDetailDto);
-        when(characterMapper.asDetailDTO(pendingCharacter)).thenReturn(pendingCharacterDetailDto);
-        when(userMapper.asDTO(hostUser)).thenReturn(new UserDto(userId, "Host",
-                "avatar.png"));
 
-        DinnerView result = dinnerService.getDinnerView(oauthId, dinnerId);
+        DinnerView dinnerView = dinnerService.getDinnerView(oauthId, dinnerId);
 
-        assertThat(result).isInstanceOf(HostDinnerViewDto.class);
-        HostDinnerViewDto dto = (HostDinnerViewDto) result;
-        assertThat(dto.host().uuid()).isEqualTo(userId);
-        assertThat(dto.storyTitle()).isEqualTo("Story Title");
-        assertThat(dto.storyBannerData()).isEqualTo(Base64.getEncoder().encodeToString(bannerBytes));
-        assertThat(dto.yourPrivateInfo().characterId()).isEqualTo(characterId);
-        assertThat(dto.yourPrivateInfo().privateDescription()).isEqualTo("private");
-
-        assertThat(dto.participants()).hasSize(2);
-        dto.participants().stream()
-                .filter(p -> p.user() != null)
-                .forEach(participantDto -> {
-                    assertThat(participantDto.user().uuid()).isEqualTo(userId);
-                    assertThat(participantDto.character()).isEqualTo(characterDetailDto);
-                });
-
-        assertThat(dto.assignments()).hasSize(2);
-        boolean foundAssigned = false;
-        boolean foundPending = false;
-        for (CharacterAssignmentDto assignmentDto : dto.assignments()) {
-            if (assignmentDto.characterId().equals(characterId)) {
-                assertThat(assignmentDto.userId()).contains(userId);
-                assertThat(assignmentDto.inviteCode()).isEmpty();
-                foundAssigned = true;
-            } else if (assignmentDto.characterId().equals(pendingCharacterId)) {
-                assertThat(assignmentDto.userId()).isEmpty();
-                assertThat(assignmentDto.inviteCode()).contains("INVITE456");
-                foundPending = true;
-            }
-        }
-        assertThat(foundAssigned).isTrue();
-        assertThat(foundPending).isTrue();
+        assertThat(dinnerView).isInstanceOf(GuestDinnerViewDto.class);
+        verify(dinnerMapper).getPreDinnerInfo(dinner);
+        verify(dinnerMapper).getPrivateInfoForUser(user, dinner);
+        verify(dinnerMapper).getConclusion(dinner);
+        verify(dinnerMapper, times(0)).getHostInfo(any());
     }
 
     @Test
-    void getDinnerView_returnsGuestDinnerView_whenUserIsGuest() throws Exception {
-        String oauthId = "guest-oauth";
+    void getDinnerView_returnsHostView_whenUserIsHost() throws Exception {
+        String oauthId = "host-oauth";
         UUID dinnerId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment)).build();
 
-        User guest = User.builder().id(userId).oauthId(oauthId).name("Guest").avatarUrl("avatar.png").build();
-        User hostUser = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").name("Host").build();
-        byte[] bannerBytes = "banner-data-guest".getBytes();
-        Story story = Story.builder().title("Story Title").bannerImage(bannerBytes).briefing("brief").build();
-        character = Character.builder().id(characterId).privateDescription("private").build();
-        mystery = Mystery.builder().story(story).characters(List.of(character)).build();
-        CharacterAssignment assignment = CharacterAssignment.builder().user(guest).character(character).build();
-        dinner = Dinner.builder()
-                .id(dinnerId)
-                .host(hostUser)
-                .mystery(mystery)
-                .date(LocalDateTime.now())
-                .characterAssignments(Set.of(assignment))
-                .participants(Set.of(guest))
-                .build();
-
-        CharacterDetailDto characterDetailDto = mock(
-                com.geraldsaccount.killinary.model.dto.output.detail.CharacterDetailDto.class);
-        when(userService.getUserOrThrow(oauthId)).thenReturn(guest);
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
-        when(characterMapper.asDetailDTO(character)).thenReturn(characterDetailDto);
-        when(userMapper.asDTO(guest)).thenReturn(new UserDto(userId, "Guest",
-                "avatar.png"));
-        when(userMapper.asDTO(hostUser))
-                .thenReturn(new UserDto(hostUser.getId(), hostUser.getName(),
-                        hostUser.getAvatarUrl()));
 
-        DinnerView result = dinnerService.getDinnerView(oauthId, dinnerId);
+        DinnerView dinnerView = dinnerService.getDinnerView(oauthId, dinnerId);
 
-        assertThat(result).isInstanceOf(GuestDinnerViewDto.class);
-        GuestDinnerViewDto dto = (GuestDinnerViewDto) result;
-        assertThat(dto.uuid()).isEqualTo(dinnerId);
-        assertThat(dto.host().uuid()).isEqualTo(hostUser.getId());
-        assertThat(dto.storyTitle()).isEqualTo("Story Title");
-        assertThat(dto.storyBannerData()).isEqualTo(Base64.getEncoder().encodeToString(bannerBytes));
-        assertThat(dto.yourPrivateInfo().characterId()).isEqualTo(characterId);
-        assertThat(dto.yourPrivateInfo().privateDescription()).isEqualTo("private");
-
-        assertThat(dto.participants()).hasSize(1);
-        DinnerParticipantDto participantDto = dto.participants().iterator().next();
-        assertThat(participantDto.user().uuid()).isEqualTo(userId);
-        assertThat(participantDto.character()).isEqualTo(characterDetailDto);
+        assertThat(dinnerView).isInstanceOf(HostDinnerViewDto.class);
+        verify(dinnerMapper).getPreDinnerInfo(dinner);
+        verify(dinnerMapper).getPrivateInfoForUser(user, dinner);
+        verify(dinnerMapper).getConclusion(dinner);
+        verify(dinnerMapper).getHostInfo(dinner);
     }
 }
