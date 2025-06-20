@@ -74,4 +74,9 @@ public class Dinner {
     @Builder.Default
     @OneToMany(mappedBy = "dinner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<CharacterAssignment> characterAssignments = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "dinner_id")
+    private Set<Vote> suspectVotes = new HashSet<>();
 }
