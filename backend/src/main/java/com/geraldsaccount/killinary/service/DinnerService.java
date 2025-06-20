@@ -201,4 +201,54 @@ public class DinnerService {
                 privateInfo);
     }
 
+    public DinnerView progressDinner(String oauthId, UUID dinnerId) throws UserNotFoundException,
+            DinnerNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException {
+        User user = userService.getUserOrThrow(oauthId);
+
+        Dinner dinner = dinnerRepository.findById(dinnerId)
+                .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
+
+        boolean isHost = dinner.getHost().equals(user);
+
+        if (!isHost) {
+            throw new AccessDeniedException("Only host can progress dinner");
+        }
+
+        switch (dinner.getStatus()) {
+            case DinnerStatus.CREATED -> {
+                boolean allCharactersAssigned = dinner.getCharacterAssignments().stream()
+                        .allMatch(cass -> cass.getUser() != null);
+                if (!allCharactersAssigned) {
+                    throw new AccessDeniedException("Dinner can only be started if all characters have been assigned.");
+                }
+
+                dinnerRepository.save(dinner.withStatus(DinnerStatus.IN_PROGRESS));
+            }
+            case DinnerStatus.IN_PROGRESS -> {
+                int currentStage = dinner.getCurrentStage();
+                boolean isLastStage = currentStage + 1 >= dinner.getMystery().getStages().size();
+
+                if (isLastStage) {
+                    dinnerRepository.save(dinner.withStatus(DinnerStatus.VOTING));
+                } else {
+                    dinnerRepository.save(dinner.withCurrentStage(currentStage + 1));
+                }
+            }
+            case DinnerStatus.VOTING -> {
+                boolean allGuestsVoted = dinner.getSuspectVotes().size() == dinner.getCharacterAssignments().stream()
+                        .filter(cas -> cas.getUser() != null).count();
+
+                if (allGuestsVoted) {
+                    dinnerRepository.save(dinner.withStatus(DinnerStatus.CONCLUDED));
+                } else {
+                    throw new AccessDeniedException("Dinner can only be concluded if all guests have voted.");
+                }
+            }
+            case DinnerStatus.CONCLUDED, DinnerStatus.CANCELED -> {
+            }
+            default -> throw new AssertionError();
+        }
+        return getDinnerView(oauthId, dinnerId);
+    }
+
 }
