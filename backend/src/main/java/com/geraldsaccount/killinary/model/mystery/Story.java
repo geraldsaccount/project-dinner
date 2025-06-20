@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,17 +29,19 @@ public class Story {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "shop_description")
+    @Column(name = "shop_description", columnDefinition = "TEXT")
     private String shopDescription;
 
-    @Lob
-    @Column(name = "banner_image", columnDefinition = "bytea") // Changed from banner_url
+    @Column(name = "banner_image", columnDefinition = "bytea")
     private byte[] bannerImage;
 
+    @Column(name = "rules", columnDefinition = "TEXT")
     private String rules;
 
+    @Column(name = "setting", columnDefinition = "TEXT")
     private String setting;
 
+    @Column(name = "briefing", columnDefinition = "TEXT")
     private String briefing;
 
     @Override

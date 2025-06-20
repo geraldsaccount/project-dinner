@@ -17,7 +17,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -56,20 +55,20 @@ public class Character {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(name = "shop_description")
+    @Column(name = "shop_description", columnDefinition = "TEXT")
     private String shopDescription;
 
-    @Column(name = "private_description")
+    @Column(name = "private_description", columnDefinition = "TEXT")
     private String privateDescription;
 
-    @Lob
-    @Column(name = "avatar_image", columnDefinition = "bytea") // Specify the correct PostgreSQL type
+    @Column(name = "avatar_image", columnDefinition = "bytea")
     private byte[] avatarImage;
 
     @Builder.Default
     @ElementCollection
     @CollectionTable(name = "character_relationships", joinColumns = @JoinColumn(name = "character_id"))
     @MapKeyColumn(name = "related_character_id")
+    @Column(name = "relationship_description", columnDefinition = "TEXT")
     private Map<UUID, String> relationships = new HashMap<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

@@ -3,6 +3,7 @@ package com.geraldsaccount.killinary.model.mystery;
 import java.util.Set;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,6 +34,7 @@ public class Crime {
     @JoinTable(name = "crime_criminals", joinColumns = @JoinColumn(name = "crime_id"), inverseJoinColumns = @JoinColumn(name = "character_id"))
     private Set<Character> criminals;
 
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Override
