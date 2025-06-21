@@ -131,6 +131,7 @@ public class DinnerMapper {
 
         Set<PrivateInfoDto> missingPrivateInfos = null;
         List<String> stagePrompts = null;
+        boolean allHaveVoted = false;
         if (dinner.getStatus() != DinnerStatus.CREATED) {
             missingPrivateInfos = assignments.stream()
                     .filter(ass -> ass.getUser() == null)
@@ -141,12 +142,16 @@ public class DinnerMapper {
                     .limit(dinner.getCurrentStage() + 1)
                     .map(s -> s.getHostPrompt())
                     .toList();
+            allHaveVoted = dinner.getSuspectVotes().size() == assignments.stream()
+                    .filter(ass -> ass.getUser() != null)
+                    .count();
         }
 
         return new HostInfoDto(
                 mystery.getStory().getBriefing(),
                 assignmentDtos,
                 missingPrivateInfos,
-                stagePrompts);
+                stagePrompts,
+                allHaveVoted);
     }
 }

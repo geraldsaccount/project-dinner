@@ -9,6 +9,7 @@ public record HostInfoDto(
         String briefing,
         Set<CharacterAssignmentDto> assignments,
         Set<PrivateInfoDto> missingPrivateInfo,
-        List<String> stagePrompts) {
+        List<String> stagePrompts,
+        boolean allHaveVoted) {
 
 }
