@@ -1,7 +1,7 @@
-import * as React from "react"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+import * as React from "react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function TooltipProvider({
   delayDuration = 0,
@@ -10,10 +10,10 @@ function TooltipProvider({
   return (
     <TooltipPrimitive.Provider
       data-slot="tooltip-provider"
-      delayDuration={delayDuration}
+      delayDuration={delayDuration} // Keeping delayDuration as it's a functional choice
       {...props}
     />
-  )
+  );
 }
 
 function Tooltip({
@@ -23,13 +23,13 @@ function Tooltip({
     <TooltipProvider>
       <TooltipPrimitive.Root data-slot="tooltip" {...props} />
     </TooltipProvider>
-  )
+  );
 }
 
 function TooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
+  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
 function TooltipContent({
@@ -44,16 +44,24 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          "bg-primary text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md px-3 py-1.5 text-xs text-balance",
+          // Brutalist changes for TooltipContent:
+          // - bg-primary text-primary-foreground (already present, good for contrast)
+          // - Removed rounded-md for sharp corners
+          // - Added strong border (border-2 border-border)
+          // - Removed all animations for immediate appearance/disappearance
+          "bg-primary text-primary-foreground z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-none border-2 border-border px-3 py-1.5 text-xs text-balance", // Brutalist styling
+          "data-[state=open]:animate-none data-[state=closed]:animate-none", // Remove all animations (fade, zoom, slide)
           className
         )}
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="bg-primary fill-primary z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
+        {/* Brutalist Arrow: sharp corners, solid fill, matching colors */}
+        <TooltipPrimitive.Arrow className="bg-primary fill-primary z-50 size-3 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-none border-2 border-primary" />{" "}
+        {/* Brutalist arrow: larger size, no rounding, border */}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
-  )
+  );
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

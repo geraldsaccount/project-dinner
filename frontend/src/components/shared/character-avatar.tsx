@@ -9,9 +9,7 @@ type Props = {
 
 const CharacterAvatar = ({ character, className }: Props) => {
   return (
-    <Avatar
-      className={cn("border-2 border-muted-foreground shrink-0", className)}
-    >
+    <Avatar className={className}>
       <AvatarImage src={`data:image/jpeg;base64,${character.avatarData}`} />
       <AvatarFallback>
         {character.name

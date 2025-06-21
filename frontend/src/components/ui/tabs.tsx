@@ -1,7 +1,7 @@
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
+import * as React from "react";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils"; // Assuming cn is available or a simplified version
 
 function Tabs({
   className,
@@ -13,7 +13,7 @@ function Tabs({
       className={cn("flex flex-col gap-2", className)}
       {...props}
     />
-  )
+  );
 }
 
 function TabsList({
@@ -23,13 +23,18 @@ function TabsList({
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
+      // Brutalist changes for TabsList, using CSS variables:
+      // - Removed rounded-lg for sharp corners
+      // - Changed background to primary with primary-foreground text for stark contrast
+      // - Added a strong border using the 'border' variable
+      // - Removed padding to make it a more tightly packed block
       className={cn(
-        "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
+        "bg-primary text-primary-foreground inline-flex h-9 w-fit items-center justify-center border-2 border-border", // Brutalist styling with variables
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
 function TabsTrigger({
@@ -39,13 +44,24 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
+      // Brutalist changes for TabsTrigger, using CSS variables:
+      // - Removed rounded-md for sharp corners
+      // - Removed shadow-sm for flat appearance
+      // - Changed active state background to background with foreground text for high contrast
+      // - Explicit border using 'border' variable for active state
+      // - Removed soft transitions for abrupt changes
+      // - Bold, uppercase text
+      // - Strong focus outline using 'ring' variable
       className={cn(
-        "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[state=active]:bg-background data-[state=active]:text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring text-primary-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border-r-2 border-l-2 border-transparent px-3 py-1 text-sm font-bold uppercase whitespace-nowrap transition-none disabled:pointer-events-none disabled:opacity-50", // Brutalist styling with variables
+        "data-[state=active]:border-border data-[state=active]:shadow-none", // Active state: solid border, no shadow
+        "&:last-child]:border-r-0", // Remove right border from last child if it creates double border visually
+        "&:first-child]:border-l-0", // Remove left border from first child if it creates double border visually
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
 function TabsContent({
@@ -55,10 +71,17 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
+      // Brutalist changes for TabsContent, using CSS variables:
+      // - Added a strong border to enclose the content using 'border' variable
+      // - Increased padding for content area
+      // - Changed background to background with foreground text for contrast
+      className={cn(
+        "flex-1 outline-none border-2 border-border p-6 bg-background text-foreground",
+        className
+      )} // Brutalist styling with variables
       {...props}
     />
-  )
+  );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent };
