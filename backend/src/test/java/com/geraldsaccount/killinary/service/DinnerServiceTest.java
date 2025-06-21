@@ -370,8 +370,8 @@ class DinnerServiceTest {
     void getDinnerView_throwsAccessDenied_whenUserNotInDinner() throws Exception {
         String oauthId = "user-oauth";
         UUID dinnerId = UUID.randomUUID();
-        host = User.builder().oauthId("UH").name("Host").build();
-        user = User.builder().oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("UH").name("Host").build();
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
         dinner = Dinner.builder().id(dinnerId).host(host).participants(Set.of()).build();
         when(userService.getUserOrThrow(oauthId)).thenReturn(user);
         when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));

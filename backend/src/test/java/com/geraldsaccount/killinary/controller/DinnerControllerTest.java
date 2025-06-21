@@ -32,6 +32,7 @@ import com.geraldsaccount.killinary.model.dinner.DinnerStatus;
 import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.other.CreatedDinnerDto;
 import com.geraldsaccount.killinary.model.mystery.Character;
+import com.geraldsaccount.killinary.model.mystery.Crime;
 import com.geraldsaccount.killinary.model.mystery.Gender;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.PlayerConfig;
@@ -105,6 +106,7 @@ class DinnerControllerTest {
         Mystery mystery = mysteryRepository.save(Mystery.builder()
                 .story(Story.builder().title("Murder Mystery")
                         .build())
+                .crime(Crime.builder().criminals(Set.of(character)).description("He did it").build())
                 .build());
 
         newMystery = mysteryRepository.save(Mystery.builder()
@@ -117,6 +119,7 @@ class DinnerControllerTest {
                 .host(host)
                 .mystery(mystery)
                 .config(config)
+                .currentStage(0)
                 .status(DinnerStatus.CONCLUDED)
                 .date(LocalDateTime.of(2025, 6, 2, 18, 0))
                 .build());
