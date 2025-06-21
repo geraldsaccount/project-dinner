@@ -3,6 +3,7 @@ package com.geraldsaccount.killinary.service;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doThrow;
@@ -33,7 +35,9 @@ import com.geraldsaccount.killinary.mappers.UserMapper;
 import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.model.dinner.Dinner;
+import com.geraldsaccount.killinary.model.dinner.Vote;
 import com.geraldsaccount.killinary.model.dto.input.CreateDinnerDto;
+import com.geraldsaccount.killinary.model.dto.input.dinner.VoteDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerSummaryDto;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerView;
 import com.geraldsaccount.killinary.model.dto.output.dinner.GuestDinnerViewDto;
@@ -418,4 +422,160 @@ class DinnerServiceTest {
         verify(dinnerMapper).getConclusion(dinner);
         verify(dinnerMapper).getHostInfo(dinner);
     }
+
+    @Test
+    void progressDinner_throwsUserNotFound_withInvalidOauthId() throws Exception {
+        String invalidOauthId = "invalid-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        when(userService.getUserOrThrow(invalidOauthId)).thenThrow(new UserNotFoundException("User not found"));
+        assertThatThrownBy(() -> dinnerService.progressDinner(invalidOauthId, dinnerId))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("User not found");
+    }
+
+    @Test
+    void progressDinner_throwsDinnerNotFound_withInvalidDinner() throws Exception {
+        String oauthId = "user-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        user = User.builder().oauthId(oauthId).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> dinnerService.progressDinner(oauthId, dinnerId))
+                .isInstanceOf(com.geraldsaccount.killinary.exceptions.DinnerNotFoundException.class)
+                .hasMessage("Could not find dinner");
+    }
+
+    @Test
+    void progressDinner_throwsAccessDenied_whenNotHost() throws Exception {
+        String oauthId = "guest-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of()).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        assertThatThrownBy(() -> dinnerService.progressDinner(oauthId, dinnerId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Only host can progress dinner");
+    }
+
+    @Test
+    void progressDinner_throwsAccessDenied_whenNotAllCharactersAssigned() throws Exception {
+        String oauthId = "host-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        CharacterAssignment assignment = CharacterAssignment.builder().user(null).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment))
+                .status(com.geraldsaccount.killinary.model.dinner.DinnerStatus.CREATED).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        assertThatThrownBy(() -> dinnerService.progressDinner(oauthId, dinnerId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("Dinner can only be started if all characters have been assigned.");
+    }
+
+    @Test
+    void progressDinner_setsStatusToInProgress_whenAllCharactersAssigned() throws Exception {
+        String oauthId = "host-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment))
+                .status(com.geraldsaccount.killinary.model.dinner.DinnerStatus.CREATED).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(dinnerRepository.save(any())).thenReturn(dinner);
+        // Act
+        dinnerService.progressDinner(oauthId, dinnerId);
+        // Assert
+        verify(dinnerRepository).save(
+                argThat(d -> d.getStatus() == com.geraldsaccount.killinary.model.dinner.DinnerStatus.IN_PROGRESS));
+    }
+
+    @Test
+    void progressDinner_changesCurrentStage_whenInProgress() throws Exception {
+        String oauthId = "host-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        com.geraldsaccount.killinary.model.mystery.Stage stage1 = mock(
+                com.geraldsaccount.killinary.model.mystery.Stage.class);
+        com.geraldsaccount.killinary.model.mystery.Stage stage2 = mock(
+                com.geraldsaccount.killinary.model.mystery.Stage.class);
+        mystery = mock(com.geraldsaccount.killinary.model.mystery.Mystery.class);
+        when(mystery.getStages()).thenReturn(List.of(stage1, stage2));
+        dinner = Dinner.builder().id(dinnerId).host(host).mystery(mystery).currentStage(0)
+                .status(com.geraldsaccount.killinary.model.dinner.DinnerStatus.IN_PROGRESS).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(dinnerRepository.save(any())).thenReturn(dinner);
+        // Act
+        dinnerService.progressDinner(oauthId, dinnerId);
+        // Assert
+        verify(dinnerRepository).save(argThat(d -> d.getCurrentStage() == 1));
+    }
+
+    @Test
+    void progressDinner_setStatusToVoting_whenLastStage() throws Exception {
+        String oauthId = "host-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        com.geraldsaccount.killinary.model.mystery.Stage stage1 = mock(
+                com.geraldsaccount.killinary.model.mystery.Stage.class);
+        mystery = mock(com.geraldsaccount.killinary.model.mystery.Mystery.class);
+        when(mystery.getStages()).thenReturn(List.of(stage1));
+        dinner = Dinner.builder().id(dinnerId).host(host).mystery(mystery).currentStage(0)
+                .status(com.geraldsaccount.killinary.model.dinner.DinnerStatus.IN_PROGRESS).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(dinnerRepository.save(any())).thenReturn(dinner);
+        // Act
+        dinnerService.progressDinner(oauthId, dinnerId);
+        // Assert
+        verify(dinnerRepository)
+                .save(argThat(d -> d.getStatus() == com.geraldsaccount.killinary.model.dinner.DinnerStatus.VOTING));
+    }
+
+    @Test
+    void progressDinner_throwsAccessDenied_whenNotAllVotesIn() throws Exception {
+        String oauthId = "host-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).build();
+        Set<CharacterAssignment> assignments = Set.of(assignment);
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(assignments)
+                .status(com.geraldsaccount.killinary.model.dinner.DinnerStatus.VOTING).suspectVotes(Set.of()).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        assertThatThrownBy(() -> dinnerService.progressDinner(oauthId, dinnerId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("Dinner can only be concluded if all guests have voted.");
+    }
+
+    @Test
+    void progressDinner_setStatusToConcluded_whenAllVotesIn() throws Exception {
+        String oauthId = "host-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        host = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        user = host;
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).build();
+        Set<CharacterAssignment> assignments = Set.of(assignment);
+        Vote vote = Vote.builder().user(user).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(assignments)
+                .status(com.geraldsaccount.killinary.model.dinner.DinnerStatus.VOTING).suspectVotes(Set.of(vote))
+                .build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(dinnerRepository.save(any())).thenReturn(dinner);
+        // Act
+        dinnerService.progressDinner(oauthId, dinnerId);
+        // Assert
+        verify(dinnerRepository)
+                .save(argThat(d -> d.getStatus() == com.geraldsaccount.killinary.model.dinner.DinnerStatus.CONCLUDED));
+    }
+
 }
