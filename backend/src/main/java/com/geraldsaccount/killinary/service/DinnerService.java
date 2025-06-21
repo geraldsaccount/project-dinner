@@ -45,6 +45,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class DinnerService {
+    private final static String DINNER_NOT_FOUND_MESSAGE = "Could not find dinner";
+
     private final DinnerRepository dinnerRepository;
     private final UserService userService;
     private final MysteryService mysteryService;
@@ -138,7 +140,7 @@ public class DinnerService {
         User user = userService.getUserOrThrow(oauthId);
 
         Dinner dinner = dinnerRepository.findById(dinnerId)
-                .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
+                .orElseThrow(() -> new DinnerNotFoundException(DINNER_NOT_FOUND_MESSAGE));
 
         boolean isHost = user.getId().equals(dinner.getHost().getId());
         boolean isInDinner = dinner.getCharacterAssignments().stream()
@@ -175,7 +177,7 @@ public class DinnerService {
         User user = userService.getUserOrThrow(oauthId);
 
         Dinner dinner = dinnerRepository.findById(dinnerId)
-                .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
+                .orElseThrow(() -> new DinnerNotFoundException(DINNER_NOT_FOUND_MESSAGE));
 
         boolean isHost = dinner.getHost().equals(user);
 
@@ -214,6 +216,7 @@ public class DinnerService {
                 }
             }
             case DinnerStatus.CONCLUDED, DinnerStatus.CANCELED -> {
+                // do nothing if dinner already concluded
             }
             default -> throw new AssertionError();
         }
@@ -227,7 +230,7 @@ public class DinnerService {
         User user = userService.getUserOrThrow(oauthId);
 
         Dinner dinner = dinnerRepository.findById(dinnerId)
-                .orElseThrow(() -> new DinnerNotFoundException("Could not find dinner"));
+                .orElseThrow(() -> new DinnerNotFoundException(DINNER_NOT_FOUND_MESSAGE));
 
         boolean isInDinner = dinner.getCharacterAssignments().stream()
                 .anyMatch(a -> a.getUser() != null && a.getUser().equals(user));

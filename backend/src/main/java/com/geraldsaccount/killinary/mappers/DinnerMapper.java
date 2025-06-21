@@ -28,6 +28,7 @@ import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.CharacterStageInfo;
 import com.geraldsaccount.killinary.model.mystery.Crime;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
+import com.geraldsaccount.killinary.model.mystery.Stage;
 import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.utils.ImageConverter;
 
@@ -139,8 +140,8 @@ public class DinnerMapper {
                     .collect(Collectors.toSet());
 
             stagePrompts = mystery.getStages().stream()
-                    .limit(dinner.getCurrentStage() + 1)
-                    .map(s -> s.getHostPrompt())
+                    .limit(dinner.getCurrentStage() + 1L)
+                    .map(Stage::getHostPrompt)
                     .toList();
             allHaveVoted = dinner.getSuspectVotes().size() == assignments.stream()
                     .filter(ass -> ass.getUser() != null)

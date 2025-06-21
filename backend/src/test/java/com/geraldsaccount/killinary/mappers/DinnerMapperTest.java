@@ -26,7 +26,7 @@ import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.Story;
 
 @SuppressWarnings("unused")
-public class DinnerMapperTest {
+class DinnerMapperTest {
     private UserMapper userMapper;
     private CharacterMapper characterMapper;
     private DinnerMapper dinnerMapper;
