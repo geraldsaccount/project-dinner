@@ -19,7 +19,12 @@ public class CharacterMapper {
     public CharacterDetailDto asDetailDTO(Character input) {
         String avatarBase64 = ImageConverter.imageAsBase64(input.getAvatarImage());
 
-        return new CharacterDetailDto(input.getId(), input.getName(), input.getShopDescription(), avatarBase64,
+        return new CharacterDetailDto(
+                input.getId(),
+                input.getName(),
+                input.getAge(),
+                input.getShopDescription(),
+                avatarBase64,
                 input.getRole());
     }
 

@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum DinnerStatus {
     CREATED("Created"),
     IN_PROGRESS("In Progress"),
-    PAUSED("Paused"),
+    VOTING("Voting"),
     CONCLUDED("Concluded"),
     CANCELED("Canceled");
 
