@@ -578,4 +578,113 @@ class DinnerServiceTest {
                 .save(argThat(d -> d.getStatus() == com.geraldsaccount.killinary.model.dinner.DinnerStatus.CONCLUDED));
     }
 
+    @Test
+    void castVote_throwsUserNotFound_withInvalidOauthId() throws Exception {
+        String invalidOauthId = "invalid-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        VoteDto voteDto = mock(VoteDto.class);
+        when(userService.getUserOrThrow(invalidOauthId)).thenThrow(new UserNotFoundException("User not found"));
+        assertThatThrownBy(() -> dinnerService.castVote(invalidOauthId, dinnerId, voteDto))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("User not found");
+    }
+
+    @Test
+    void castVote_throwsDinnerNotFound_withInvalidDinner() throws Exception {
+        String oauthId = "user-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        VoteDto voteDto = mock(VoteDto.class);
+        user = User.builder().oauthId(oauthId).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> dinnerService.castVote(oauthId, dinnerId, voteDto))
+                .isInstanceOf(com.geraldsaccount.killinary.exceptions.DinnerNotFoundException.class)
+                .hasMessage("Could not find dinner");
+    }
+
+    @Test
+    void castVote_throwsAccessDenied_whenUserIsNotParticipant() throws Exception {
+        String oauthId = "user-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        VoteDto voteDto = mock(VoteDto.class);
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of()).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        assertThatThrownBy(() -> dinnerService.castVote(oauthId, dinnerId, voteDto))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("User cannot cast vote for a dinner they are not participating in");
+    }
+
+    @Test
+    void castVote_throwsCharacterNotFound_whenVoteHasInvalidCharId() throws Exception {
+        String oauthId = "user-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        UUID invalidCharId = UUID.randomUUID();
+        VoteDto voteDto = mock(VoteDto.class);
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").build();
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).build();
+        mystery = Mystery.builder().characters(List.of()).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment)).mystery(mystery)
+                .build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(voteDto.suspectId()).thenReturn(invalidCharId);
+        assertThatThrownBy(() -> dinnerService.castVote(oauthId, dinnerId, voteDto))
+                .isInstanceOf(com.geraldsaccount.killinary.exceptions.CharacterNotFoundException.class)
+                .hasMessage("Could not find character with given id");
+    }
+
+    @Test
+    void castVote_addsVote_ifValid() throws Exception {
+        String oauthId = "user-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        UUID charId = UUID.randomUUID();
+        VoteDto voteDto = mock(VoteDto.class);
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").build();
+        character = Character.builder().id(charId).build();
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).character(character).build();
+        mystery = Mystery.builder().characters(List.of(character)).build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment)).mystery(mystery)
+                .suspectVotes(new HashSet<>()).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(voteDto.suspectId()).thenReturn(charId);
+        when(voteDto.motive()).thenReturn("Because!");
+        when(dinnerRepository.save(any())).thenReturn(dinner);
+        // Act
+        dinnerService.castVote(oauthId, dinnerId, voteDto);
+        // Assert
+        verify(dinnerRepository).save(argThat(d -> d.getSuspectVotes().stream().anyMatch(v -> v.getUser().equals(user)
+                && v.getSuspect().equals(character) && "Because!".equals(v.getMotive()))));
+    }
+
+    @Test
+    void castVote_replacesVote_ifAlreadyVoted() throws Exception {
+        String oauthId = "user-oauth";
+        UUID dinnerId = UUID.randomUUID();
+        UUID charId = UUID.randomUUID();
+        VoteDto voteDto = mock(VoteDto.class);
+        user = User.builder().id(UUID.randomUUID()).oauthId(oauthId).build();
+        host = User.builder().id(UUID.randomUUID()).oauthId("host-oauth").build();
+        character = Character.builder().id(charId).build();
+        CharacterAssignment assignment = CharacterAssignment.builder().user(user).character(character).build();
+        mystery = Mystery.builder().characters(List.of(character)).build();
+        Vote oldVote = Vote.builder().user(user).suspect(character).motive("Old motive").build();
+        dinner = Dinner.builder().id(dinnerId).host(host).characterAssignments(Set.of(assignment)).mystery(mystery)
+                .suspectVotes(Set.of(oldVote)).build();
+        when(userService.getUserOrThrow(oauthId)).thenReturn(user);
+        when(dinnerRepository.findById(dinnerId)).thenReturn(Optional.of(dinner));
+        when(voteDto.suspectId()).thenReturn(charId);
+        when(voteDto.motive()).thenReturn("New motive");
+        when(dinnerRepository.save(any())).thenReturn(dinner);
+        // Act
+        dinnerService.castVote(oauthId, dinnerId, voteDto);
+        // Assert
+        verify(dinnerRepository).save(argThat(d -> d.getSuspectVotes().stream().anyMatch(v -> v.getUser().equals(user)
+                && v.getSuspect().equals(character) && "New motive".equals(v.getMotive()))));
+    }
 }
