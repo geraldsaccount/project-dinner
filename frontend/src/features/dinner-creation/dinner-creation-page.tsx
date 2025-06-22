@@ -33,7 +33,7 @@ const eventSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
-const EventCreationPage = () => {
+const DinnerCreationPage = () => {
   const {
     data: stories,
     loading: storiesLoading,
@@ -204,4 +204,4 @@ const EventCreationPage = () => {
   );
 };
 
-export default EventCreationPage;
+export default DinnerCreationPage;
