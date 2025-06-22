@@ -18,7 +18,7 @@ const DinnerCast = ({ dinner }: Props) => {
 
   return (
     <section>
-      <SectionHeader title="Guests & Characters" className="mb-4" />
+      {/* <SectionHeader title="Guests & Characters" className="mb-4" />
       <GridLayout gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}>
         {dinner.participants.map((p) =>
           p.character.uuid === dinner.yourPrivateInfo.characterId ? null : (
@@ -47,7 +47,7 @@ const DinnerCast = ({ dinner }: Props) => {
             </CharacterCard>
           )
         )}
-      </GridLayout>
+      </GridLayout> */}
     </section>
   );
 };

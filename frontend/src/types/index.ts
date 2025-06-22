@@ -106,7 +106,7 @@ export interface DinnerParticipantDto {
 export interface GuestDinnerViewDto {
   preDinnerInfo: PreDinnerInfoDto;
   privateInfo: PrivateInfoDto;
-  conclusion: ConclusionDto;
+  conclusion: ConclusionDto | undefined;
 }
 
 /**
@@ -126,7 +126,7 @@ export interface CharacterAssignmentDto {
 export interface HostDinnerViewDto {
   preDinnerInfo: PreDinnerInfoDto;
   privateInfo: PrivateInfoDto | undefined;
-  conclusion: ConclusionDto;
+  conclusion: ConclusionDto | undefined;
   hostInfo: HostInfoDto;
 }
 
@@ -176,7 +176,7 @@ export interface HostInfoDto {
   briefing: string;
   assignments: CharacterAssignmentDto[];
   missingPrivateInfo: PrivateInfoDto[];
-  stagePrompts: string;
+  stagePrompts: string[] | undefined;
   allHaveVoted: boolean;
 }
 

@@ -15,10 +15,12 @@ import com.geraldsaccount.killinary.model.User;
 import com.geraldsaccount.killinary.model.dinner.CharacterAssignment;
 import com.geraldsaccount.killinary.model.dinner.Dinner;
 import com.geraldsaccount.killinary.model.dto.output.dinner.DinnerParticipantDto;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
+import com.geraldsaccount.killinary.repository.DinnerRepository;
 import com.geraldsaccount.killinary.utils.ImageConverter;
 
 import jakarta.transaction.Transactional;
@@ -29,11 +31,12 @@ import lombok.RequiredArgsConstructor;
 public class CharacterAssignmentService {
     private final UserService userService;
     private final CharacterAssignmentRepository repository;
+    private final DinnerRepository dinnerRepository;
     private final CharacterMapper characterMapper;
     private final UserMapper userMapper;
 
     @Transactional
-    public void acceptInvitation(String oauthId, String inviteCode)
+    public CreatedDinnerDto acceptInvitation(String oauthId, String inviteCode)
             throws UserNotFoundException, CharacterAssignmentNotFoundException,
             AccessDeniedException {
         User user = userService.getUserOrThrow(oauthId);
@@ -41,11 +44,18 @@ public class CharacterAssignmentService {
         CharacterAssignment assignment = repository.findByCode(inviteCode)
                 .orElseThrow(() -> new CharacterAssignmentNotFoundException("Invalid invitation code"));
 
+        Dinner dinner = assignment.getDinner();
         userService.validateHasNotPlayedStory(user,
-                assignment.getDinner().getMystery().getId());
+                dinner.getMystery().getId());
         repository.save(assignment
                 .withCode(null)
                 .withUser(user));
+
+        Set<User> participants = dinner.getParticipants();
+        participants.add(user);
+        dinnerRepository.save(dinner.withParticipants(participants));
+
+        return new CreatedDinnerDto(assignment.getDinner().getId());
     }
 
     @Transactional

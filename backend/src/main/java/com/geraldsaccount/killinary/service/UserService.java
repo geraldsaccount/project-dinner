@@ -39,7 +39,7 @@ public class UserService {
 
     @Transactional
     public void updateUserData(User updatedUser) throws UserNotFoundException {
-        User existingUser = userRepository.findById(updatedUser.getId())
+        User existingUser = userRepository.findByOauthId(updatedUser.getOauthId())
                 .orElseThrow(() -> new UserNotFoundException("User could not be found."));
         updatedUser = userMapper.withUpdatedClerkUserData(existingUser, updatedUser);
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.geraldsaccount.killinary.exceptions.AccessDeniedException;
 import com.geraldsaccount.killinary.exceptions.CharacterAssignmentNotFoundException;
 import com.geraldsaccount.killinary.exceptions.UserNotFoundException;
+import com.geraldsaccount.killinary.model.dto.output.other.CreatedDinnerDto;
 import com.geraldsaccount.killinary.model.dto.output.other.InvitationViewDto;
 import com.geraldsaccount.killinary.service.CharacterAssignmentService;
 
@@ -22,9 +23,9 @@ public class InviteController {
     private final CharacterAssignmentService assignmentService;
 
     @PutMapping("{code}")
-    public void acceptInvitation(Authentication authentication, @PathVariable String code)
+    public CreatedDinnerDto acceptInvitation(Authentication authentication, @PathVariable String code)
             throws UserNotFoundException, CharacterAssignmentNotFoundException, AccessDeniedException {
-        assignmentService.acceptInvitation(authentication.getName(), code);
+        return assignmentService.acceptInvitation(authentication.getName(), code);
     }
 
     @GetMapping("{code}")

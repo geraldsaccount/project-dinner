@@ -7,21 +7,31 @@ import YourCharacter from "./components/your-character";
 import AlreadyPlayedMessage from "./components/already-played-message";
 import StoryBanner from "./components/story-banner";
 import useApi from "@/hooks/useApi";
-import { InvitationViewDto } from "@/types";
-import { useParams } from "react-router-dom";
+import { InvitationViewDto, NewDinnerDTO } from "@/types";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { InviteCodeForm } from "./invite-code-page";
 import LoadingHeader from "@/components/shared/loading-header";
 import ErrorPage from "@/pages/error-page";
+import { useAuthenticatedApi } from "@/hooks";
+import { toast } from "sonner";
+import SectionHeader from "@/components/shared/section-header";
 
 const InvitationPage = () => {
   const { inviteCode } = useParams();
+  const navigate = useNavigate();
   const {
     data: invitation,
     loading,
     error,
     callApi: fetchApi,
   } = useApi<InvitationViewDto>();
+  const {
+    loading: accepting,
+    error: acceptFail,
+    callApi: putAccept
+  } = useAuthenticatedApi<NewDinnerDTO>();
+
   useEffect(() => {
     if (inviteCode) {
       fetchApi(`/api/invite/${inviteCode}`);
@@ -54,28 +64,40 @@ const InvitationPage = () => {
     ),
   ];
 
+  const acceptInvitation = async () => {
+    console.log("accepting")
+    const dinner = await putAccept(`/api/invite/${inviteCode}`, "PUT");
+    if (acceptFail) {
+      toast.error("Something went wrong.");
+    } else if (dinner && dinner.dinnerId) {
+      navigate(`/dinners/${dinner.dinnerId}`);
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-4">
       <PageHeader title="You're invited to dinner!" />
       <HostCallout host={invitation.host} dateTime={invitation.dateTime} />
       <StoryBanner invitation={invitation} />
-      <div className="flex flex-col">
-        <h3 className="text-2xl font-extrabold">Meet the Cast</h3>
-        <CastGrid
-          participants={sortedParticipants}
-          yourCharacterUuid={invitation.yourAssignedCharacter.uuid}
-        />
+        <section>
+            <SectionHeader title="Meet the Cast" />
+            <CastGrid
+            participants={sortedParticipants}
+            yourCharacterUuid={invitation.yourAssignedCharacter.uuid}
+            />
+        </section>
+        
         <YourCharacter character={invitation.yourAssignedCharacter} />
         {invitation.canAccept ? (
           <>
             <SignedIn>
-              <Button className="w-full sm:w-auto self-start mt-2">
+              <Button className="w-full sm:w-auto self-start mt-2" disabled={accepting} onClick={acceptInvitation}>
                 Accept Invitation
               </Button>
             </SignedIn>
             <SignedOut>
               <div className="flex mt-2 gap-2">
-                <Button className="w-full sm:w-auto" disabled>
+                <Button className="w-full sm:w-auto" disabled onClick={acceptInvitation}>
                   Accept Invitation
                 </Button>
                 <SignInButton>
@@ -89,6 +111,7 @@ const InvitationPage = () => {
             <AlreadyPlayedMessage />
           </div>
         )}
+      <div>
       </div>
     </div>
   );

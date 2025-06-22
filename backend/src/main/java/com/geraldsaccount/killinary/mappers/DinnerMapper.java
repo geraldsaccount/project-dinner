@@ -38,132 +38,135 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DinnerMapper {
 
-  private final UserMapper userMapper;
-  private final CharacterMapper characterMapper;
+    private final UserMapper userMapper;
+    private final CharacterMapper characterMapper;
 
-  public PreDinnerInfoDto getPreDinnerInfo(Dinner dinner) {
-    Mystery mystery = dinner.getMystery();
-    Story story = mystery.getStory();
-    Set<CharacterAssignment> assignments = dinner.getCharacterAssignments();
-    Set<DinnerParticipantDto> participants = assignments.stream()
-        .map(a -> {
-          User participant = a.getUser();
-          UserDto userDto = participant == null ? null : userMapper.asDTO(participant);
-          Character character = a.getCharacter();
-          CharacterDetailDto characterDto = characterMapper.asDetailDTO(character);
-          return new DinnerParticipantDto(userDto, characterDto);
-        })
-        .collect(Collectors.toSet());
-    return new PreDinnerInfoDto(
-        dinner.getId(),
-        dinner.getDate(),
-        userMapper.asDTO(dinner.getHost()),
-        story.getTitle(),
-        ImageConverter.imageAsBase64(story.getBannerImage()),
-        story.getSetting(),
-        story.getRules(),
-        participants);
-  }
-
-  public PrivateInfoDto getPrivateInfoForUser(User user, Dinner dinner) {
-    Optional<CharacterAssignment> assignedCharacter = dinner.getCharacterAssignments().stream()
-        .filter(a -> a.getUser() != null && a.getUser().getId().equals(user.getId()))
-        .findFirst();
-    PrivateInfoDto privateInfo = null;
-    if (assignedCharacter.isPresent()) {
-      Character character = assignedCharacter.get().getCharacter();
-      privateInfo = getPrivateInfoForCharacter(character, dinner);
-    }
-    return privateInfo;
-  }
-
-  public PrivateInfoDto getPrivateInfoForCharacter(Character character, Dinner dinner) {
-    List<CharacterStageDto> stages = null;
-    if (dinner.getStatus() != DinnerStatus.CREATED) {
-      List<CharacterStageInfo> stageInfoList = character.getStageInfo();
-
-      stages = IntStream.range(0, Math.min(stageInfoList.size(), dinner.getCurrentStage() + 1))
-          .mapToObj(i -> {
-            CharacterStageInfo s = stageInfoList.get(i);
-            return new CharacterStageDto(
-                dinner.getMystery().getStages().get(i).getTitle(),
-                s.getObjectivePrompt(),
-                s.getEvents().stream()
-                    .map(e -> new StageEventDto(e.getTime(), e.getTitle(), e.getDescription()))
-                    .toList());
-          })
-          .toList();
+    public PreDinnerInfoDto getPreDinnerInfo(Dinner dinner) {
+        Mystery mystery = dinner.getMystery();
+        Story story = mystery.getStory();
+        Set<CharacterAssignment> assignments = dinner.getCharacterAssignments();
+        Set<DinnerParticipantDto> participants = assignments.stream()
+                .map(a -> {
+                    User participant = a.getUser();
+                    UserDto userDto = participant == null ? null : userMapper.asDTO(participant);
+                    Character character = a.getCharacter();
+                    CharacterDetailDto characterDto = characterMapper.asDetailDTO(character);
+                    return new DinnerParticipantDto(userDto, characterDto);
+                })
+                .collect(Collectors.toSet());
+        return new PreDinnerInfoDto(
+                dinner.getId(),
+                dinner.getDate(),
+                userMapper.asDTO(dinner.getHost()),
+                story.getTitle(),
+                ImageConverter.imageAsBase64(story.getBannerImage()),
+                story.getSetting(),
+                story.getRules(),
+                participants);
     }
 
-    return new PrivateInfoDto(
-        character.getId(),
-        character.getPrivateDescription(),
-        character.getRelationships(),
-        stages);
-  }
-
-  public ConclusionDto getConclusion(Dinner dinner) {
-    Crime crime = dinner.getMystery().getCrime();
-    List<FinalVoteDto> votes = dinner.getSuspectVotes().stream()
-        .map(v -> new FinalVoteDto(
-            v.getUser().getId(),
-            v.getSuspects().stream()
-                .map(s -> s.getId())
-                .toList(),
-            v.getMotive()))
-        .toList();
-
-    if (dinner.getStatus() == DinnerStatus.VOTING) {
-      return new ConclusionDto(true, null, null, votes);
+    public PrivateInfoDto getPrivateInfoForUser(User user, Dinner dinner) {
+        Optional<CharacterAssignment> assignedCharacter = dinner.getCharacterAssignments().stream()
+                .filter(a -> a.getUser() != null && a.getUser().getId().equals(user.getId()))
+                .findFirst();
+        PrivateInfoDto privateInfo = null;
+        if (assignedCharacter.isPresent()) {
+            Character character = assignedCharacter.get().getCharacter();
+            privateInfo = getPrivateInfoForCharacter(character, dinner);
+        }
+        return privateInfo;
     }
 
-    if (dinner.getStatus() != DinnerStatus.CONCLUDED) {
-      return null;
+    public PrivateInfoDto getPrivateInfoForCharacter(Character character, Dinner dinner) {
+        List<CharacterStageDto> stages = null;
+        if (dinner.getStatus() != DinnerStatus.CREATED) {
+            List<CharacterStageInfo> stageInfoList = character.getStageInfo();
+
+            stages = IntStream
+                    .range(0,
+                            Math.min(stageInfoList.size(),
+                                    (dinner.getCurrentStage() == null ? 0 : dinner.getCurrentStage()) + 1))
+                    .mapToObj(i -> {
+                        CharacterStageInfo s = stageInfoList.get(i);
+                        return new CharacterStageDto(
+                                dinner.getMystery().getStages().get(i).getTitle(),
+                                s.getObjectivePrompt(),
+                                s.getEvents().stream()
+                                        .map(e -> new StageEventDto(e.getTime(), e.getTitle(), e.getDescription()))
+                                        .toList());
+                    })
+                    .toList();
+        }
+
+        return new PrivateInfoDto(
+                character.getId(),
+                character.getPrivateDescription(),
+                character.getRelationships(),
+                stages);
     }
 
-    List<UUID> criminalIds = crime.getCriminals().stream()
-        .map(c -> c.getId())
-        .toList();
-    return new ConclusionDto(false, criminalIds, crime.getDescription(), votes);
-  }
+    public ConclusionDto getConclusion(Dinner dinner) {
+        Crime crime = dinner.getMystery().getCrime();
+        List<FinalVoteDto> votes = dinner.getSuspectVotes().stream()
+                .map(v -> new FinalVoteDto(
+                        v.getUser().getId(),
+                        v.getSuspects().stream()
+                                .map(s -> s.getId())
+                                .toList(),
+                        v.getMotive()))
+                .toList();
 
-  public HostInfoDto getHostInfo(Dinner dinner) {
-    Mystery mystery = dinner.getMystery();
+        if (dinner.getStatus() == DinnerStatus.VOTING) {
+            return new ConclusionDto(true, null, null, votes);
+        }
 
-    Set<CharacterAssignment> assignments = dinner.getCharacterAssignments();
-    Set<CharacterAssignmentDto> assignmentDtos = assignments.stream()
-        .map(a -> {
-          boolean isAssigned = a.getUser() != null;
-          return new CharacterAssignmentDto(
-              a.getCharacter().getId(),
-              isAssigned ? Optional.of(a.getUser().getId()) : Optional.empty(),
-              isAssigned ? Optional.empty() : Optional.of(a.getCode()));
-        })
-        .collect(Collectors.toSet());
+        if (dinner.getStatus() != DinnerStatus.CONCLUDED) {
+            return null;
+        }
 
-    Set<PrivateInfoDto> missingPrivateInfos = null;
-    List<String> stagePrompts = null;
-    boolean allHaveVoted = false;
-    if (dinner.getStatus() != DinnerStatus.CREATED) {
-      missingPrivateInfos = assignments.stream()
-          .filter(ass -> ass.getUser() == null)
-          .map(ass -> getPrivateInfoForCharacter(ass.getCharacter(), dinner))
-          .collect(Collectors.toSet());
-
-      stagePrompts = mystery.getStages().stream()
-          .limit(dinner.getCurrentStage() + 1L)
-          .map(Stage::getHostPrompt)
-          .toList();
-      allHaveVoted = dinner.getSuspectVotes().size() == assignments.stream()
-          .filter(ass -> ass.getUser() != null)
-          .count();
+        List<UUID> criminalIds = crime.getCriminals().stream()
+                .map(c -> c.getId())
+                .toList();
+        return new ConclusionDto(false, criminalIds, crime.getDescription(), votes);
     }
 
-    return new HostInfoDto(
-        mystery.getStory().getBriefing(),
-        assignmentDtos,
-        missingPrivateInfos,
-        stagePrompts,
-        allHaveVoted);
-  }
+    public HostInfoDto getHostInfo(Dinner dinner) {
+        Mystery mystery = dinner.getMystery();
+
+        Set<CharacterAssignment> assignments = dinner.getCharacterAssignments();
+        Set<CharacterAssignmentDto> assignmentDtos = assignments.stream()
+                .map(a -> {
+                    boolean isAssigned = a.getUser() != null;
+                    return new CharacterAssignmentDto(
+                            a.getCharacter().getId(),
+                            isAssigned ? Optional.of(a.getUser().getId()) : Optional.empty(),
+                            isAssigned ? Optional.empty() : Optional.of(a.getCode()));
+                })
+                .collect(Collectors.toSet());
+
+        Set<PrivateInfoDto> missingPrivateInfos = null;
+        List<String> stagePrompts = null;
+        boolean allHaveVoted = false;
+        if (dinner.getStatus() != DinnerStatus.CREATED) {
+            missingPrivateInfos = assignments.stream()
+                    .filter(ass -> ass.getUser() == null)
+                    .map(ass -> getPrivateInfoForCharacter(ass.getCharacter(), dinner))
+                    .collect(Collectors.toSet());
+
+            stagePrompts = mystery.getStages().stream()
+                    .limit((dinner.getCurrentStage() == null ? 0 : dinner.getCurrentStage()) + 1L)
+                    .map(Stage::getHostPrompt)
+                    .toList();
+            allHaveVoted = dinner.getSuspectVotes().size() == assignments.stream()
+                    .filter(ass -> ass.getUser() != null)
+                    .count();
+        }
+
+        return new HostInfoDto(
+                mystery.getStory().getBriefing(),
+                assignmentDtos,
+                missingPrivateInfos,
+                stagePrompts,
+                allHaveVoted);
+    }
 }

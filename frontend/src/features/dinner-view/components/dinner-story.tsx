@@ -8,7 +8,7 @@ type Props = {
 
 const DinnerStory = ({ dinner }: Props) => (
   <section>
-    <SectionHeader title="The Story" className="mb-4" />
+    {/* <SectionHeader title="The Story" className="mb-4" />
     <Card className="pt-0 overflow-hidden">
       <CardHeader className="px-0">
         <img src={`data:image/jpeg;base64,${dinner.storyBannerData}`} className="w-full h-64 object-cover" />
@@ -24,7 +24,7 @@ const DinnerStory = ({ dinner }: Props) => (
             ))}
         </div>
       </CardContent>
-    </Card>
+    </Card> */}
   </section>
 );
 
