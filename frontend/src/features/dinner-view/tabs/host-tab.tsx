@@ -34,37 +34,44 @@ const HostTab = ({ dinner }: Props) => {
       </section>
     );
 
-    if (dinner.hostInfo.allHaveVoted)
-      return section("Dinner Controls", "Conclude Mystery");
-    if (dinner.conclusion) return section("Dinner Controls", "Start Vote");
-    if (dinner.hostInfo.stagePrompts && dinner.hostInfo.stagePrompts.length > 0)
-      return section("Dinner Controls", "Next Stage");
-    if (!dinner.hostInfo.assignments.some((a) => !a.userId))
-      return section("Dinner Controls", "Start Dinner");
+    switch (dinner.preDinnerInfo.status) {
+      case "CREATED":
+        if (!dinner.hostInfo.assignments.some((a) => !a.userId))
+          return section("Dinner Controls", "Start Dinner");
+        break;
+      case "IN_PROGRESS":
+        if (
+          dinner.hostInfo.stagePrompts &&
+          dinner.hostInfo.stagePrompts.length > 0
+        )
+          return section("Dinner Controls", "Next Stage");
+        return section("Dinner Controls", "Start Vote");
+      case "VOTING":
+        if (dinner.hostInfo.allHaveVoted)
+          return section("Dinner Controls", "Conclude Mystery");
+        break;
+    }
     return null;
   };
-  console.log(dinner.hostInfo.stagePrompts)
+  console.log(dinner.hostInfo.stagePrompts);
 
   return (
     <div className="space-y-8">
       {renderControls()}
-      {dinner.hostInfo.stagePrompts &&
-        !dinner.conclusion?.motive && (
-          <section>
-            <SectionHeader title="Stage Prompt" />
-            <p>Read the following prompt out loud to your guests.</p>
-            {dinner.hostInfo.stagePrompts[
-              dinner.hostInfo.stagePrompts.length - 1
-            ]
-              .split(/\r?\n\r?\n/)
-              .filter((paragraph) => paragraph.trim() !== "")
-              .map((paragraph, idx) => (
-                <p key={idx} className="leading-relaxed mb-4">
-                  {paragraph}
-                </p>
-              ))}
-          </section>
-        )}
+      {dinner.hostInfo.stagePrompts && !dinner.conclusion?.motive && (
+        <section>
+          <SectionHeader title="Stage Prompt" />
+          <p>Read the following prompt out loud to your guests.</p>
+          {dinner.hostInfo.stagePrompts[dinner.hostInfo.stagePrompts.length - 1]
+            .split(/\r?\n\r?\n/)
+            .filter((paragraph) => paragraph.trim() !== "")
+            .map((paragraph, idx) => (
+              <p key={idx} className="leading-relaxed mb-4">
+                {paragraph}
+              </p>
+            ))}
+        </section>
+      )}
 
       <section>
         <SectionHeader title="Guest Tracker" />

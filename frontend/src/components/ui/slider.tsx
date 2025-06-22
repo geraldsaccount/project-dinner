@@ -45,7 +45,7 @@ function Slider({
           // - bg-muted (or background) for the track
           // - Removed rounded-full for sharp rectangular track
           // - Strong border around the track
-          "bg-muted relative grow overflow-hidden rounded-none border-2 border-border", // Brutalist styling
+          "bg-muted relative grow overflow-hidden rounded-none border-2 border-primary", // Brutalist styling
           "data-[orientation=horizontal]:h-2 data-[orientation=horizontal]:w-full", // Slightly thicker horizontal track
           "data-[orientation=vertical]:h-full data-[orientation=vertical]:w-2" // Slightly thicker vertical track
         )}

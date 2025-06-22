@@ -126,7 +126,7 @@ function Carousel({
         // - Strong border around the entire carousel
         // - bg-background for content area
         className={cn(
-          "relative border-2 border-border bg-background",
+          "relative border-primary border-x-2 bg-background",
           className
         )} // Brutalist styling
         role="region"
@@ -149,7 +149,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
       // Brutalist Carousel Content:
       // - Removed overflow-hidden to allow for potential visual glitches if items aren't perfect (brutalist vibe)
       // - Added internal padding if desired for content spacing
-      className="p-4" // Added general padding to the content area
+      className="p-4 overflow-clip" // Added general padding to the content area
     >
       <div
         className={cn(
@@ -177,7 +177,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       // - bg-card for distinct item background
       // - No rounding
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full border-2 border-border bg-card rounded-none", // Brutalist styling
+        "min-w-0 shrink-0 grow-0 basis-full rounded-none", // Brutalist styling
         // Re-introduced padding here instead of negative margin on content
         orientation === "horizontal" ? "pr-4" : "pb-4", // Use padding on item itself
         className
@@ -204,7 +204,7 @@ function CarouselPrevious({
         // Brutalist Previous Button:
         // - Removed rounded-full for sharp square button
         // - Adjusted positioning for a more explicit, architectural feel
-        "absolute rounded-none border-2 border-border size-10", // Strong border, sharp corners, larger size
+        "absolute size-10 bg-transparent border-none", // Strong border, sharp corners, larger size
         orientation === "horizontal"
           ? "top-1/2 -left-8 -translate-y-1/2" // Adjusted left position for closer placement
           : "-top-8 left-1/2 -translate-x-1/2 rotate-90", // Adjusted top position
@@ -237,7 +237,7 @@ function CarouselNext({
         // Brutalist Next Button:
         // - Removed rounded-full for sharp square button
         // - Adjusted positioning for a more explicit, architectural feel
-        "absolute rounded-none border-2 border-border size-10", // Strong border, sharp corners, larger size
+        "absolute bg-transparent border-none size-10", // Strong border, sharp corners, larger size
         orientation === "horizontal"
           ? "top-1/2 -right-8 -translate-y-1/2" // Adjusted right position for closer placement
           : "-bottom-8 left-1/2 -translate-x-1/2 rotate-90", // Adjusted bottom position

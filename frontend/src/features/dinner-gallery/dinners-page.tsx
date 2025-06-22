@@ -46,9 +46,8 @@ const DinnersPage = () => {
         <div className="flex flex-col gap-4">
           <p>You have not attended any dinners yet.</p>
           <Button>
-            <Link to={"create"}>Host Dinner</Link>
+            <Link to={"host"}>Host Dinner</Link>
           </Button>
-          <DinnerSummaryCardSkeleton />
         </div>
       );
     }
@@ -59,7 +58,7 @@ const DinnersPage = () => {
         gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}
       >
         <Button className="h-auto text-xl font-bold align-top">
-          <Link to={"create"}>Host new dinner</Link>
+          <Link to={"host"}>Host new dinner</Link>
         </Button>
         {summaries.map((e) => (
           <DinnerSummaryCard key={e.uuid} summary={e} />

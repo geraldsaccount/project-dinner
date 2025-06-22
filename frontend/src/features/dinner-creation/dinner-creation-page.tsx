@@ -59,9 +59,7 @@ const DinnerCreationPage = () => {
     },
   });
 
-  const selectedStory = stories?.find(
-    (s) => s.uuid === form.watch("storyId")
-  );
+  const selectedStory = stories?.find((s) => s.uuid === form.watch("storyId"));
   const sortedConfigs = selectedStory
     ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
     : [];

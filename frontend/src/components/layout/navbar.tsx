@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { navItems } from "@/data/navigation-data";
 import { Sidebar } from "./sidebar";
 import {
@@ -20,7 +20,18 @@ import {
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
-  const [activeItem, setActiveItem] = useState<string>("/");
+  const location = useLocation();
+  // Get the first path segment after the domain, or "/" if root
+  const getActiveItem = () => {
+    const path = location.pathname.split("/").filter(Boolean)[0];
+    return path ? `/${path}` : "/";
+  };
+  const [activeItem, setActiveItem] = useState<string>(getActiveItem());
+
+  // Update activeItem when the route changes
+  useEffect(() => {
+    setActiveItem(getActiveItem());
+  }, [location.pathname]);
 
   return (
     <header className="flex sticky top-0 z-50 w-full border-b-2 border-foreground bg-background flex-row justify-center">

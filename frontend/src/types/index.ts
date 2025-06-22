@@ -156,6 +156,7 @@ export interface PreDinnerInfoDto {
   setting: string;
   rules: string;
   participants: DinnerParticipantDto[];
+  status: DinnerStatus;
 }
 
 export interface PrivateInfoDto {
@@ -188,6 +189,20 @@ export const Gender = {
   MALE: "MALE" as Gender,
   FEMALE: "FEMALE" as Gender,
   ANY: "ANY" as Gender,
+};
+
+export type DinnerStatus =
+  | "CREATED"
+  | "IN_PROGRESS"
+  | "VOTING"
+  | "CONCLUDED"
+  | "CANCELED";
+export const DinnerStatus = {
+  CREATED: "CREATED" as DinnerStatus,
+  IN_PROGRESS: "IN_PROGRESS" as DinnerStatus,
+  VOTING: "VOTING" as DinnerStatus,
+  CONCLUDED: "CONCLUDED" as DinnerStatus,
+  CANCELED: "CANCELED" as DinnerStatus,
 };
 
 /**

@@ -11,7 +11,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
       // - Added a subtle border for definition (using 'border' color)
       // - Maintained bg-accent and animate-pulse
       className={cn(
-        "bg-accent animate-pulse rounded-none border border-border",
+        "bg-accent animate-pulse rounded-none border-none",
         className
       )} // Brutalist styling
       {...props}

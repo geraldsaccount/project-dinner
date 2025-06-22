@@ -5,7 +5,7 @@ const DinnerSummaryCardSkeleton = () => (
   <Card className="py-0 overflow-clip">
     <div className="flex">
       <div className="w-1/3 flex-shrink-0 flex items-center justify-center">
-        <Skeleton className="rounded-none rounded-l-md w-full h-full bg-muted-foreground" />
+        <Skeleton className="rounded-none w-full h-full bg-muted-foreground" />
       </div>
       <div className="w-2/3 p-4">
         <CardHeader className="p-0 pb-2 bg-transparent border-none">

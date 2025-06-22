@@ -6,7 +6,6 @@ import SecretTab from "./tabs/secret-tab";
 import StagesTab from "./tabs/stages-tab";
 import ConclusionTab from "./tabs/conclusion-tab";
 import HostTab from "./tabs/host-tab";
-import { sampleHostDinnerView } from "@/data/sample-dinner-views";
 import VoteTab from "./tabs/vote-tab";
 import { useParams } from "react-router-dom";
 import { useAuthenticatedApi } from "@/hooks";
@@ -30,7 +29,7 @@ const DinnerPage = () => {
     }
     // eslint-disable-next-line
   }, [dinnerId]);
-//   const dinner = sampleHostDinnerView;
+  //   const dinner = sampleHostDinnerView;
   const isHostDinnerView = (
     dinner: HostDinnerViewDto | GuestDinnerViewDto
   ): dinner is HostDinnerViewDto => {
@@ -72,7 +71,7 @@ const DinnerPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-6xl ">
+    <div className="flex flex-col gap-8 justify-center">
       <DinnerHeader preDinnerInfo={dinner.preDinnerInfo} />
       <Tabs
         defaultValue={isHostDinnerView(dinner) ? "host" : "public"}
@@ -86,12 +85,11 @@ const DinnerPage = () => {
           ))}
         </TabsList>
 
-{
-    isHostDinnerView(dinner) && 
-        <TabsContent value="host" className="border-primary">
-          <HostTab dinner={dinner} />
-        </TabsContent>
-}
+        {isHostDinnerView(dinner) && (
+          <TabsContent value="host" className="border-primary">
+            <HostTab dinner={dinner} />
+          </TabsContent>
+        )}
         <TabsContent value="public" className="border-primary">
           <PublicTab preDinnerInfo={dinner.preDinnerInfo} />
         </TabsContent>
@@ -104,26 +102,30 @@ const DinnerPage = () => {
             />
           </TabsContent>
         )}
-        {dinner.privateInfo?.stages && dinner.privateInfo.stages.length > 0 && (
-          <TabsContent value="stages" className="border-primary">
-            <StagesTab stages={dinner.privateInfo.stages} />
-          </TabsContent>
-        )}
-        {dinner.conclusion && dinner.privateInfo && (
-          <TabsContent value="vote" className="border-primary">
-            <VoteTab
-              dinnerId={dinner.preDinnerInfo.uuid}
-              userId={
-                dinner.preDinnerInfo.participants.find(
-                  (p) => p.character.uuid === dinner.privateInfo?.characterId
-                )?.user?.uuid
-              }
-              participants={dinner.preDinnerInfo.participants}
-              conclusion={dinner.conclusion}
-            />
-          </TabsContent>
-        )}
-        {dinner.conclusion && (
+        {dinner.preDinnerInfo.status != "CREATED" &&
+          dinner.privateInfo?.stages &&
+          dinner.privateInfo.stages.length > 0 && (
+            <TabsContent value="stages" className="border-primary">
+              <StagesTab stages={dinner.privateInfo.stages} />
+            </TabsContent>
+          )}
+        {dinner.preDinnerInfo.status == "VOTING" &&
+          dinner.conclusion &&
+          dinner.privateInfo && (
+            <TabsContent value="vote" className="border-primary">
+              <VoteTab
+                dinnerId={dinner.preDinnerInfo.uuid}
+                userId={
+                  dinner.preDinnerInfo.participants.find(
+                    (p) => p.character.uuid === dinner.privateInfo?.characterId
+                  )?.user?.uuid
+                }
+                participants={dinner.preDinnerInfo.participants}
+                conclusion={dinner.conclusion}
+              />
+            </TabsContent>
+          )}
+        {dinner.preDinnerInfo.status == "CONCLUDED" && dinner.conclusion && (
           <TabsContent value="conclusion" className="border-primary">
             <ConclusionTab
               preDinnerInfo={dinner.preDinnerInfo}

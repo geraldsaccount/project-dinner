@@ -5,7 +5,6 @@ import { ClerkProvider } from "@clerk/clerk-react";
 
 import "./index.css";
 import RootLayout from "./layouts/root-layout.tsx";
-import LandingPage from "./pages/landing-page.tsx";
 import ProtectedRoute from "./components/protected-route.tsx";
 import InvitationPage from "./features/invitation/invitation-page.tsx";
 import InviteCodePage from "./features/invitation/invite-code-page.tsx";
@@ -13,6 +12,7 @@ import DinnerPage from "./features/dinner-view/dinner-page.tsx";
 import EditorPage from "./features/story-creation/editor-page.tsx";
 import DinnerCreationPage from "./features/dinner-creation/dinner-creation-page.tsx";
 import DinnersPage from "./features/dinner-gallery/dinners-page.tsx";
+import HomePage from "./features/home/home-page.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -26,10 +26,10 @@ createRoot(document.getElementById("root")!).render(
       <Router>
         <Routes>
           <Route element={<RootLayout />}>
-            <Route index element={<LandingPage />} />
+            <Route index element={<HomePage />} />
             <Route path="dinners" element={<ProtectedRoute />}>
               <Route index element={<DinnersPage />} />
-              <Route path="create" element={<DinnerCreationPage />} />
+              <Route path="host" element={<DinnerCreationPage />} />
               <Route path=":dinnerId" element={<DinnerPage />} />
               Lazy Loading
             </Route>
