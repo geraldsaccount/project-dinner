@@ -71,7 +71,7 @@ public class CharacterAssignmentService {
 
         Set<DinnerParticipantDto> otherParticipants = dinner.getCharacterAssignments().stream()
                 .map(charAs -> new DinnerParticipantDto(userMapper.asDTO(charAs.getUser()),
-                        null))
+                        characterMapper.asDetailDTO(charAs.getCharacter())))
                 .collect(Collectors.toSet());
 
         return new InvitationViewDto(inviteCode,

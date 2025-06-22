@@ -12,7 +12,7 @@ public record InvitationViewDto(
         LocalDateTime dateTime,
         UserDto host,
         String storyTitle,
-        String storyBannerUrl,
+        String storyBannerData,
         String dinnerStoryBrief,
         CharacterDetailDto yourAssignedCharacter, // The character this invite is for
         Set<DinnerParticipantDto> otherParticipants, // "Starring" view of other players
