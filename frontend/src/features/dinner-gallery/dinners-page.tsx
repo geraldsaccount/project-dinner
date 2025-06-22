@@ -1,14 +1,15 @@
 import GridLayout from "@/components/layout/grid-layout";
 import PageHeader from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import DinnerSummaryCard from "@/features/event-gallery/components/summary-card";
-import DinnerSummaryCardSkeleton from "@/features/event-gallery/components/summary-card-skeleton";
 import { useAuthenticatedApi } from "@/hooks";
 import { DinnerSummaryDto } from "@/types";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import DinnerSummaryCard from "./components/summary-card";
+import DinnerSummaryCardSkeleton from "./components/summary-card-skeleton";
+import DateTimePicker from "@/components/ui/date-time-picker";
 
-const EventsPage = () => {
+const DinnersPage = () => {
   const {
     callApi: fetchEvents,
     data: summaries,
@@ -80,4 +81,4 @@ const EventsPage = () => {
   );
 };
 
-export default EventsPage;
+export default DinnersPage;
