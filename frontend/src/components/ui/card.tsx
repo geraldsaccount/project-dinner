@@ -79,7 +79,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-content"
       // Added px-6 py-6 to CardContent for internal padding
-      className={cn("px-6 py-6", className)}
+      className={cn("px-6 pb-6", className)}
       {...props}
     />
   );
