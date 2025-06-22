@@ -4,7 +4,7 @@ import java.util.List;
 
 public record CharacterStageDto(
         String stageTitle,
-        String objectiveDescription,
+        String objectiveDesc,
         List<StageEventDto> events) {
 
 }

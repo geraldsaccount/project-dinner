@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 public record ConclusionDto(
-        List<UUID> criminalIds,
-        String motive,
-        List<FinalVoteDto> votes) {
+    boolean voteOpen,
+    List<UUID> criminalIds,
+    String motive,
+    List<FinalVoteDto> votes) {
 
 }
