@@ -7,7 +7,6 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import DinnerSummaryCard from "./components/summary-card";
 import DinnerSummaryCardSkeleton from "./components/summary-card-skeleton";
-import DateTimePicker from "@/components/ui/date-time-picker";
 
 const DinnersPage = () => {
   const {
@@ -49,6 +48,7 @@ const DinnersPage = () => {
           <Button>
             <Link to={"create"}>Host Dinner</Link>
           </Button>
+          <DinnerSummaryCardSkeleton />
         </div>
       );
     }
