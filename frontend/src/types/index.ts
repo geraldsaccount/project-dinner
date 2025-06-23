@@ -178,6 +178,7 @@ export interface HostInfoDto {
   assignments: CharacterAssignmentDto[];
   missingPrivateInfo: PrivateInfoDto[];
   stagePrompts: string[] | undefined;
+  stageCount: number;
   allHaveVoted: boolean;
 }
 

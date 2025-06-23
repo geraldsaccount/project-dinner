@@ -9,7 +9,7 @@ const RestrictedContentPage = () => {
 
       <p>Please sign in to view the desired content.</p>
       <SignInButton>
-        <Button variant={"default"} size={"sm"} className="px-2 min-w-[40px]">
+        <Button>
           Sign In
         </Button>
       </SignInButton>

@@ -42,7 +42,7 @@ const HostTab = ({ dinner }: Props) => {
       case "IN_PROGRESS":
         if (
           dinner.hostInfo.stagePrompts &&
-          dinner.hostInfo.stagePrompts.length > 0
+          dinner.hostInfo.stagePrompts.length < dinner.hostInfo.stageCount
         )
           return section("Dinner Controls", "Next Stage");
         return section("Dinner Controls", "Start Vote");
@@ -58,7 +58,7 @@ const HostTab = ({ dinner }: Props) => {
   return (
     <div className="space-y-8">
       {renderControls()}
-      {dinner.hostInfo.stagePrompts && !dinner.conclusion?.motive && (
+      {dinner.preDinnerInfo.status == "IN_PROGRESS" && dinner.hostInfo.stagePrompts && !dinner.conclusion?.motive && (
         <section>
           <SectionHeader title="Stage Prompt" />
           <p>Read the following prompt out loud to your guests.</p>
