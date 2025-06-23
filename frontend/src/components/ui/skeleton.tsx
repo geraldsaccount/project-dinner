@@ -6,7 +6,14 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("bg-accent animate-pulse rounded-md", className)}
+      // Brutalist changes for Skeleton:
+      // - Removed rounded-md for sharp corners
+      // - Added a subtle border for definition (using 'border' color)
+      // - Maintained bg-accent and animate-pulse
+      className={cn(
+        "bg-accent animate-pulse rounded-none border-none",
+        className
+      )} // Brutalist styling
       {...props}
     />
   );

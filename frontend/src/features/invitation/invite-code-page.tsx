@@ -5,7 +5,7 @@ import InviteCodeFormComponent from "./components/invite-code-form";
 const InviteCodePage = () => {
   const navigate = useNavigate();
   function handleSubmit(code: string) {
-    navigate(`/invite/${code}`);
+    navigate(`/api/invite/${code}`);
   }
   return (
     <div>

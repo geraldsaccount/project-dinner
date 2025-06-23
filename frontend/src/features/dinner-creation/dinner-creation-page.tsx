@@ -33,7 +33,7 @@ const eventSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
-const EventCreationPage = () => {
+const DinnerCreationPage = () => {
   const {
     data: stories,
     loading: storiesLoading,
@@ -59,9 +59,7 @@ const EventCreationPage = () => {
     },
   });
 
-  const selectedStory = stories?.find(
-    (s) => s.uuid === form.watch("storyId")
-  );
+  const selectedStory = stories?.find((s) => s.uuid === form.watch("storyId"));
   const sortedConfigs = selectedStory
     ? [...selectedStory.configs].sort((a, b) => a.playerCount - b.playerCount)
     : [];
@@ -204,4 +202,4 @@ const EventCreationPage = () => {
   );
 };
 
-export default EventCreationPage;
+export default DinnerCreationPage;

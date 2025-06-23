@@ -38,7 +38,7 @@ export interface CharacterSummaryDto {
  * A minimal representation of a story, used for shop thumbnails or lists.
  */
 export interface StorySummaryDto {
-//   uuid: string;
+  //   uuid: string;
   title: string;
   bannerData: string;
   thumbnailDescription: string;
@@ -51,9 +51,10 @@ export interface StorySummaryDto {
 export interface CharacterDetailDto {
   uuid: string;
   name: string;
-  role: string;
+  age: number;
   shopDescription: string;
   avatarData: string;
+  role: string;
 }
 
 /**
@@ -103,14 +104,9 @@ export interface DinnerParticipantDto {
  * The primary interface for a GUEST viewing the dinner page.
  */
 export interface GuestDinnerViewDto {
-  uuid: string;
-  dateTime: string; // ISO 8601 string format
-  host: UserDto;
-  storyTitle: string;
-  storyBannerData: string;
-  dinnerStoryBrief: string;
-  participants: DinnerParticipantDto[];
-  yourPrivateInfo: PrivateCharacterInfo; // Only the guest's own private data.
+  preDinnerInfo: PreDinnerInfoDto;
+  privateInfo: PrivateInfoDto;
+  conclusion: ConclusionDto | undefined;
 }
 
 /**
@@ -128,19 +124,10 @@ export interface CharacterAssignmentDto {
  * Contains all guest info PLUS host-specific management data.
  */
 export interface HostDinnerViewDto {
-  uuid: string;
-  dateTime: string;
-  host: UserDto;
-  storyTitle: string;
-  storyBannerData: string;
-  dinnerStoryBrief: string;
-  participants: DinnerParticipantDto[];
-  yourPrivateInfo: PrivateCharacterInfo; // Only the guest's own private data.
-
-  // Host-specific information
-  assignments: CharacterAssignmentDto[];
-  allPrivateInfo: PrivateCharacterInfo[];
-  // maybe sometimes also extraHostInformation
+  preDinnerInfo: PreDinnerInfoDto;
+  privateInfo: PrivateInfoDto | undefined;
+  conclusion: ConclusionDto | undefined;
+  hostInfo: HostInfoDto;
 }
 
 /**
@@ -154,10 +141,45 @@ export interface InvitationViewDto {
   host: UserDto;
   storyTitle: string;
   storyBannerData: string;
-  dinnerStoryBrief: string;
+  shopDescription: string;
   yourAssignedCharacter: CharacterDetailDto;
   otherParticipants: DinnerParticipantDto[];
   canAccept: boolean;
+}
+
+export interface PreDinnerInfoDto {
+  uuid: string;
+  dateTime: string;
+  host: UserDto;
+  storyTitle: string;
+  storyBannerData: string;
+  setting: string;
+  rules: string;
+  participants: DinnerParticipantDto[];
+  status: DinnerStatus;
+}
+
+export interface PrivateInfoDto {
+  characterId: string;
+  characterDescription: string;
+  relationships: Record<string, string>;
+  stages: CharacterStageDto[];
+}
+
+export interface ConclusionDto {
+  voteOpen: boolean;
+  criminalIds: string[];
+  motive: string;
+  votes: FinalVoteDto[];
+}
+
+export interface HostInfoDto {
+  briefing: string;
+  assignments: CharacterAssignmentDto[];
+  missingPrivateInfo: PrivateInfoDto[];
+  stagePrompts: string[] | undefined;
+  stageCount: number;
+  allHaveVoted: boolean;
 }
 
 /**
@@ -168,6 +190,20 @@ export const Gender = {
   MALE: "MALE" as Gender,
   FEMALE: "FEMALE" as Gender,
   ANY: "ANY" as Gender,
+};
+
+export type DinnerStatus =
+  | "CREATED"
+  | "IN_PROGRESS"
+  | "VOTING"
+  | "CONCLUDED"
+  | "CANCELED";
+export const DinnerStatus = {
+  CREATED: "CREATED" as DinnerStatus,
+  IN_PROGRESS: "IN_PROGRESS" as DinnerStatus,
+  VOTING: "VOTING" as DinnerStatus,
+  CONCLUDED: "CONCLUDED" as DinnerStatus,
+  CANCELED: "CANCELED" as DinnerStatus,
 };
 
 /**
@@ -181,10 +217,28 @@ export interface ConfigDto {
 }
 
 export interface StoryForCreationDto {
-    uuid: string;
-    story: StorySummaryDto;
-    minPlayerCount: number;
-    maxPlayerCount: number;
-    characters: CharacterDetailDto[];
-    configs: ConfigDto[];
+  uuid: string;
+  story: StorySummaryDto;
+  minPlayerCount: number;
+  maxPlayerCount: number;
+  characters: CharacterDetailDto[];
+  configs: ConfigDto[];
+}
+
+export interface CharacterStageDto {
+  stageTitle: string;
+  objectiveDesc: string;
+  events: StageEventDto[];
+}
+
+export interface StageEventDto {
+  time: string;
+  title: string;
+  description: string;
+}
+
+export interface FinalVoteDto {
+  guestId: string; // user
+  suspectIds: string[]; // character
+  motive: string;
 }

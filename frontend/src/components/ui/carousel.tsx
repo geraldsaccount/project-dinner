@@ -7,6 +7,7 @@ import useEmblaCarousel, {
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+// Assuming Button component from your brutalist button.tsx is available
 import { Button } from "@/components/ui/button";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -120,10 +121,16 @@ function Carousel({
     >
       <div
         onKeyDownCapture={handleKeyDown}
-        className={cn("relative", className)}
+        data-slot="carousel"
+        // Brutalist Carousel Root:
+        // - Strong border around the entire carousel
+        // - bg-background for content area
+        className={cn(
+          "relative border-primary border-x-2 bg-background",
+          className
+        )} // Brutalist styling
         role="region"
         aria-roledescription="carousel"
-        data-slot="carousel"
         {...props}
       >
         {children}
@@ -138,13 +145,17 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       ref={carouselRef}
-      className="overflow-hidden"
       data-slot="carousel-content"
+      // Brutalist Carousel Content:
+      // - Removed overflow-hidden to allow for potential visual glitches if items aren't perfect (brutalist vibe)
+      // - Added internal padding if desired for content spacing
+      className="p-4 overflow-clip" // Added general padding to the content area
     >
       <div
         className={cn(
           "flex",
-          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+          // Removed negative margins, content will fill carousel based on CarouselItem padding
+          orientation === "horizontal" ? "" : "flex-col",
           className
         )}
         {...props}
@@ -161,9 +172,14 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"
+      // Brutalist Carousel Item:
+      // - Strong border around each item
+      // - bg-card for distinct item background
+      // - No rounding
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
+        "min-w-0 shrink-0 grow-0 basis-full rounded-none", // Brutalist styling
+        // Re-introduced padding here instead of negative margin on content
+        orientation === "horizontal" ? "pr-4" : "pb-4", // Use padding on item itself
         className
       )}
       {...props}
@@ -173,8 +189,8 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
 
 function CarouselPrevious({
   className,
-  variant = "outline",
-  size = "icon",
+  variant = "outline", // Use brutalist outline variant for the button
+  size = "icon", // Use brutalist icon size for the button
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel();
@@ -185,10 +201,13 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        // Brutalist Previous Button:
+        // - Removed rounded-full for sharp square button
+        // - Adjusted positioning for a more explicit, architectural feel
+        "absolute size-10 bg-transparent border-none", // Strong border, sharp corners, larger size
         orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 -left-8 -translate-y-1/2" // Adjusted left position for closer placement
+          : "-top-8 left-1/2 -translate-x-1/2 rotate-90", // Adjusted top position
         className
       )}
       disabled={!canScrollPrev}
@@ -203,8 +222,8 @@ function CarouselPrevious({
 
 function CarouselNext({
   className,
-  variant = "outline",
-  size = "icon",
+  variant = "outline", // Use brutalist outline variant for the button
+  size = "icon", // Use brutalist icon size for the button
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { orientation, scrollNext, canScrollNext } = useCarousel();
@@ -215,10 +234,13 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        // Brutalist Next Button:
+        // - Removed rounded-full for sharp square button
+        // - Adjusted positioning for a more explicit, architectural feel
+        "absolute bg-transparent border-none size-10", // Strong border, sharp corners, larger size
         orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 -right-8 -translate-y-1/2" // Adjusted right position for closer placement
+          : "-bottom-8 left-1/2 -translate-x-1/2 rotate-90", // Adjusted bottom position
         className
       )}
       disabled={!canScrollNext}

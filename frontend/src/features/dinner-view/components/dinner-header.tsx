@@ -1,31 +1,32 @@
 import PageHeader from "@/components/shared/page-header";
-import UserAvatar from "@/components/shared/user-avatar";
-import { GuestDinnerViewDto, HostDinnerViewDto } from "@/types";
+import { PreDinnerInfoDto } from "@/types";
 
 type Props = {
-  dinner: GuestDinnerViewDto | HostDinnerViewDto;
+  preDinnerInfo: PreDinnerInfoDto;
 };
 
-const DinnerHeader = ({ dinner }: Props) => (
-  <header className="flex justify-between">
-    <div>
-      <PageHeader title="Dinner Details" />
-      <p className="text-lg text-muted-foreground mt-1">
-        {dinner.dateTime &&
-          new Date(dinner.dateTime).toLocaleDateString(undefined, {
+const DinnerHeader = ({ preDinnerInfo }: Props) => (
+  <header className="w-full border-b-4 border-black pb-4">
+    <PageHeader title={preDinnerInfo.storyTitle} className="text-center" />
+    <img
+      src={`data:image/jpeg;base64,${preDinnerInfo.storyBannerData}`}
+      alt="Story Banner"
+      className="w-full h-48 md:h-64 object-cover border-2 border-black mb-4"
+    />
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end text-sm mt-4">
+      <p className="mb-2 md:mb-0">
+        <span className="font-bold">DATE/TIME:</span>{" "}
+        {preDinnerInfo.dateTime &&
+          new Date(preDinnerInfo.dateTime).toLocaleDateString(undefined, {
             weekday: "long",
             year: "numeric",
             month: "long",
             day: "numeric",
           })}
       </p>
-    </div>
-    <div className="flex items-center mt-4 sm:mt-0">
-      <UserAvatar className="w-16 h-16 mr-4" user={dinner.host} />
-      <div>
-        <p className="text-sm text-muted-foreground">Hosted by</p>
-        <p className="font-semibold text-lg">{dinner.host.name}</p>
-      </div>
+      <p>
+        <span className="font-bold">HOST:</span> {preDinnerInfo.host.name}
+      </p>
     </div>
   </header>
 );

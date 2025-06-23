@@ -37,6 +37,7 @@ import com.geraldsaccount.killinary.model.mystery.Character;
 import com.geraldsaccount.killinary.model.mystery.Mystery;
 import com.geraldsaccount.killinary.model.mystery.Story;
 import com.geraldsaccount.killinary.repository.CharacterAssignmentRepository;
+import com.geraldsaccount.killinary.repository.DinnerRepository;
 
 @ActiveProfiles("test")
 @SuppressWarnings("unused")
@@ -46,6 +47,8 @@ class CharacterAssignmentServiceTest {
     private UserService userService;
     @Mock
     private CharacterAssignmentRepository repository;
+    @Mock
+    private DinnerRepository dinnerRepository;
     @Mock
     private CharacterMapper characterMapper;
     @Mock
@@ -79,6 +82,7 @@ class CharacterAssignmentServiceTest {
 
         verify(userService).validateHasNotPlayedStory(user, mystery.getId());
         verify(repository).save(assignment);
+        verify(dinnerRepository).save(any());
     }
 
     @Test

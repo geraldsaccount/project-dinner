@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
@@ -25,16 +26,14 @@ const InviteLinkSection = ({ inviteCode }: Props) => {
 
   return (
     <div className="gap-1">
-      <label className="block text-sm font-medium">
-        Awaiting Guest - Share Invite:
-      </label>
+      <Label className="block text-sm">Awaiting Guest - Share Invite:</Label>
       <div className="flex items-center gap-2">
         <input
           id="invite-link"
           type="text"
           readOnly
           value={inviteUrl}
-          className="flex-grow p-2 border border-muted-foreground rounded-md bg-gray-50 text-sm"
+          className="flex-grow p-2 pr-0 border border-muted-foreground rounded-none bg-gray-50 text-sm"
         />
         <TooltipProvider>
           <Tooltip open={copied || undefined} defaultOpen={false}>

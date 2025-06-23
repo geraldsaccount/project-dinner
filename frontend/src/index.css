@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+body {
+  font-family: "Inter", sans-serif; /* Default for all body text */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-heading {
+  /* Apply this class to specific heading elements if not already a native heading tag */
+  font-family: "IBM Plex Serif", serif; /* For all brutalist headers */
+}
+
+/* Ensure your existing brutalist components like Button, Tabs, etc.,
+   that use `font-bold uppercase` classes either inherit 'IBM Plex Serif' or
+   you explicitly set 'Inter' if you want them to remain sans-serif.
+   Given brutalist emphasis, using IBM Plex Serif for these might make them even stronger. */
+/* Example: For brutalist buttons/tabs if you want the serif font */
+.font-bold.uppercase {
+  font-family: "IBM Plex Serif", serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

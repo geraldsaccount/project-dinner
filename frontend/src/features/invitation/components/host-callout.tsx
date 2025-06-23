@@ -9,7 +9,7 @@ type Props = {
 
 const HostCallout = ({ host, dateTime }: Props) => {
   return (
-    <Alert className="mb-2 flex items-center gap-3">
+    <Alert className="flex items-center gap-3">
       <UserAvatar user={host} className="h-14 w-14" />
       <span className="font-normal flex-1 flex flex-wrap items-center gap-x-1">
         <span className="font-bold">{host.name}</span>

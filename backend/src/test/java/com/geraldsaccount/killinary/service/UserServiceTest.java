@@ -68,14 +68,18 @@ class UserServiceTest {
     @Test
     void updateUserData_shouldUpdateUser_whenUserExists() throws Exception {
         UUID userId = UUID.randomUUID();
+        String oauthId = "U1";
         User updatedUser = new User();
         updatedUser.setId(userId);
+        updatedUser.setOauthId(oauthId);
         User existingUser = new User();
         existingUser.setId(userId);
+        existingUser.setOauthId(oauthId);
         User mappedUser = new User();
         mappedUser.setId(userId);
+        mappedUser.setOauthId(oauthId);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByOauthId(oauthId)).thenReturn(Optional.of(existingUser));
         when(userMapper.withUpdatedClerkUserData(existingUser, updatedUser)).thenReturn(mappedUser);
 
         userService.updateUserData(updatedUser);

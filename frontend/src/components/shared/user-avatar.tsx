@@ -1,6 +1,5 @@
 import { UserDto } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { cn } from "@/lib/utils";
 
 type Props = {
   user: UserDto;
@@ -9,9 +8,7 @@ type Props = {
 
 const UserAvatar = ({ user, className }: Props) => {
   return (
-    <Avatar
-      className={cn("border-2 border-muted-foreground shrink-0", className)}
-    >
+    <Avatar className={className}>
       <AvatarImage src={user.avatarUrl} />
       <AvatarFallback>
         {user.name

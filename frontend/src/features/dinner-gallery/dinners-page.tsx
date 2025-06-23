@@ -1,14 +1,14 @@
 import GridLayout from "@/components/layout/grid-layout";
 import PageHeader from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import DinnerSummaryCard from "@/features/event-gallery/components/summary-card";
-import DinnerSummaryCardSkeleton from "@/features/event-gallery/components/summary-card-skeleton";
 import { useAuthenticatedApi } from "@/hooks";
 import { DinnerSummaryDto } from "@/types";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import DinnerSummaryCard from "./components/summary-card";
+import DinnerSummaryCardSkeleton from "./components/summary-card-skeleton";
 
-const EventsPage = () => {
+const DinnersPage = () => {
   const {
     callApi: fetchEvents,
     data: summaries,
@@ -46,7 +46,7 @@ const EventsPage = () => {
         <div className="flex flex-col gap-4">
           <p>You have not attended any dinners yet.</p>
           <Button>
-            <Link to={"create"}>Host Dinner</Link>
+            <Link to={"host"}>Host Dinner</Link>
           </Button>
         </div>
       );
@@ -58,7 +58,7 @@ const EventsPage = () => {
         gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}
       >
         <Button className="h-auto text-xl font-bold align-top">
-          <Link to={"create"}>Host new dinner</Link>
+          <Link to={"host"}>Host new dinner</Link>
         </Button>
         {summaries.map((e) => (
           <DinnerSummaryCard key={e.uuid} summary={e} />
@@ -80,4 +80,4 @@ const EventsPage = () => {
   );
 };
 
-export default EventsPage;
+export default DinnersPage;

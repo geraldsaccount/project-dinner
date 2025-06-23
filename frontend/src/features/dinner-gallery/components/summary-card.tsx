@@ -2,20 +2,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DinnerSummaryDto } from "@/types";
 import { NavLink } from "react-router-dom";
 
-
 type Props = {
   summary: DinnerSummaryDto;
 };
 
 const DinnerSummaryCard = ({ summary }: Props) => {
-  const {
-    uuid,
-    dateTime,
-    host,
-    storyTitle,
-    yourAssignedCharacterName,
-  } = summary;
-
+  const { uuid, dateTime, host, storyTitle, yourAssignedCharacterName } =
+    summary;
 
   return (
     <NavLink to={uuid} className="h-auto">
@@ -23,14 +16,14 @@ const DinnerSummaryCard = ({ summary }: Props) => {
         <div className="flex h-full">
           <div className="w-1/3 flex-shrink-0 flex items-center justify-center bg-gray-100">
             <img
-              src="https://placehold.co/100x100"
+              src={`data:image/jpeg;base64,${summary.storyBannerData}`}
               alt={storyTitle}
               className="object-cover w-full h-full"
             />
           </div>
           <div className="w-2/3 p-4">
-            <CardHeader className="p-0 pb-2">
-              <div className="font-bold text-lg">{storyTitle}</div>
+            <CardHeader className="p-0 pb-2 bg-transparent border-none">
+              <div className="font-bold text-lg text-primary">{storyTitle}</div>
               <div className="text-sm text-muted-foreground">
                 Host: {host.name}
               </div>

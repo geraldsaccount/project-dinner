@@ -1,6 +1,5 @@
 package com.geraldsaccount.killinary.security;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +31,7 @@ public class SecurityConfig {
             .requestMatchers("/api/protected/**").authenticated()
             .requestMatchers("/api/dinners/**").authenticated()
             // .requestMatchers(HttpMethod.GET, "/api/stories/**").permitAll()
-            .requestMatchers("/api/editor/**").authenticated()
+            // .requestMatchers("/api/editor/**").authenticated()
             // .requestMatchers("/api/editor/**").hasAnyRole("ADMIN", "AUTHOR")
             .requestMatchers(HttpMethod.GET, "/api/invite/**").permitAll()
             .requestMatchers("/api/invite/**").authenticated()

@@ -19,11 +19,11 @@ const HostCastChoice = ({ dinner }: Props) => {
         Please choose a Character before inviting your guests.
       </p>
       <GridLayout gridCols={{ base: 1, sm: 2, md: 2, xl: 3 }}>
-        {dinner.participants.map((p) => (
+        {dinner.preDinnerInfo.participants.map((p) => (
           <CharacterCard key={p.character.uuid} character={p.character}>
             <CharacterChoiceSection
               inviteCode={
-                dinner.assignments.find(
+                dinner.hostInfo.assignments.find(
                   (a) => a.characterId === p.character.uuid
                 )?.inviteCode || ""
               }

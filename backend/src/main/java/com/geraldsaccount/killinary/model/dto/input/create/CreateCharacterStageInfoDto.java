@@ -5,6 +5,6 @@ import java.util.List;
 public record CreateCharacterStageInfoDto(
         String stageId,
         String objectivePrompt,
-        List<CreateStageEvent> stageEvents) {
+        List<CreateStageEvent> events) {
 
 }

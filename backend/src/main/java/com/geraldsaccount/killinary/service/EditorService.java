@@ -180,8 +180,8 @@ public class EditorService {
                 .id(new CharacterStageInfoId(stage.getId(), characterId))
                 .order(stage.getOrder())
                 .objectivePrompt(input.objectivePrompt())
-                .events(input.stageEvents() == null ? List.of()
-                        : input.stageEvents().stream().map(this::buildStageEvent).toList())
+                .events(input.events() == null ? List.of()
+                        : input.events().stream().map(this::buildStageEvent).toList())
                 .build();
     }
 
