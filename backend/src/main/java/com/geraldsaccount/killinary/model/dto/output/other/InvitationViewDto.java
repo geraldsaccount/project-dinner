@@ -13,7 +13,7 @@ public record InvitationViewDto(
         UserDto host,
         String storyTitle,
         String storyBannerData,
-        String dinnerStoryBrief,
+        String shopDescription,
         CharacterDetailDto yourAssignedCharacter, // The character this invite is for
         Set<DinnerParticipantDto> otherParticipants, // "Starring" view of other players
         boolean canAccept) { // Backend determines if user has played story before

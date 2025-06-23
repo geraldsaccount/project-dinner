@@ -89,7 +89,7 @@ public class CharacterAssignmentService {
                 userMapper.asDTO(dinner.getHost()),
                 story.getTitle(),
                 ImageConverter.imageAsBase64(story.getBannerImage()),
-                story.getBriefing(),
+                story.getShopDescription(),
                 characterMapper.asDetailDTO(assignment.getCharacter()),
                 otherParticipants,
                 canAccept);

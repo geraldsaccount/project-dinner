@@ -17,7 +17,7 @@ const StoryBanner = ({ invitation }: Props) => (
         {invitation.storyTitle}
       </h3>
       <div className="text-base font-medium drop-shadow-lg">
-        {invitation.dinnerStoryBrief}
+        {invitation.shopDescription}
       </div>
     </div>
   </div>

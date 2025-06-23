@@ -141,7 +141,7 @@ export interface InvitationViewDto {
   host: UserDto;
   storyTitle: string;
   storyBannerData: string;
-  dinnerStoryBrief: string;
+  shopDescription: string;
   yourAssignedCharacter: CharacterDetailDto;
   otherParticipants: DinnerParticipantDto[];
   canAccept: boolean;
